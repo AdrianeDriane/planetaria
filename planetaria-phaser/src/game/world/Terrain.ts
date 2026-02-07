@@ -96,7 +96,7 @@ export default class Terrain {
         // =================================================================
         const platforms: [number, number, number][] = [
             // Starting area platforms (near spawn)
-            [200, groundY - 100, 6],
+            [200, groundY - 130, 6],
             [500, groundY - 150, 4],
             [350, groundY - 200, 5],
 
