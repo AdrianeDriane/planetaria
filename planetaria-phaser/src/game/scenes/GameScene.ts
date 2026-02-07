@@ -1,16 +1,18 @@
 import Phaser from "phaser";
 import { WORLD, CAMERA } from "../config";
 import { createGridBackground } from "../world/GridBackground";
+import Terrain from "../world/Terrain";
 import Player from "../entities/Player";
 
 /**
  * GameScene.ts
  *
- * Thin orchestrator — delegates all logic to focused modules.
- * This scene wires together the world, player, and camera.
+ * Thin orchestrator for a platformer scene.
+ * Wires together: background, terrain, player, collisions, camera.
  */
 export default class GameScene extends Phaser.Scene {
     private player!: Player;
+    private terrain!: Terrain;
 
     constructor() {
         super({ key: "GameScene" });
@@ -18,15 +20,27 @@ export default class GameScene extends Phaser.Scene {
 
     preload(): void {
         Player.preload(this);
+        Terrain.preload(this);
     }
 
     create(): void {
-        // --- World ---
+        // --- World bounds ---
         this.physics.world.setBounds(0, 0, WORLD.WIDTH, WORLD.HEIGHT);
+
+        // --- Background (visual only, no collision) ---
         createGridBackground(this);
+
+        // --- Terrain (solid ground + platforms) ---
+        this.terrain = new Terrain(this);
 
         // --- Player ---
         this.player = new Player(this);
+
+        // --- Collision: player lands on terrain ---
+        this.physics.add.collider(
+            this.player.getSprite(),
+            this.terrain.getGroup(),
+        );
 
         // --- Camera ---
         const camera = this.cameras.main;

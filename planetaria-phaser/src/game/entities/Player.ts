@@ -4,49 +4,40 @@ import { PLAYER, WORLD } from "../config";
 /**
  * Player.ts
  *
- * Encapsulates all player logic: creation, physics,
- * input handling, animation, and directional facing.
+ * Platformer player with horizontal movement, jumping,
+ * and gravity. Collides with terrain via the scene.
  *
- * Usage in a scene:
- *   this.player = new Player(this);
- *   // in update():
- *   this.player.update();
+ * Controls:
+ *   A / D  — move left / right
+ *   W      — jump (only when on ground)
  */
 export default class Player {
     private sprite: Phaser.GameObjects.Sprite;
+    private body!: Phaser.Physics.Arcade.Body;
     private keys: {
         W: Phaser.Input.Keyboard.Key;
         A: Phaser.Input.Keyboard.Key;
-        S: Phaser.Input.Keyboard.Key;
         D: Phaser.Input.Keyboard.Key;
     };
     private facingLeft = false;
 
     constructor(private scene: Phaser.Scene) {
         this.sprite = this.createSprite();
-        this.setupPhysics();
+        this.body = this.setupPhysics();
         this.createAnimations();
         this.keys = this.setupInput();
     }
 
     // --- Public API -----------------------------------------------------------
 
-    /** Call this from the scene's update() every frame. */
+    /** Call every frame from the scene's update(). */
     update(): void {
-        const body = this.sprite.body as Phaser.Physics.Arcade.Body;
-        const velocity = this.getInputVector();
-
-        // --- Apply movement ---
-        body.setVelocity(velocity.x * PLAYER.SPEED, velocity.y * PLAYER.SPEED);
-
-        // --- Facing direction ---
-        this.updateFacing(velocity.x);
-
-        // --- Animation ---
-        this.updateAnimation(velocity.length() > 0);
+        this.handleMovement();
+        this.updateFacing();
+        this.updateAnimation();
     }
 
-    /** Expose the sprite for camera follow, collisions, etc. */
+    /** Expose sprite for camera follow, collision setup, etc. */
     getSprite(): Phaser.GameObjects.Sprite {
         return this.sprite;
     }
@@ -62,9 +53,13 @@ export default class Player {
     // --- Private ---------------------------------------------------------------
 
     private createSprite(): Phaser.GameObjects.Sprite {
+        // Spawn above the ground floor so the player falls into place
+        const spawnX = WORLD.WIDTH / 4;
+        const spawnY = WORLD.HEIGHT - 200;
+
         const sprite = this.scene.add.sprite(
-            WORLD.WIDTH / 2,
-            WORLD.HEIGHT / 2,
+            spawnX,
+            spawnY,
             PLAYER.TEXTURE_KEY,
         );
         sprite.setDepth(10);
@@ -72,17 +67,31 @@ export default class Player {
         return sprite;
     }
 
-    private setupPhysics(): void {
+    private setupPhysics(): Phaser.Physics.Arcade.Body {
         this.scene.physics.add.existing(this.sprite);
         const body = this.sprite.body as Phaser.Physics.Arcade.Body;
 
-        // Hitbox covers only the bottom portion (feet)
+        // --- Hitbox: narrower than sprite for forgiving platforming ---
         body.setSize(PLAYER.HITBOX_WIDTH, PLAYER.HITBOX_HEIGHT);
-        body.setOffset(0, PLAYER.FRAME_HEIGHT - PLAYER.HITBOX_HEIGHT);
+
+        // Center the hitbox horizontally, align to feet vertically
+        const offsetX = (PLAYER.FRAME_WIDTH - PLAYER.HITBOX_WIDTH) / 2;
+        const offsetY = PLAYER.FRAME_HEIGHT - PLAYER.HITBOX_HEIGHT;
+        body.setOffset(offsetX, offsetY);
+
         body.setCollideWorldBounds(true);
+
+        // --- Gravity is set globally in PhaserGame.tsx config ---
+        // The body inherits it automatically. No need to set per-body
+        // unless you want a different gravity for this entity.
+
+        return body;
     }
 
     private createAnimations(): void {
+        // Guard: don't recreate if scene restarts
+        if (this.scene.anims.exists("player-walk")) return;
+
         this.scene.anims.create({
             key: "player-walk",
             frames: this.scene.anims.generateFrameNumbers(PLAYER.TEXTURE_KEY, {
@@ -96,55 +105,76 @@ export default class Player {
 
     private setupInput() {
         const keyboard = this.scene.input.keyboard;
-
-        if (!keyboard) {
-            throw new Error("Keyboard input not available");
-        }
+        if (!keyboard) throw new Error("Keyboard input not available");
 
         return keyboard.addKeys({
             W: Phaser.Input.Keyboard.KeyCodes.W,
             A: Phaser.Input.Keyboard.KeyCodes.A,
-            S: Phaser.Input.Keyboard.KeyCodes.S,
             D: Phaser.Input.Keyboard.KeyCodes.D,
         }) as {
             W: Phaser.Input.Keyboard.Key;
             A: Phaser.Input.Keyboard.Key;
-            S: Phaser.Input.Keyboard.Key;
             D: Phaser.Input.Keyboard.Key;
         };
     }
 
     /**
-     * Reads WASD input and returns a normalized velocity vector.
-     * Normalization prevents diagonal movement from being ~1.41x faster.
+     * Horizontal movement + jump logic.
+     *
+     * Key differences from top-down:
+     *   - Only A/D control horizontal velocity
+     *   - Vertical velocity is controlled by gravity + jump impulse
+     *   - Jump only allowed when touching ground (body.blocked.down)
+     *   - No diagonal normalization needed (gravity handles Y)
      */
-    private getInputVector(): Phaser.Math.Vector2 {
-        let x = 0;
-        let y = 0;
+    private handleMovement(): void {
+        // --- Horizontal ---
+        if (this.keys.A.isDown) {
+            this.body.setVelocityX(-PLAYER.SPEED);
+        } else if (this.keys.D.isDown) {
+            this.body.setVelocityX(PLAYER.SPEED);
+        } else {
+            // No horizontal input — stop immediately (tight controls)
+            this.body.setVelocityX(0);
+        }
 
-        if (this.keys.A.isDown) x = -1;
-        else if (this.keys.D.isDown) x = 1;
+        // --- Jump ---
+        // blocked.down = true when standing on a solid surface
+        const isOnGround = this.body.blocked.down;
 
-        if (this.keys.W.isDown) y = -1;
-        else if (this.keys.S.isDown) y = 1;
-
-        const vector = new Phaser.Math.Vector2(x, y);
-        if (vector.length() > 0) vector.normalize();
-        return vector;
+        if (this.keys.W.isDown && isOnGround) {
+            this.body.setVelocityY(PLAYER.JUMP_VELOCITY);
+        }
     }
 
-    private updateFacing(velocityX: number): void {
-        if (velocityX < 0 && !this.facingLeft) {
+    private updateFacing(): void {
+        const vx = this.body.velocity.x;
+
+        if (vx < 0 && !this.facingLeft) {
             this.sprite.setFlipX(true);
             this.facingLeft = true;
-        } else if (velocityX > 0 && this.facingLeft) {
+        } else if (vx > 0 && this.facingLeft) {
             this.sprite.setFlipX(false);
             this.facingLeft = false;
         }
     }
 
-    private updateAnimation(isMoving: boolean): void {
-        if (isMoving) {
+    /**
+     * Animation states:
+     *   - In air (not on ground) → static idle frame (or jump frame if you have one)
+     *   - On ground + moving     → walk animation
+     *   - On ground + still      → static idle frame
+     */
+    private updateAnimation(): void {
+        const isOnGround = this.body.blocked.down;
+        const isMovingX = Math.abs(this.body.velocity.x) > 0;
+
+        if (!isOnGround) {
+            // Airborne — freeze on a single frame
+            // Change to a dedicated jump frame if your spritesheet has one
+            this.sprite.anims.stop();
+            this.sprite.setFrame(PLAYER.IDLE_FRAME);
+        } else if (isMovingX) {
             this.sprite.anims.play("player-walk", true);
         } else {
             this.sprite.anims.stop();

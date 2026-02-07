@@ -4,19 +4,19 @@ import { WORLD } from "../config";
 /**
  * GridBackground.ts
  *
- * Draws a tiled grid across the entire world
- * so player movement is visually trackable.
+ * Purely visual background grid — no collision.
+ * Renders behind everything for spatial reference.
  */
 export function createGridBackground(scene: Phaser.Scene): void {
     const { WIDTH, HEIGHT, TILE_SIZE } = WORLD;
     const graphics = scene.add.graphics();
 
-    // --- Background fill ---
+    // --- Sky gradient background ---
     graphics.fillStyle(0x1a1a2e, 1);
     graphics.fillRect(0, 0, WIDTH, HEIGHT);
 
-    // --- Grid lines ---
-    graphics.lineStyle(1, 0x2a2a4e, 0.5);
+    // --- Subtle grid lines ---
+    graphics.lineStyle(1, 0x2a2a4e, 0.3);
 
     for (let x = 0; x <= WIDTH; x += TILE_SIZE) {
         graphics.moveTo(x, 0);
@@ -30,13 +30,6 @@ export function createGridBackground(scene: Phaser.Scene): void {
 
     graphics.strokePath();
 
-    // --- Center crosshair ---
-    const cx = WIDTH / 2;
-    const cy = HEIGHT / 2;
-    graphics.lineStyle(2, 0x4a4a8e, 0.8);
-    graphics.moveTo(cx - 16, cy);
-    graphics.lineTo(cx + 16, cy);
-    graphics.moveTo(cx, cy - 16);
-    graphics.lineTo(cx, cy + 16);
-    graphics.strokePath();
+    // --- Set depth behind everything ---
+    graphics.setDepth(-10);
 }
