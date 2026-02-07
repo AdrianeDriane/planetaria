@@ -24,7 +24,9 @@ export default class Terrain {
     }
 
     /** Generate the ground tile texture. Call-free if already cached. */
-    static preload(scene: Phaser.Scene): void {
+    // To remove warning I removed this param, this is the default params:
+    // scene: Phaser.Scene
+    static preload(): void {
         // We generate the texture at runtime, no file to load.
         // This method exists to keep the preload pattern consistent.
         // If you have a tileset PNG, load it here instead:
