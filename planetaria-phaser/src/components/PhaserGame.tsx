@@ -3,12 +3,6 @@ import Phaser from "phaser";
 import GameScene from "../game/scenes/GameScene";
 import { DISPLAY, PHYSICS } from "../game/config";
 
-/**
- * PhaserGame.tsx
- *
- * React wrapper that manages the Phaser game lifecycle.
- * Now configured with downward gravity for platformer physics.
- */
 const PhaserGame: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const gameRef = useRef<Phaser.Game | null>(null);
@@ -32,7 +26,6 @@ const PhaserGame: React.FC = () => {
             physics: {
                 default: "arcade",
                 arcade: {
-                    // --- Gravity pulls everything down (platformer!) ---
                     gravity: { x: 0, y: PHYSICS.GRAVITY },
                     debug: PHYSICS.DEBUG,
                 },
@@ -52,11 +45,8 @@ const PhaserGame: React.FC = () => {
     }, []);
 
     return (
-        <div className="flex items-center justify-center w-full h-screen bg-gray-950">
-            <div
-                ref={containerRef}
-                className="w-full max-w-4xl aspect-video border-2 border-gray-700 rounded-lg overflow-hidden shadow-lg shadow-black/50"
-            />
+        <div className="w-screen h-screen bg-gray-950">
+            <div ref={containerRef} className="w-full h-full" />
         </div>
     );
 };
