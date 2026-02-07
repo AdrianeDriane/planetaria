@@ -20,7 +20,7 @@ export default class GameScene extends Phaser.Scene {
 
     preload(): void {
         Player.preload(this);
-        Terrain.preload(this);
+        Terrain.preload();
     }
 
     create(): void {
