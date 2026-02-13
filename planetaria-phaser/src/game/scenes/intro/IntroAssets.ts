@@ -21,7 +21,7 @@ import { INTRO_TEXTURES } from "./IntroTypes";
 export function generatePlaceholderTextures(scene: Phaser.Scene): void {
   generateStarfieldTexture(scene);
   generateVoidDevourerTexture(scene);
-  generatePlanetTextures(scene);
+  generatePlutoTexture(scene);
   generateShipTexture(scene);
   generateShockwaveTexture(scene);
   generateParticleTextures(scene);
@@ -102,27 +102,9 @@ function generateVoidDevourerTexture(scene: Phaser.Scene): void {
 }
 
 /**
- * Generates placeholder planet textures with basic shading.
- *
- * PLACEHOLDER: intro_mercury — Grey cratered Mercury
- * PLACEHOLDER: intro_venus — Golden Venus
- * PLACEHOLDER: intro_earth — Blue-green Earth
- * PLACEHOLDER: intro_mars — Red Mars
- * PLACEHOLDER: intro_jupiter — Amber Jupiter
- * PLACEHOLDER: intro_saturn — Tan Saturn
- * PLACEHOLDER: intro_uranus — Cyan Uranus
- * PLACEHOLDER: intro_neptune — Deep blue Neptune
- * PLACEHOLDER: intro_pluto — Small brownish Pluto
+ * PLACEHOLDER: intro_pluto — Small brownish Pluto (no real sprite yet)
  */
-function generatePlanetTextures(scene: Phaser.Scene): void {
-  createSinglePlanetTexture(scene, INTRO_TEXTURES.MERCURY, 30, 0xaaaaaa);
-  createSinglePlanetTexture(scene, INTRO_TEXTURES.VENUS, 35, 0xddaa44);
-  createSinglePlanetTexture(scene, INTRO_TEXTURES.EARTH, 35, 0x44aa77);
-  createSinglePlanetTexture(scene, INTRO_TEXTURES.MARS, 28, 0xcc4422);
-  createSinglePlanetTexture(scene, INTRO_TEXTURES.JUPITER, 55, 0xddaa66);
-  createSinglePlanetTexture(scene, INTRO_TEXTURES.SATURN, 50, 0xccbb66);
-  createSinglePlanetTexture(scene, INTRO_TEXTURES.URANUS, 40, 0x66bbcc);
-  createSinglePlanetTexture(scene, INTRO_TEXTURES.NEPTUNE, 45, 0x3344bb);
+function generatePlutoTexture(scene: Phaser.Scene): void {
   createSinglePlanetTexture(scene, INTRO_TEXTURES.PLUTO, 18, 0x997766);
 }
 

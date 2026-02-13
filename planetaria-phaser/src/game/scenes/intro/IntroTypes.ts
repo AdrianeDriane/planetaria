@@ -87,21 +87,21 @@ export const INTRO_TEXTURES = {
   STARFIELD: "intro_starfield",
   /** PLACEHOLDER: intro_void — The Void Devourer entity sprite */
   VOID_DEVOURER: "intro_void",
-  /** PLACEHOLDER: intro_mercury — Mercury planet sprite */
+  /** Real asset: Mercury planet sprite (assets/ui/mercury.png) */
   MERCURY: "intro_mercury",
-  /** PLACEHOLDER: intro_venus — Venus planet sprite */
+  /** Real asset: Venus planet sprite (assets/ui/venus.png) */
   VENUS: "intro_venus",
-  /** PLACEHOLDER: intro_earth — Earth planet sprite */
+  /** Real asset: Earth planet sprite (assets/ui/earth.png) */
   EARTH: "intro_earth",
-  /** PLACEHOLDER: intro_mars — Mars planet sprite */
+  /** Real asset: Mars planet sprite (assets/ui/mars.png) */
   MARS: "intro_mars",
-  /** PLACEHOLDER: intro_jupiter — Jupiter planet sprite */
+  /** Real asset: Jupiter planet sprite (assets/ui/jupiter.png) */
   JUPITER: "intro_jupiter",
-  /** PLACEHOLDER: intro_saturn — Saturn planet sprite */
+  /** Real asset: Saturn planet sprite (assets/ui/saturn.png) */
   SATURN: "intro_saturn",
-  /** PLACEHOLDER: intro_uranus — Uranus planet sprite */
+  /** Real asset: Uranus planet sprite (assets/ui/uranus.png) */
   URANUS: "intro_uranus",
-  /** PLACEHOLDER: intro_neptune — Neptune planet sprite */
+  /** Real asset: Neptune planet sprite (assets/ui/neptune.png) */
   NEPTUNE: "intro_neptune",
   /** PLACEHOLDER: intro_pluto — Pluto dwarf-planet sprite */
   PLUTO: "intro_pluto",

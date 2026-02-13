@@ -39,7 +39,7 @@ export const PLAYER = {
 
   // Hitbox (feet-aligned)
   HITBOX_WIDTH: 20,
-  HITBOX_HEIGHT: 32,
+  HITBOX_HEIGHT: 40,
 
   // ---------------------------------------------------------------
   // Animation Frames

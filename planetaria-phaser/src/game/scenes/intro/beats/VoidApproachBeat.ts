@@ -14,8 +14,8 @@ import { INTRO_TEXTURES } from "../IntroTypes";
  *
  * Assets used:
  *   PLACEHOLDER: intro_void — Void Devourer sprite
- *   PLACEHOLDER: intro_neptune — Neptune planet sprite
  *   PLACEHOLDER: intro_pluto — Pluto dwarf-planet sprite
+ *   Neptune uses real asset (assets/ui/neptune.png)
  */
 export function buildVoidApproachVisuals(
   scene: Phaser.Scene,
@@ -52,13 +52,12 @@ export function buildVoidApproachVisuals(
   });
 
   // ── Neptune (trembling under the Void's pull) ──
-  // PLACEHOLDER: intro_neptune — Replace with Neptune sprite
   const neptune = scene.add
     .image(width * 0.55, height * 0.32, INTRO_TEXTURES.NEPTUNE)
-    .setScale(1);
+    .setScale(0.12);
   container.add(neptune);
 
-  // Shake + subtle scale pulse to show distress
+  // Shake to show distress
   scene.tweens.add({
     targets: neptune,
     x: neptune.x + 3,
@@ -66,16 +65,6 @@ export function buildVoidApproachVisuals(
     duration: 60,
     yoyo: true,
     repeat: -1,
-  });
-
-  scene.tweens.add({
-    targets: neptune,
-    scaleX: 0.96,
-    scaleY: 0.96,
-    duration: 800,
-    yoyo: true,
-    repeat: -1,
-    ease: "Sine.easeInOut",
   });
 
   // Neptune label

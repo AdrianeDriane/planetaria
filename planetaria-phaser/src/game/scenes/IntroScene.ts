@@ -66,10 +66,17 @@ export default class IntroScene extends Phaser.Scene {
   /* ================================================================== */
 
   preload(): void {
-    // Generate all placeholder textures.
-    // When real assets are ready, load them here instead:
-    //   this.load.image(INTRO_TEXTURES.SHIP, "assets/intro/ship.png");
-    // and remove the corresponding generator from IntroAssets.ts.
+    // Load real planet sprites from assets/ui/
+    this.load.image("intro_mercury", "assets/ui/mercury.png");
+    this.load.image("intro_venus", "assets/ui/venus.png");
+    this.load.image("intro_earth", "assets/ui/earth.png");
+    this.load.image("intro_mars", "assets/ui/mars.png");
+    this.load.image("intro_jupiter", "assets/ui/jupiter.png");
+    this.load.image("intro_saturn", "assets/ui/saturn.png");
+    this.load.image("intro_uranus", "assets/ui/uranus.png");
+    this.load.image("intro_neptune", "assets/ui/neptune.png");
+
+    // Generate remaining procedural/placeholder textures
     generatePlaceholderTextures(this);
   }
 

@@ -7,13 +7,13 @@ import { INTRO_TEXTURES } from "../IntroTypes";
  * Beat 3: "S.S. Astra — Training Mission near Mercury"
  *
  * Visuals:
- *   - Mercury planet on the left
+ *   - Mercury planet on the left (real sprite)
  *   - S.S. Astra ship gently bobbing nearby
  *   - Engine exhaust particles
  *   - Calm, routine atmosphere
  *
  * Assets used:
- *   PLACEHOLDER: intro_mercury — Mercury planet sprite
+ *   Mercury uses real asset (assets/ui/mercury.png)
  *   PLACEHOLDER: intro_ship — S.S. Astra spaceship sprite
  */
 export function buildSSAstraVisuals(
@@ -23,10 +23,9 @@ export function buildSSAstraVisuals(
   const { width, height } = scene.scale;
 
   // ── Mercury ──
-  // PLACEHOLDER: intro_mercury — Replace with Mercury sprite
   const mercury = scene.add
     .image(width * 0.3, height * 0.32, INTRO_TEXTURES.MERCURY)
-    .setScale(2);
+    .setScale(0.15);
   container.add(mercury);
 
   // Subtle slow rotation

@@ -1,9 +1,5 @@
 import Phaser from "phaser";
-import {
-  PLANET_CORE_COLORS,
-  PLANET_NAMES,
-  PLANET_TEXTURE_KEYS,
-} from "../IntroTypes";
+import { PLANET_NAMES, PLANET_TEXTURE_KEYS } from "../IntroTypes";
 
 /**
  * PlanetaryCoresBeat.ts
@@ -12,23 +8,14 @@ import {
  *
  * Visuals:
  *   - All 8 planets shown in a row from Mercury to Neptune
- *   - Each has a pulsing inner core glow
  *   - Labels beneath each planet
  *   - Staggered reveal with gentle floating animation
  *
- * Assets used:
- *   PLACEHOLDER: intro_mercury — Mercury planet sprite
- *   PLACEHOLDER: intro_venus — Venus planet sprite
- *   PLACEHOLDER: intro_earth — Earth planet sprite
- *   PLACEHOLDER: intro_mars — Mars planet sprite
- *   PLACEHOLDER: intro_jupiter — Jupiter planet sprite
- *   PLACEHOLDER: intro_saturn — Saturn planet sprite
- *   PLACEHOLDER: intro_uranus — Uranus planet sprite
- *   PLACEHOLDER: intro_neptune — Neptune planet sprite
+ * Uses real planet sprites from assets/ui/
  */
 
-// Display scales to normalise different-sized planet textures into the row
-const PLANET_SCALES = [0.45, 0.5, 0.5, 0.45, 0.4, 0.4, 0.45, 0.45];
+// Display scales — PNGs are large, these shrink them to fit the row
+const PLANET_SCALES = [0.05, 0.06, 0.065, 0.055, 0.09, 0.08, 0.07, 0.065];
 
 export function buildPlanetaryCoresVisuals(
   scene: Phaser.Scene,
@@ -44,18 +31,11 @@ export function buildPlanetaryCoresVisuals(
     const x = startX + (endX - startX) * (i / 7);
     const scale = PLANET_SCALES[i];
 
-    // Sub-container for this planet group (planet + glow + label)
+    // Sub-container for this planet group (planet + label)
     const planetGroup = scene.add.container(x, y);
     container.add(planetGroup);
 
-    // ── Core glow (pulsing colored circle behind planet) ──
-    const coreGlow = scene.add.graphics();
-    coreGlow.fillStyle(PLANET_CORE_COLORS[i], 0.3);
-    coreGlow.fillCircle(0, 0, 20);
-    planetGroup.add(coreGlow);
-
     // ── Planet sprite ──
-    // PLACEHOLDER: Replace with individual planet sprite
     const planet = scene.add
       .image(0, 0, PLANET_TEXTURE_KEYS[i])
       .setScale(scale);
@@ -92,15 +72,6 @@ export function buildPlanetaryCoresVisuals(
       repeat: -1,
       ease: "Sine.easeInOut",
       delay: i * 100,
-    });
-
-    // Core glow pulse
-    scene.tweens.add({
-      targets: coreGlow,
-      alpha: 0.1,
-      duration: 800 + i * 100,
-      yoyo: true,
-      repeat: -1,
     });
   }
 
