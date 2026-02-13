@@ -31,7 +31,7 @@ export function buildVoidApproachVisuals(
     .setAlpha(0.9);
   container.add(voidEntity);
 
-  // Menacing pulsation
+  // Menacing pulsation with scale + alpha
   scene.tweens.add({
     targets: voidEntity,
     scaleX: 1.7,
@@ -43,20 +43,39 @@ export function buildVoidApproachVisuals(
     ease: "Sine.easeInOut",
   });
 
-  // ── Neptune (trembling) ──
+  // Slow ominous rotation
+  scene.tweens.add({
+    targets: voidEntity,
+    angle: 360,
+    duration: 20000,
+    repeat: -1,
+  });
+
+  // ── Neptune (trembling under the Void's pull) ──
   // PLACEHOLDER: intro_neptune — Replace with Neptune sprite
   const neptune = scene.add
     .image(width * 0.55, height * 0.32, INTRO_TEXTURES.NEPTUNE)
     .setScale(1);
   container.add(neptune);
 
-  // Shake effect to show Neptune trembling
+  // Shake + subtle scale pulse to show distress
   scene.tweens.add({
     targets: neptune,
-    x: neptune.x + 2,
+    x: neptune.x + 3,
+    y: neptune.y + 1,
     duration: 60,
     yoyo: true,
     repeat: -1,
+  });
+
+  scene.tweens.add({
+    targets: neptune,
+    scaleX: 0.96,
+    scaleY: 0.96,
+    duration: 800,
+    yoyo: true,
+    repeat: -1,
+    ease: "Sine.easeInOut",
   });
 
   // Neptune label
@@ -69,12 +88,21 @@ export function buildVoidApproachVisuals(
     .setOrigin(0.5);
   container.add(labelNeptune);
 
-  // ── Pluto (consumed — ghost) ──
+  // ── Pluto (consumed — ghost being pulled toward Void) ──
   // PLACEHOLDER: intro_pluto — Replace with Pluto sprite
   const pluto = scene.add
     .image(width * 0.72, height * 0.28, INTRO_TEXTURES.PLUTO)
     .setAlpha(0.15);
   container.add(pluto);
+
+  // Slowly drift toward the void and fade out
+  scene.tweens.add({
+    targets: pluto,
+    x: width * 0.78,
+    alpha: 0.03,
+    duration: 4000,
+    ease: "Sine.easeIn",
+  });
 
   // Consumed label
   const labelPluto = scene.add
@@ -85,6 +113,14 @@ export function buildVoidApproachVisuals(
     })
     .setOrigin(0.5);
   container.add(labelPluto);
+
+  // Label fades alongside Pluto
+  scene.tweens.add({
+    targets: labelPluto,
+    alpha: 0,
+    duration: 4000,
+    ease: "Sine.easeIn",
+  });
 
   // ── Title ──
   const title = scene.add
@@ -97,12 +133,22 @@ export function buildVoidApproachVisuals(
     .setOrigin(0.5);
   container.add(title);
 
-  // Title flicker
+  // Title flicker with scale pulse
   scene.tweens.add({
     targets: title,
     alpha: 0.5,
     duration: 1200,
     yoyo: true,
     repeat: -1,
+  });
+
+  scene.tweens.add({
+    targets: title,
+    scaleX: 1.03,
+    scaleY: 1.03,
+    duration: 2000,
+    yoyo: true,
+    repeat: -1,
+    ease: "Sine.easeInOut",
   });
 }

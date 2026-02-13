@@ -4,17 +4,19 @@ import { INTRO_TEXTURES } from "./IntroTypes";
 /**
  * IntroAssets.ts
  *
- * Generates all placeholder textures for the intro cinematic.
+ * Generates all textures for the intro cinematic.
  *
- * Each texture is tagged with a PLACEHOLDER comment indicating
- * what real asset should eventually replace it. Search for
- * "PLACEHOLDER:" to find all replacement points.
+ * Textures marked PLACEHOLDER are temporary stand-ins for real
+ * sprite assets. Search for "PLACEHOLDER:" to find them.
  *
  * To replace a placeholder:
  *   1. Add your real asset to the preload() of IntroScene
- *      (e.g., this.load.image("intro_ship", "assets/ship.png"))
+ *      (e.g., this.load.image("intro_ship", "assets/intro/ship.png"))
  *   2. Remove or skip the corresponding generator call below
  *   3. The texture key in INTRO_TEXTURES stays the same
+ *
+ * Procedural textures (particles, starfield, dust) are NOT
+ * placeholders — they are intentionally code-generated.
  */
 export function generatePlaceholderTextures(scene: Phaser.Scene): void {
   generateStarfieldTexture(scene);
@@ -32,9 +34,8 @@ export function generatePlaceholderTextures(scene: Phaser.Scene): void {
 /* ------------------------------------------------------------------ */
 
 /**
- * PLACEHOLDER: intro_starfield
+ * Procedural starfield background.
  * A static deep-space background with scattered star dots.
- * Replace with a hand-painted or tiled space background.
  */
 function generateStarfieldTexture(scene: Phaser.Scene): void {
   const w = 800;
@@ -103,16 +104,26 @@ function generateVoidDevourerTexture(scene: Phaser.Scene): void {
 /**
  * Generates placeholder planet textures with basic shading.
  *
- * PLACEHOLDER: intro_mercury — Grey cratered planet
- * PLACEHOLDER: intro_neptune — Blue gas giant
- * PLACEHOLDER: intro_pluto — Small brownish dwarf planet
- * PLACEHOLDER: intro_planet_large — Generic large planet
+ * PLACEHOLDER: intro_mercury — Grey cratered Mercury
+ * PLACEHOLDER: intro_venus — Golden Venus
+ * PLACEHOLDER: intro_earth — Blue-green Earth
+ * PLACEHOLDER: intro_mars — Red Mars
+ * PLACEHOLDER: intro_jupiter — Amber Jupiter
+ * PLACEHOLDER: intro_saturn — Tan Saturn
+ * PLACEHOLDER: intro_uranus — Cyan Uranus
+ * PLACEHOLDER: intro_neptune — Deep blue Neptune
+ * PLACEHOLDER: intro_pluto — Small brownish Pluto
  */
 function generatePlanetTextures(scene: Phaser.Scene): void {
   createSinglePlanetTexture(scene, INTRO_TEXTURES.MERCURY, 30, 0xaaaaaa);
+  createSinglePlanetTexture(scene, INTRO_TEXTURES.VENUS, 35, 0xddaa44);
+  createSinglePlanetTexture(scene, INTRO_TEXTURES.EARTH, 35, 0x44aa77);
+  createSinglePlanetTexture(scene, INTRO_TEXTURES.MARS, 28, 0xcc4422);
+  createSinglePlanetTexture(scene, INTRO_TEXTURES.JUPITER, 55, 0xddaa66);
+  createSinglePlanetTexture(scene, INTRO_TEXTURES.SATURN, 50, 0xccbb66);
+  createSinglePlanetTexture(scene, INTRO_TEXTURES.URANUS, 40, 0x66bbcc);
   createSinglePlanetTexture(scene, INTRO_TEXTURES.NEPTUNE, 45, 0x3344bb);
   createSinglePlanetTexture(scene, INTRO_TEXTURES.PLUTO, 18, 0x997766);
-  createSinglePlanetTexture(scene, INTRO_TEXTURES.PLANET_LARGE, 60, 0x4488cc);
 }
 
 /** Helper: draws a circle planet with a specular highlight. */
@@ -216,10 +227,8 @@ function generateShockwaveTexture(scene: Phaser.Scene): void {
 }
 
 /**
- * PLACEHOLDER: intro_particle_fire — Small orange fire/spark particle
- * PLACEHOLDER: intro_particle_smoke — Small grey smoke puff particle
- *
- * Replace with tiny pixel-art particle sprites.
+ * Procedural fire and smoke particles.
+ * Small colored circles used for engine exhaust, impact effects, etc.
  */
 function generateParticleTextures(scene: Phaser.Scene): void {
   // Fire particle
@@ -242,9 +251,8 @@ function generateParticleTextures(scene: Phaser.Scene): void {
 }
 
 /**
- * PLACEHOLDER: intro_star_particle
+ * Procedural star particle.
  * A tiny white pixel used for animated parallax stars.
- * Replace with a small pixel-art star sprite if desired.
  */
 function generateStarParticleTexture(scene: Phaser.Scene): void {
   const gfx = scene.make.graphics({ x: 0, y: 0 });
@@ -255,9 +263,8 @@ function generateStarParticleTexture(scene: Phaser.Scene): void {
 }
 
 /**
- * PLACEHOLDER: intro_dust_particle
+ * Procedural dust particle.
  * A faint lavender mote for space dust layers.
- * Replace with a subtle 1–2px dust sprite.
  */
 function generateDustParticleTexture(scene: Phaser.Scene): void {
   const gfx = scene.make.graphics({ x: 0, y: 0 });

@@ -8,8 +8,8 @@ import { INTRO_TEXTURES } from "../IntroTypes";
  *
  * Visuals:
  *   - Ship in the centre
- *   - Expanding shockwave ring sweeping from right to left
- *   - Ship shakes violently on impact
+ *   - Multiple expanding shockwave rings sweeping from right to left
+ *   - Ship shakes violently on impact with sparks
  *   - Purple flash and warning text
  *
  * Assets used:
@@ -29,16 +29,16 @@ export function buildShockwaveVisuals(
     .setScale(0.7);
   container.add(ship);
 
-  // ── Shockwave ring expanding from the right ──
+  // ── Primary shockwave ring ──
   // PLACEHOLDER: intro_shockwave — Replace with shockwave ring sprite
-  const wave = scene.add
+  const wave1 = scene.add
     .image(width * 0.85, height * 0.3, INTRO_TEXTURES.SHOCKWAVE)
     .setScale(0.5)
     .setAlpha(0.9);
-  container.add(wave);
+  container.add(wave1);
 
   scene.tweens.add({
-    targets: wave,
+    targets: wave1,
     scaleX: 4,
     scaleY: 4,
     alpha: 0,
@@ -48,17 +48,45 @@ export function buildShockwaveVisuals(
     delay: 500,
   });
 
+  // ── Secondary trailing ring (offset timing) ──
+  const wave2 = scene.add
+    .image(width * 0.9, height * 0.3, INTRO_TEXTURES.SHOCKWAVE)
+    .setScale(0.3)
+    .setAlpha(0.5);
+  container.add(wave2);
+
+  scene.tweens.add({
+    targets: wave2,
+    scaleX: 3.5,
+    scaleY: 3.5,
+    alpha: 0,
+    x: width * 0.15,
+    duration: 3200,
+    repeat: -1,
+    delay: 1000,
+  });
+
   // ── Impact sequence (delayed) ──
   scene.time.delayedCall(1500, () => {
-    // Ship shakes violently
+    // Ship shakes violently with angle distortion
     scene.tweens.add({
       targets: ship,
-      x: ship.x + Phaser.Math.Between(-8, 8),
-      y: ship.y + Phaser.Math.Between(-5, 5),
-      angle: Phaser.Math.Between(-15, 15),
-      duration: 80,
+      x: ship.x + Phaser.Math.Between(-10, 10),
+      y: ship.y + Phaser.Math.Between(-6, 6),
+      angle: Phaser.Math.Between(-20, 20),
+      duration: 70,
       yoyo: true,
-      repeat: 15,
+      repeat: 20,
+    });
+
+    // Ship scale distortion from impact
+    scene.tweens.add({
+      targets: ship,
+      scaleX: 0.65,
+      scaleY: 0.75,
+      duration: 100,
+      yoyo: true,
+      repeat: 5,
     });
 
     // Purple energy flash
@@ -68,14 +96,32 @@ export function buildShockwaveVisuals(
       width,
       height,
       0xff44ff,
-      0.3
+      0.4
     );
     container.add(flash);
 
     scene.tweens.add({
       targets: flash,
       alpha: 0,
-      duration: 800,
+      duration: 600,
+    });
+
+    // Impact sparks around the ship
+    const sparks = scene.add.particles(0, 0, INTRO_TEXTURES.PARTICLE_FIRE, {
+      x: ship.x,
+      y: ship.y,
+      speed: { min: 40, max: 120 },
+      angle: { min: 0, max: 360 },
+      scale: { start: 0.6, end: 0 },
+      lifespan: 500,
+      frequency: 50,
+      quantity: 3,
+      alpha: { start: 1, end: 0 },
+    });
+    container.add(sparks);
+
+    scene.time.delayedCall(1500, () => {
+      sparks.stop();
     });
   });
 
@@ -90,11 +136,20 @@ export function buildShockwaveVisuals(
     .setOrigin(0.5);
   container.add(warning);
 
-  // Alarm-style blink
+  // Alarm-style blink with scale pulse
   scene.tweens.add({
     targets: warning,
     alpha: 0.2,
-    duration: 400,
+    duration: 300,
+    yoyo: true,
+    repeat: -1,
+  });
+
+  scene.tweens.add({
+    targets: warning,
+    scaleX: 1.05,
+    scaleY: 1.05,
+    duration: 300,
     yoyo: true,
     repeat: -1,
   });

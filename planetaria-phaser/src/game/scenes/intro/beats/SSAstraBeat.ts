@@ -15,7 +15,6 @@ import { INTRO_TEXTURES } from "../IntroTypes";
  * Assets used:
  *   PLACEHOLDER: intro_mercury — Mercury planet sprite
  *   PLACEHOLDER: intro_ship — S.S. Astra spaceship sprite
- *   PLACEHOLDER: intro_particle_fire — Engine exhaust particle
  */
 export function buildSSAstraVisuals(
   scene: Phaser.Scene,
@@ -29,6 +28,16 @@ export function buildSSAstraVisuals(
     .image(width * 0.3, height * 0.32, INTRO_TEXTURES.MERCURY)
     .setScale(2);
   container.add(mercury);
+
+  // Subtle slow rotation
+  scene.tweens.add({
+    targets: mercury,
+    angle: 15,
+    duration: 12000,
+    yoyo: true,
+    repeat: -1,
+    ease: "Sine.easeInOut",
+  });
 
   const labelMercury = scene.add
     .text(mercury.x, mercury.y + 70, "Mercury", {
@@ -46,11 +55,21 @@ export function buildSSAstraVisuals(
     .setScale(0.7);
   container.add(ship);
 
-  // Gentle bobbing motion
+  // Gentle bobbing motion (combined x and y for more natural feel)
   scene.tweens.add({
     targets: ship,
     y: ship.y + 8,
     duration: 2000,
+    yoyo: true,
+    repeat: -1,
+    ease: "Sine.easeInOut",
+  });
+
+  scene.tweens.add({
+    targets: ship,
+    x: ship.x + 3,
+    angle: 2,
+    duration: 3000,
     yoyo: true,
     repeat: -1,
     ease: "Sine.easeInOut",
@@ -66,7 +85,6 @@ export function buildSSAstraVisuals(
   container.add(labelShip);
 
   // ── Engine exhaust particles ──
-  // PLACEHOLDER: intro_particle_fire — Replace with exhaust particle sprite
   const engineEmitter = scene.add.particles(
     0,
     0,
@@ -74,13 +92,13 @@ export function buildSSAstraVisuals(
     {
       x: ship.x - 5,
       y: ship.y + 45,
-      speed: { min: 10, max: 30 },
-      angle: { min: 80, max: 100 },
+      speed: { min: 10, max: 40 },
+      angle: { min: 75, max: 105 },
       scale: { start: 0.5, end: 0 },
-      lifespan: 600,
-      frequency: 120,
-      quantity: 1,
-      alpha: { start: 0.6, end: 0 },
+      lifespan: 700,
+      frequency: 80,
+      quantity: 2,
+      alpha: { start: 0.7, end: 0 },
     }
   );
   container.add(engineEmitter);

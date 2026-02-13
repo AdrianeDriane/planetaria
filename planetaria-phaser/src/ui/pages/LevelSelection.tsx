@@ -177,6 +177,23 @@ const LEVELS: LevelData[] = [
   },
 ];
 
+// ─── Responsive Scale Hook ───
+
+function useViewportScale(): number {
+  const compute = () => {
+    const vmin = Math.min(window.innerWidth, window.innerHeight);
+    if (vmin >= 600) return 1;
+    return Math.max(0.35, vmin / 600);
+  };
+  const [scale, setScale] = useState(compute);
+  useEffect(() => {
+    const handler = () => setScale(compute());
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+  return scale;
+}
+
 // ─── Pixel Art Lock Icon ───
 
 const PixelLockIcon: React.FC<{ size?: number }> = ({ size = 3 }) => {
@@ -247,11 +264,12 @@ const PixelBackArrow: React.FC = () => {
 const SpritePlaceholder: React.FC<{
   level: LevelData;
   isUnlocked: boolean;
-}> = ({ level, isUnlocked }) => {
+  scale?: number;
+}> = ({ level, isUnlocked, scale = 1 }) => {
   const [spriteLoaded, setSpriteLoaded] = useState(false);
   const [spriteError, setSpriteError] = useState(false);
 
-  const size = level.spriteSize;
+  const size = Math.round(level.spriteSize * scale);
   const displayChar = level.isBoss ? "?" : level.name[0];
 
   return (
@@ -316,6 +334,7 @@ interface PlanetNodeProps {
   isSelected: boolean;
   onSelect: (id: number) => void;
   onLaunch: (id: number) => void;
+  scale?: number;
 }
 
 const PlanetNode: React.FC<PlanetNodeProps> = ({
@@ -324,6 +343,7 @@ const PlanetNode: React.FC<PlanetNodeProps> = ({
   isSelected,
   onSelect,
   onLaunch,
+  scale = 1,
 }) => {
   // Stagger the float animation per planet so they don't all bob in sync
   const floatDelay = (level.id - 1) * 0.7;
@@ -362,7 +382,11 @@ const PlanetNode: React.FC<PlanetNodeProps> = ({
           }
         }}
       >
-        <SpritePlaceholder level={level} isUnlocked={isUnlocked} />
+        <SpritePlaceholder
+          level={level}
+          isUnlocked={isUnlocked}
+          scale={scale}
+        />
 
         {isSelected && isUnlocked && (
           <div
@@ -567,6 +591,8 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({
     };
   }, []);
 
+  const spriteScale = useViewportScale();
+
   const unlockedCount = Object.values(progress).filter(
     (s) => s === "unlocked"
   ).length;
@@ -669,6 +695,7 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({
             isSelected={selectedLevel === level.id}
             onSelect={handlePlanetSelect}
             onLaunch={handleLaunch}
+            scale={spriteScale}
           />
         ))}
       </div>

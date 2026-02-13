@@ -83,31 +83,56 @@ export interface Nebula {
  * corresponding key usage here.
  */
 export const INTRO_TEXTURES = {
-  /** PLACEHOLDER: intro_starfield — Deep-space background tile */
+  /** Procedural deep-space background */
   STARFIELD: "intro_starfield",
   /** PLACEHOLDER: intro_void — The Void Devourer entity sprite */
   VOID_DEVOURER: "intro_void",
   /** PLACEHOLDER: intro_mercury — Mercury planet sprite */
   MERCURY: "intro_mercury",
+  /** PLACEHOLDER: intro_venus — Venus planet sprite */
+  VENUS: "intro_venus",
+  /** PLACEHOLDER: intro_earth — Earth planet sprite */
+  EARTH: "intro_earth",
+  /** PLACEHOLDER: intro_mars — Mars planet sprite */
+  MARS: "intro_mars",
+  /** PLACEHOLDER: intro_jupiter — Jupiter planet sprite */
+  JUPITER: "intro_jupiter",
+  /** PLACEHOLDER: intro_saturn — Saturn planet sprite */
+  SATURN: "intro_saturn",
+  /** PLACEHOLDER: intro_uranus — Uranus planet sprite */
+  URANUS: "intro_uranus",
   /** PLACEHOLDER: intro_neptune — Neptune planet sprite */
   NEPTUNE: "intro_neptune",
   /** PLACEHOLDER: intro_pluto — Pluto dwarf-planet sprite */
   PLUTO: "intro_pluto",
-  /** PLACEHOLDER: intro_planet_large — Generic large planet sprite */
-  PLANET_LARGE: "intro_planet_large",
   /** PLACEHOLDER: intro_ship — S.S. Astra spaceship sprite */
   SHIP: "intro_ship",
-  /** PLACEHOLDER: intro_shockwave — Expanding shockwave ring */
+  /** PLACEHOLDER: intro_shockwave — Expanding shockwave ring sprite */
   SHOCKWAVE: "intro_shockwave",
-  /** PLACEHOLDER: intro_particle_fire — Orange fire/explosion particle */
+  /** Procedural fire/spark particle */
   PARTICLE_FIRE: "intro_particle_fire",
-  /** PLACEHOLDER: intro_particle_smoke — Grey smoke particle */
+  /** Procedural smoke puff particle */
   PARTICLE_SMOKE: "intro_particle_smoke",
-  /** PLACEHOLDER: intro_star_particle — Tiny white star dot for starfield */
+  /** Procedural tiny star dot for parallax starfield */
   STAR_PARTICLE: "intro_star_particle",
-  /** PLACEHOLDER: intro_dust_particle — Faint dust mote */
+  /** Procedural faint dust mote */
   DUST_PARTICLE: "intro_dust_particle",
 } as const;
+
+/**
+ * Ordered planet texture keys from Mercury to Neptune.
+ * Used by PlanetaryCoresBeat to display all 8 planets.
+ */
+export const PLANET_TEXTURE_KEYS: string[] = [
+  INTRO_TEXTURES.MERCURY,
+  INTRO_TEXTURES.VENUS,
+  INTRO_TEXTURES.EARTH,
+  INTRO_TEXTURES.MARS,
+  INTRO_TEXTURES.JUPITER,
+  INTRO_TEXTURES.SATURN,
+  INTRO_TEXTURES.URANUS,
+  INTRO_TEXTURES.NEPTUNE,
+];
 
 /* ------------------------------------------------------------------ */
 /*  Color Palettes                                                     */

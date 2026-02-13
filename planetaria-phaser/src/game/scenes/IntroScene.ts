@@ -92,10 +92,10 @@ export default class IntroScene extends Phaser.Scene {
 
     // ── "Continue" prompt ──
     this.skipText = this.add
-      .text(width - 20, height - 20, "[ Press SPACE or click to continue ]", {
+      .text(width - 20, height - 20, "[ SPACE / Click ]", {
         fontFamily: "monospace",
-        fontSize: "14px",
-        color: "#888888",
+        fontSize: "12px",
+        color: "#666666",
       })
       .setOrigin(1, 1)
       .setDepth(1000)
@@ -149,14 +149,14 @@ export default class IntroScene extends Phaser.Scene {
     const container = this.add.container(0, 0).setDepth(100);
     this.beatContainers.push(container);
 
-    // Semi-transparent overlay for text readability
+    // Semi-transparent subtitle bar at the bottom for text readability
     const overlay = this.add.rectangle(
       width / 2,
-      height / 2,
+      height * 0.85,
       width,
-      height,
+      height * 0.2,
       0x000000,
-      0.45
+      0.6
     );
     container.add(overlay);
 
@@ -164,13 +164,13 @@ export default class IntroScene extends Phaser.Scene {
     const builder = this.beatBuilders[beat.id];
     builder(this, container);
 
-    // ── Typewriter text ──
+    // ── Typewriter text (subtitle position — lower third) ──
     this.activeTextRenderer = new IntroTextRenderer(
       this,
       width / 2,
-      height * 0.62,
+      height * 0.85,
       beat.text,
-      width * 0.75
+      width * 0.7
     );
     container.add(this.activeTextRenderer.getTextObject());
 

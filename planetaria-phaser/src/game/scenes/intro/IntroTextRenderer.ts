@@ -29,13 +29,13 @@ export default class IntroTextRenderer {
     this.textObject = scene.add
       .text(x, y, "", {
         fontFamily: "monospace",
-        fontSize: "16px",
+        fontSize: "13px",
         color: "#ccddff",
         align: "center",
-        lineSpacing: 6,
+        lineSpacing: 4,
         wordWrap: { width: maxWidth },
       })
-      .setOrigin(0.5, 0);
+      .setOrigin(0.5, 0.5);
 
     this.startTyping();
   }
