@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import Phaser from "phaser";
 import GameScene from "../../game/scenes/GameScene";
 import { DISPLAY, PHYSICS } from "../../game/config";
+import IntroScene from "../../game/scenes/IntroScene";
 
 const PhaserGame: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -30,7 +31,7 @@ const PhaserGame: React.FC = () => {
           debug: PHYSICS.DEBUG,
         },
       },
-      scene: [GameScene],
+      scene: [IntroScene, GameScene],
       input: { keyboard: true },
     };
 
