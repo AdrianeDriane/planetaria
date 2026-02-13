@@ -693,7 +693,7 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({
                 e.stopPropagation();
                 handleLaunch(selectedData.id);
               }}
-              className="mt-1 cursor-pointer border-2 px-6 py-2 font-['Press_Start_2P'] text-[8px] tracking-wider transition-all duration-150 active:scale-95 md:text-[9px]"
+              className="mt-1 cursor-pointer border-2 px-6 pt-1 pb-2 font-['Press_Start_2P'] text-[8px] tracking-wider transition-all duration-150 active:scale-95 md:text-[9px]"
               style={{
                 borderColor: selectedData.colors.body,
                 color: selectedData.colors.body,
@@ -701,7 +701,7 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({
                 boxShadow: `0 0 12px ${selectedData.colors.glow}`,
               }}
             >
-              ▶ LAUNCH
+              <span className="text-[15px]">▶︎</span> LAUNCH
             </button>
           </div>
         ) : selectedData && !isSelectedUnlocked ? (
