@@ -105,7 +105,7 @@ export const INTRO_TEXTURES = {
   NEPTUNE: "intro_neptune",
   /** PLACEHOLDER: intro_pluto — Pluto dwarf-planet sprite */
   PLUTO: "intro_pluto",
-  /** PLACEHOLDER: intro_ship — S.S. Astra spaceship sprite */
+  /** Real asset: S.S. Astra spaceship (assets/ui/ss_astra.png) */
   SHIP: "intro_ship",
   /** PLACEHOLDER: intro_shockwave — Expanding shockwave ring sprite */
   SHOCKWAVE: "intro_shockwave",

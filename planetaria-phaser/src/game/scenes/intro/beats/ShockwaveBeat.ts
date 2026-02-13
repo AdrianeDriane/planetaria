@@ -23,10 +23,9 @@ export function buildShockwaveVisuals(
   const { width, height } = scene.scale;
 
   // ── Ship ──
-  // PLACEHOLDER: intro_ship — Replace with ship sprite
   const ship = scene.add
     .image(width * 0.5, height * 0.3, INTRO_TEXTURES.SHIP)
-    .setScale(0.7);
+    .setScale(0.06);
   container.add(ship);
 
   // ── Primary shockwave ring ──
@@ -68,25 +67,25 @@ export function buildShockwaveVisuals(
 
   // ── Impact sequence (delayed) ──
   scene.time.delayedCall(1500, () => {
-    // Ship shakes violently with angle distortion
+    // Ship shakes gently with slight angle distortion
     scene.tweens.add({
       targets: ship,
-      x: ship.x + Phaser.Math.Between(-10, 10),
-      y: ship.y + Phaser.Math.Between(-6, 6),
-      angle: Phaser.Math.Between(-20, 20),
-      duration: 70,
+      x: ship.x + Phaser.Math.Between(-2, 2),
+      y: ship.y + Phaser.Math.Between(-1, 1),
+      angle: Phaser.Math.Between(-5, 5),
+      duration: 160,
       yoyo: true,
       repeat: 20,
     });
 
-    // Ship scale distortion from impact
+    // Subtle scale pulse from impact
     scene.tweens.add({
       targets: ship,
-      scaleX: 0.65,
-      scaleY: 0.75,
-      duration: 100,
+      scaleX: 0.07,
+      scaleY: 0.065,
+      duration: 120,
       yoyo: true,
-      repeat: 5,
+      repeat: 3,
     });
 
     // Purple energy flash
@@ -115,7 +114,7 @@ export function buildShockwaveVisuals(
       scale: { start: 0.6, end: 0 },
       lifespan: 500,
       frequency: 50,
-      quantity: 3,
+      quantity: 16,
       alpha: { start: 1, end: 0 },
     });
     container.add(sparks);

@@ -54,7 +54,7 @@ export function buildVoidApproachVisuals(
   // ── Neptune (trembling under the Void's pull) ──
   const neptune = scene.add
     .image(width * 0.55, height * 0.32, INTRO_TEXTURES.NEPTUNE)
-    .setScale(0.12);
+    .setScale(0.1);
   container.add(neptune);
 
   // Shake to show distress

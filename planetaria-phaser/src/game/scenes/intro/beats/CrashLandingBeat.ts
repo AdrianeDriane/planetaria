@@ -22,30 +22,133 @@ export function buildCrashLandingVisuals(
 ): void {
   const { width, height } = scene.scale;
 
-  // ── Mercury surface ──
-  const ground = scene.add.rectangle(
-    width / 2,
-    height * 0.48,
-    width * 0.8,
-    8,
-    0x887766
-  );
-  container.add(ground);
+  // ── Mercury surface (procedural) ──
+  const surfaceGfx = scene.add.graphics();
+  const surfaceY = height * 0.46;
 
-  const surfaceLabel = scene.add
-    .text(width / 2, height * 0.51, "— Mercury Surface —", {
-      fontFamily: "monospace",
-      fontSize: "10px",
-      color: "#776655",
-    })
-    .setOrigin(0.5);
-  container.add(surfaceLabel);
+  // Seeded-random helper for deterministic terrain
+  const seededRng = (seed: number) => {
+    let s = seed;
+    return () => {
+      s = (s * 16807 + 0) % 2147483647;
+      return (s - 1) / 2147483646;
+    };
+  };
+  const rng = seededRng(42);
+
+  // Generate jagged ridgeline points across the full width
+  const leftEdge = 0;
+  const rightEdge = width;
+  const surfaceWidth = rightEdge - leftEdge;
+  const ridgePoints: { x: number; y: number }[] = [];
+  const segments = 40;
+  for (let i = 0; i <= segments; i++) {
+    const t = i / segments;
+    const x = leftEdge + t * surfaceWidth;
+    // Layered noise for natural feel
+    const coarse = Math.sin(t * Math.PI * 3) * 6;
+    const medium = Math.sin(t * Math.PI * 7 + 1.3) * 3;
+    const fine = (rng() - 0.5) * 4;
+    const y = surfaceY + coarse + medium + fine;
+    ridgePoints.push({ x, y });
+  }
+
+  // Deep ground fill — dark Mercury crust
+  surfaceGfx.fillStyle(0x3a3028, 1);
+  surfaceGfx.beginPath();
+  surfaceGfx.moveTo(ridgePoints[0].x, ridgePoints[0].y);
+  for (const pt of ridgePoints) surfaceGfx.lineTo(pt.x, pt.y);
+  surfaceGfx.lineTo(rightEdge, height);
+  surfaceGfx.lineTo(leftEdge, height);
+  surfaceGfx.closePath();
+  surfaceGfx.fillPath();
+
+  // Mid-layer — slightly lighter sub-surface
+  surfaceGfx.fillStyle(0x4e4438, 0.7);
+  surfaceGfx.beginPath();
+  surfaceGfx.moveTo(ridgePoints[0].x, ridgePoints[0].y + 4);
+  for (const pt of ridgePoints) surfaceGfx.lineTo(pt.x, pt.y + 4);
+  surfaceGfx.lineTo(rightEdge, height);
+  surfaceGfx.lineTo(leftEdge, height);
+  surfaceGfx.closePath();
+  surfaceGfx.fillPath();
+
+  // Surface highlight — lighter top edge
+  surfaceGfx.lineStyle(2, 0x9a8a72, 0.9);
+  surfaceGfx.beginPath();
+  surfaceGfx.moveTo(ridgePoints[0].x, ridgePoints[0].y);
+  for (const pt of ridgePoints) surfaceGfx.lineTo(pt.x, pt.y);
+  surfaceGfx.strokePath();
+
+  // Secondary highlight line (faint)
+  surfaceGfx.lineStyle(1, 0xbba882, 0.3);
+  surfaceGfx.beginPath();
+  surfaceGfx.moveTo(ridgePoints[0].x, ridgePoints[0].y - 1);
+  for (const pt of ridgePoints) surfaceGfx.lineTo(pt.x, pt.y - 1);
+  surfaceGfx.strokePath();
+
+  // ── Craters ──
+  const craterData = [
+    { cx: 0.2, r: 18, depth: 3 },
+    { cx: 0.45, r: 12, depth: 2 },
+    { cx: 0.65, r: 22, depth: 4 },
+    { cx: 0.8, r: 10, depth: 2 },
+    { cx: 0.35, r: 8, depth: 1.5 },
+  ];
+  for (const c of craterData) {
+    const cx = leftEdge + c.cx * surfaceWidth;
+    const cy = surfaceY + c.depth + 6;
+
+    // Crater shadow / depression (dark ellipse)
+    surfaceGfx.fillStyle(0x2a2218, 0.6);
+    surfaceGfx.fillEllipse(cx, cy, c.r * 2, c.r * 0.7);
+
+    // Crater rim highlight (top arc)
+    surfaceGfx.lineStyle(1, 0x8a7a62, 0.5);
+    surfaceGfx.beginPath();
+    surfaceGfx.arc(cx, cy - 1, c.r, Math.PI * 1.1, Math.PI * 1.9, false);
+    surfaceGfx.strokePath();
+
+    // Inner shadow
+    surfaceGfx.fillStyle(0x1e1a14, 0.4);
+    surfaceGfx.fillEllipse(cx + 1, cy + 1, c.r * 1.2, c.r * 0.4);
+  }
+
+  // ── Small rocks / boulders scattered on the surface ──
+  for (let i = 0; i < 15; i++) {
+    const rx = leftEdge + rng() * surfaceWidth;
+    const ridgeIdx = Math.min(
+      segments,
+      Math.floor(((rx - leftEdge) / surfaceWidth) * segments)
+    );
+    const baseY = ridgePoints[ridgeIdx].y;
+    const ry = baseY + 1 + rng() * 8;
+    const rSize = 1 + rng() * 3;
+    const shade = 0x50 + Math.floor(rng() * 0x20);
+    const rockColor = (shade << 16) | ((shade - 0x10) << 8) | (shade - 0x20);
+    surfaceGfx.fillStyle(rockColor, 0.7);
+    surfaceGfx.fillRect(rx, ry, rSize, rSize * 0.7);
+  }
+
+  // ── Surface dust speckles ──
+  for (let i = 0; i < 30; i++) {
+    const dx = leftEdge + rng() * surfaceWidth;
+    const ridgeIdx = Math.min(
+      segments,
+      Math.floor(((dx - leftEdge) / surfaceWidth) * segments)
+    );
+    const baseY = ridgePoints[ridgeIdx].y;
+    const dy = baseY + 2 + rng() * 14;
+    surfaceGfx.fillStyle(0x6a5a48, 0.3 + rng() * 0.3);
+    surfaceGfx.fillPoint(dx, dy, 1 + rng());
+  }
+
+  container.add(surfaceGfx);
 
   // ── Ship falling and crashing ──
-  // PLACEHOLDER: intro_ship — Replace with ship sprite
   const ship = scene.add
     .image(width * 0.6, height * 0.05, INTRO_TEXTURES.SHIP)
-    .setScale(0.6)
+    .setScale(0.06)
     .setAngle(-25);
   container.add(ship);
 
@@ -67,7 +170,7 @@ export function buildCrashLandingVisuals(
   scene.tweens.add({
     targets: ship,
     x: width * 0.45,
-    y: height * 0.43,
+    y: height * 0.42,
     angle: { from: -25, to: 15 },
     duration: 2500,
     ease: "Quad.easeIn",
@@ -108,7 +211,7 @@ function onCrashImpact(
   sceneHeight: number
 ): void {
   const { width } = scene.scale;
-  const impactY = sceneHeight * 0.44;
+  const impactY = sceneHeight * 0.42;
 
   // ── White impact flash ──
   const impactFlash = scene.add.rectangle(

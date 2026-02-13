@@ -22,7 +22,6 @@ export function generatePlaceholderTextures(scene: Phaser.Scene): void {
   generateStarfieldTexture(scene);
   generateVoidDevourerTexture(scene);
   generatePlutoTexture(scene);
-  generateShipTexture(scene);
   generateShockwaveTexture(scene);
   generateParticleTextures(scene);
   generateStarParticleTexture(scene);
@@ -138,42 +137,6 @@ function createSinglePlanetTexture(
   gfx.fillCircle(cx + radius * 0.2, cy + radius * 0.2, radius * 0.7);
 
   gfx.generateTexture(key, size, size);
-  gfx.destroy();
-}
-
-/**
- * PLACEHOLDER: intro_ship
- * The S.S. Astra research vessel — a small spaceship.
- * Replace with a pixel-art ship sprite (facing upward).
- */
-function generateShipTexture(scene: Phaser.Scene): void {
-  const gfx = scene.make.graphics({ x: 0, y: 0 });
-
-  // Hull body
-  gfx.fillStyle(0xcccccc);
-  gfx.fillTriangle(40, 0, 0, 30, 80, 30); // Nose cone
-  gfx.fillRect(0, 30, 80, 40); // Main hull
-
-  // Wing struts
-  gfx.fillStyle(0x888888);
-  gfx.fillTriangle(0, 40, -20, 70, 0, 70); // Left wing
-  gfx.fillTriangle(80, 40, 100, 70, 80, 70); // Right wing
-
-  // Cockpit window
-  gfx.fillStyle(0x44aaff, 0.6);
-  gfx.fillTriangle(40, 8, 30, 25, 50, 25);
-
-  // Engine glow
-  gfx.fillStyle(0x44aaff);
-  gfx.fillRect(15, 70, 15, 8);
-  gfx.fillRect(50, 70, 15, 8);
-
-  // Engine exhaust hint
-  gfx.fillStyle(0x2266aa, 0.5);
-  gfx.fillRect(18, 78, 9, 4);
-  gfx.fillRect(53, 78, 9, 4);
-
-  gfx.generateTexture(INTRO_TEXTURES.SHIP, 100, 84);
   gfx.destroy();
 }
 

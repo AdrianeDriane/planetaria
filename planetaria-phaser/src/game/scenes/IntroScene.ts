@@ -75,6 +75,7 @@ export default class IntroScene extends Phaser.Scene {
     this.load.image("intro_saturn", "assets/ui/saturn.png");
     this.load.image("intro_uranus", "assets/ui/uranus.png");
     this.load.image("intro_neptune", "assets/ui/neptune.png");
+    this.load.image("intro_ship", "assets/ui/ss_astra.png");
 
     // Generate remaining procedural/placeholder textures
     generatePlaceholderTextures(this);

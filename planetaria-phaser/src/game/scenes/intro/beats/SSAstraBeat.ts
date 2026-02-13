@@ -48,10 +48,9 @@ export function buildSSAstraVisuals(
   container.add(labelMercury);
 
   // ── S.S. Astra ──
-  // PLACEHOLDER: intro_ship — Replace with ship sprite
   const ship = scene.add
     .image(width * 0.55, height * 0.26, INTRO_TEXTURES.SHIP)
-    .setScale(0.7);
+    .setScale(0.06);
   container.add(ship);
 
   // Gentle bobbing motion (combined x and y for more natural feel)
