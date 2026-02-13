@@ -6,6 +6,127 @@ interface MainMenuProps {
   onPlay: () => void;
 }
 
+// ─── Pixel Art Icon Components ───
+// These render crisp pixel-art icons using small div grids
+
+const PixelInfoIcon: React.FC = () => {
+  // 7x7 pixel grid for a retro "i" info symbol
+  // . = transparent, W = white, B = bright blue accent
+  const grid = [
+    "..WBW..",
+    "..WBW..",
+    ".......",
+    ".WWBW..",
+    "..WBW..",
+    "..WBW..",
+    ".WWBWW.",
+  ];
+
+  return (
+    <div className="flex flex-col" style={{ gap: 0 }}>
+      {grid.map((row, y) => (
+        <div key={y} className="flex" style={{ gap: 0 }}>
+          {row.split("").map((cell, x) => (
+            <div
+              key={x}
+              style={{
+                width: 3,
+                height: 3,
+                backgroundColor:
+                  cell === "W"
+                    ? "#c8d8ff"
+                    : cell === "B"
+                      ? "#ffffff"
+                      : "transparent",
+              }}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const PixelSpeakerOnIcon: React.FC = () => {
+  // 9x7 pixel grid: speaker cone + sound waves
+  // G = green body, L = light green highlight, W = wave (green)
+  const grid = [
+    "...LG....",
+    "..LGG.W..",
+    "LLGGG..W.",
+    "LGGGG.W.W",
+    "LLGGG..W.",
+    "..LGG.W..",
+    "...LG....",
+  ];
+
+  return (
+    <div className="flex flex-col" style={{ gap: 0 }}>
+      {grid.map((row, y) => (
+        <div key={y} className="flex" style={{ gap: 0 }}>
+          {row.split("").map((cell, x) => (
+            <div
+              key={x}
+              style={{
+                width: 3,
+                height: 3,
+                backgroundColor:
+                  cell === "G"
+                    ? "#4ade80"
+                    : cell === "L"
+                      ? "#86efac"
+                      : cell === "W"
+                        ? "#22c55e"
+                        : "transparent",
+              }}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const PixelSpeakerMutedIcon: React.FC = () => {
+  // 9x7 pixel grid: speaker cone + X for muted
+  // R = red body, L = light red, X = red X mark
+  const grid = [
+    "...LR....",
+    "..LRR.X.X",
+    "LLRRR..X.",
+    "LRRRR.X..",
+    "LLRRR..X.",
+    "..LRR.X.X",
+    "...LR....",
+  ];
+
+  return (
+    <div className="flex flex-col" style={{ gap: 0 }}>
+      {grid.map((row, y) => (
+        <div key={y} className="flex" style={{ gap: 0 }}>
+          {row.split("").map((cell, x) => (
+            <div
+              key={x}
+              style={{
+                width: 3,
+                height: 3,
+                backgroundColor:
+                  cell === "R"
+                    ? "#f87171"
+                    : cell === "L"
+                      ? "#fca5a5"
+                      : cell === "X"
+                        ? "#ef4444"
+                        : "transparent",
+              }}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const MainMenu: React.FC<MainMenuProps> = ({ onPlay }) => {
   const [isMuted, setIsMuted] = useState(false);
 
@@ -73,26 +194,28 @@ const MainMenu: React.FC<MainMenuProps> = ({ onPlay }) => {
 
       {/* HUD CONTAINER - Bottom Right */}
       <div className="absolute right-8 bottom-8 z-20 flex gap-4">
+        {/* INFO BUTTON — Pixel Art */}
         <div
           onClick={(e) => handleHudClick(e, "OPEN_INFO")}
-          className="flex h-12 w-12 items-center justify-center border-2 border-blue-400 bg-blue-900 transition-colors duration-100 hover:border-white hover:bg-blue-800"
+          className="flex h-12 w-12 items-center justify-center border-2 border-blue-400 bg-blue-950 transition-colors duration-100 hover:border-white hover:bg-blue-900"
           title="Game Instructions"
+          style={{ imageRendering: "pixelated" }}
         >
-          <span className="font-['Press_Start_2P'] text-xl text-white">i</span>
+          <PixelInfoIcon />
         </div>
 
+        {/* AUDIO TOGGLE — Pixel Art Speaker */}
         <div
           onClick={(e) => handleHudClick(e, "TOGGLE_AUDIO")}
           className={`flex h-12 w-12 items-center justify-center border-2 transition-colors duration-100 ${
             isMuted
-              ? "border-red-400 bg-red-900 hover:bg-red-800"
-              : "border-green-400 bg-green-900 hover:bg-green-800"
-          } `}
-          title="Toggle Audio"
+              ? "border-red-400 bg-red-950 hover:bg-red-900"
+              : "border-green-400 bg-green-950 hover:bg-green-900"
+          }`}
+          title={isMuted ? "Unmute Audio" : "Mute Audio"}
+          style={{ imageRendering: "pixelated" }}
         >
-          <div
-            className={`h-4 w-4 ${isMuted ? "bg-red-200" : "bg-green-200"}`}
-          />
+          {isMuted ? <PixelSpeakerMutedIcon /> : <PixelSpeakerOnIcon />}
         </div>
       </div>
 
