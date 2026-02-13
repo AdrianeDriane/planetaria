@@ -176,7 +176,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onPlay }) => {
           <img
             src={planetariaLogo}
             alt="Planetaria"
-            className="animate-logo-breathe -mt-16 h-auto w-125 max-w-[80vw] gap-10"
+            className="animate-logo-breathe -mt-16 h-auto w-80 max-w-[80vw] gap-10 md:w-120"
             style={{
               imageRendering: "pixelated",
             }}
@@ -197,7 +197,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onPlay }) => {
         {/* INFO BUTTON — Pixel Art */}
         <div
           onClick={(e) => handleHudClick(e, "OPEN_INFO")}
-          className="flex h-12 w-12 items-center justify-center border-2 border-blue-400 bg-blue-950 transition-colors duration-100 hover:border-white hover:bg-blue-900"
+          className="flex h-9 w-9 items-center justify-center border-2 border-blue-400 bg-blue-950 transition-colors duration-100 hover:border-white hover:bg-blue-900 md:h-12 md:w-12"
           title="Game Instructions"
           style={{ imageRendering: "pixelated" }}
         >
@@ -207,7 +207,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onPlay }) => {
         {/* AUDIO TOGGLE — Pixel Art Speaker */}
         <div
           onClick={(e) => handleHudClick(e, "TOGGLE_AUDIO")}
-          className={`flex h-12 w-12 items-center justify-center border-2 transition-colors duration-100 ${
+          className={`flex h-9 w-9 items-center justify-center border-2 transition-colors duration-100 md:h-12 md:w-12 ${
             isMuted
               ? "border-red-400 bg-red-950 hover:bg-red-900"
               : "border-green-400 bg-green-950 hover:bg-green-900"
