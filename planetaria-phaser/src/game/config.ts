@@ -14,14 +14,14 @@
 
 // --- World ---
 export const WORLD = {
-  WIDTH: 2000,
+  WIDTH: 10000,
   HEIGHT: 800,
   TILE_SIZE: 32,
 } as const;
 
 // --- Physics ---
 export const PHYSICS = {
-  GRAVITY: 800,
+  GRAVITY: 400,
   DEBUG: false,
 } as const;
 
@@ -86,7 +86,7 @@ export const DISPLAY = {
 export const TERRAIN = {
   TEXTURE_KEY: "ground-tile",
   TILE_SIZE: 32,
-  COLOR: 0x452a00,
-  BORDER_COLOR: 0x1f1300,
-  SURFACE_COLOR: 0x5b8a4e,
+  COLOR: 0x3a3028,
+  BORDER_COLOR: 0x1e1a14,
+  SURFACE_COLOR: 0x6a5a48,
 } as const;

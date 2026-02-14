@@ -72,8 +72,8 @@ export default class Player {
   // --- Private: Setup --------------------------------------------------------
 
   private createSprite(): Phaser.GameObjects.Sprite {
-    const spawnX = WORLD.WIDTH / 4;
-    const spawnY = WORLD.HEIGHT - 200;
+    const spawnX = 80;
+    const spawnY = WORLD.HEIGHT - 400;
 
     const sprite = this.scene.add.sprite(spawnX, spawnY, PLAYER.TEXTURE_KEY);
     sprite.setDepth(10);
