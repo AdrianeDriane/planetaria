@@ -1,9 +1,15 @@
 import { useEffect, useRef } from "react";
 import Phaser from "phaser";
 import GameScene from "../game/scenes/GameScene";
+import VenusScene from "../game/scenes/VenusScene";
 import { DISPLAY, PHYSICS } from "../game/config";
+import PixelButton from "./ui/PixelButton";
 
-const PhaserGame: React.FC = () => {
+interface PhaserGameProps {
+    onNavigateToVenus: () => void;
+}
+
+const PhaserGame: React.FC<PhaserGameProps> = ({ onNavigateToVenus }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const gameRef = useRef<Phaser.Game | null>(null);
 
@@ -30,7 +36,7 @@ const PhaserGame: React.FC = () => {
                     debug: PHYSICS.DEBUG,
                 },
             },
-            scene: [GameScene],
+            scene: [GameScene, VenusScene],
             input: { keyboard: true },
         };
 
@@ -45,8 +51,17 @@ const PhaserGame: React.FC = () => {
     }, []);
 
     return (
-        <div className="w-screen h-screen bg-gray-950">
+        <div className="w-screen h-screen bg-gray-950 relative pointer-events-none">
             <div ref={containerRef} className="w-full h-full" />
+            
+            {/* Navigation Overlay */}
+            <div className="absolute top-4 right-4 z-50 pointer-events-auto">
+                <PixelButton 
+                    label="Go to Venus" 
+                    onClick={onNavigateToVenus}
+                    variant="secondary"
+                />
+            </div>
         </div>
     );
 };
