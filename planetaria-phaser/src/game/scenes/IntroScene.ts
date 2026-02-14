@@ -190,7 +190,13 @@ export default class IntroScene extends Phaser.Scene {
       duration: 800,
       onComplete: () => {
         // Wait for typing to finish, then allow advancing
-        const typingDuration = this.activeTextRenderer!.getTotalDuration();
+        // FIX: Add null check to prevent "Cannot read properties of null (reading 'getTotalDuration')"
+        if (!this.activeTextRenderer) {
+          this.isAnimating = false;
+          return;
+        }
+
+        const typingDuration = this.activeTextRenderer.getTotalDuration();
         const bufferAfterFade = Math.max(typingDuration - 800, 0);
 
         this.time.delayedCall(
@@ -232,6 +238,7 @@ export default class IntroScene extends Phaser.Scene {
         duration: INTRO_CONFIG.FADE_DURATION,
         onComplete: () => {
           currentContainer.destroy();
+          // Ensure activeTextRenderer is still relevant before destroying
           if (this.activeTextRenderer) {
             this.activeTextRenderer.destroy();
             this.activeTextRenderer = null;
