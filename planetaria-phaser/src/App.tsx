@@ -1,9 +1,11 @@
 import { useState } from "react";
-import MainMenu from "./components/MainMenu";
-import PhaserGame from "./components/PhaserGame";
-import VenusGame from "./components/VenusGame";
 
-type AppState = "menu" | "playing" | "venus";
+import MainMenu from "./ui/pages/MainMenu";
+import PhaserGame from "./ui/pages/PhaserGame";
+import VenusGame from "./ui/pages/VenusGame";
+import EarthGame from "./ui/pages/EarthGame";
+
+type AppState = "menu" | "playing" | "venus" | "earth";
 
 function App() {
     const [appState, setAppState] = useState<AppState>("menu");
@@ -17,7 +19,10 @@ function App() {
                 <PhaserGame onNavigateToVenus={() => setAppState("venus")} />
             )}
             {appState === "venus" && (
-                <VenusGame onComplete={() => setAppState("menu")} onBack={() => setAppState("menu")} />
+                <VenusGame onComplete={() => setAppState("earth")} onBack={() => setAppState("playing")} />
+            )}
+            {appState === "earth" && (
+                <EarthGame onComplete={() => setAppState("menu")} onBack={() => setAppState("venus")} />
             )}
         </div>
     );
