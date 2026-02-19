@@ -54,13 +54,16 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
 
     // Helper function to generate non-overlapping positions
     const generateNonOverlappingPosition = (existingPositions: { x: number; y: number }[]) => {
-        const MIN_DISTANCE = 150; // Minimum distance between packets (packets are 100px, so 150px ensures no overlap)
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const MIN_DISTANCE = Math.min(vw, vh) * 0.15; // Scale min distance to viewport
         const MAX_ATTEMPTS = 50;
+        const PADDING = 60; // Keep packets away from edges
         
         for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
             const newPos = {
-                x: Math.random() * 800 + 200, // Keep within 200-1000 range
-                y: Math.random() * 400 + 150  // Keep within 150-550 range
+                x: Math.random() * (vw - PADDING * 2) + PADDING,
+                y: Math.random() * (vh - PADDING * 2) + PADDING
             };
             
             // Check if this position is far enough from all existing positions
@@ -78,19 +81,21 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
         
         // Fallback: return a position even if overlap (shouldn't happen with MAX_ATTEMPTS=50)
         return {
-            x: Math.random() * 800 + 200,
-            y: Math.random() * 400 + 150
+            x: Math.random() * (vw - PADDING * 2) + PADDING,
+            y: Math.random() * (vh - PADDING * 2) + PADDING
         };
     };
 
     // Generate positions for all packets
     const positions: { x: number; y: number }[] = [];
     
-    // Fixed positions for data packets (hand-placed to ensure good distribution)
-    positions.push({ x: 300, y: 200 });
-    positions.push({ x: 800, y: 400 });
-    positions.push({ x: 500, y: 500 });
-    positions.push({ x: 1000, y: 250 });
+    // Viewport-relative positions for data packets (distributed across screen)
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    positions.push({ x: vw * 0.25, y: vh * 0.3 });   // top-left area
+    positions.push({ x: vw * 0.7, y: vh * 0.6 });    // bottom-right area
+    positions.push({ x: vw * 0.4, y: vh * 0.7 });    // bottom-center
+    positions.push({ x: vw * 0.8, y: vh * 0.35 });   // top-right area
     
     // Generate non-overlapping positions for trap packets (7 total for variety)
     for (let i = 0; i < 7; i++) {
@@ -101,8 +106,8 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
         // DATA PACKETS (need to collect all 4)
         {
             id: "packet-1",
-            x: 300,
-            y: 200,
+            x: positions[0].x,
+            y: positions[0].y,
             image: "/assets/hot_potato_venus.png",
             type: 'data',
             contentType: 'hot-potato',
@@ -113,8 +118,8 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
         },
         {
             id: "packet-2",
-            x: 800,
-            y: 400,
+            x: positions[1].x,
+            y: positions[1].y,
             image: "/assets/acid_cloud_venus.png",
             type: 'data',
             contentType: 'acid-clouds',
@@ -125,8 +130,8 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
         },
         {
             id: "packet-3",
-            x: 500,
-            y: 500,
+            x: positions[2].x,
+            y: positions[2].y,
             image: "/assets/slow_spinning_venus.png",
             type: 'data',
             contentType: 'slow-spinning',
@@ -137,8 +142,8 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
         },
         {
             id: "packet-4",
-            x: 1000,
-            y: 250,
+            x: positions[3].x,
+            y: positions[3].y,
             image: "/assets/venus_rock.png",
             type: 'data',
             contentType: 'rocks',
@@ -236,7 +241,9 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
 
     const [telescopePos, setTelescopePos] = useState({ x: 200, y: 200 });
     const [showTitle, setShowTitle] = useState(true);
-    const telescopeRadius = 250;
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+    const [isChecklistOpen, setIsChecklistOpen] = useState(false);
+    const telescopeRadius = isMobile ? 120 : 250; // Smaller on mobile
 
     // NEW GAME MECHANICS STATE
     const [pressure, setPressure] = useState(50); // 0-100 scale
@@ -271,6 +278,15 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
     const [showInstructions, setShowInstructions] = useState(true);
     const [instructionStep, setInstructionStep] = useState(0);
     
+    // Detect mobile screen size changes
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 1024);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+    
     // Flying button for trap clearing
     const [activeTrap, setActiveTrap] = useState<string | null>(null);
     const [flyingButtonPos, setFlyingButtonPos] = useState({ x: 400, y: 300 });
@@ -279,8 +295,8 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
     // Safe zone indicator (shows where to go when pressure is red)
     // Randomize position on each game start to keep it unpredictable
     const [safeZonePos, setSafeZonePos] = useState(() => ({ 
-        x: Math.floor(Math.random() * 800) + 200, 
-        y: Math.floor(Math.random() * 400) + 150 
+        x: Math.floor(Math.random() * (window.innerWidth * 0.6) + window.innerWidth * 0.2), 
+        y: Math.floor(Math.random() * (window.innerHeight * 0.5) + window.innerHeight * 0.25) 
     }));
 
     // Title auto-hide
@@ -335,8 +351,8 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                 
                 if (!isAtSafeZone) {
                     setSafeZonePos({
-                        x: Math.floor(Math.random() * 800) + 200,
-                        y: Math.floor(Math.random() * 400) + 150
+                        x: Math.floor(Math.random() * (window.innerWidth * 0.6) + window.innerWidth * 0.2),
+                        y: Math.floor(Math.random() * (window.innerHeight * 0.5) + window.innerHeight * 0.25)
                     });
                 }
             }, 8000); // Move safe zone every 8 seconds (if player not there)
@@ -744,8 +760,8 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
         setTrapClicks(0);
         // Randomize button position
         setFlyingButtonPos({
-            x: Math.random() * (window.innerWidth - 400) + 200,
-            y: Math.random() * (window.innerHeight - 400) + 200
+            x: Math.random() * (window.innerWidth * 0.6) + window.innerWidth * 0.2,
+            y: Math.random() * (window.innerHeight * 0.6) + window.innerHeight * 0.2
         });
         
         switch (trapType) {
@@ -823,8 +839,8 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
         } else {
             // Move button to random position
             setFlyingButtonPos({
-                x: Math.random() * (window.innerWidth - 400) + 200,
-                y: Math.random() * (window.innerHeight - 400) + 200
+                x: Math.random() * (window.innerWidth * 0.6) + window.innerWidth * 0.2,
+                y: Math.random() * (window.innerHeight * 0.6) + window.innerHeight * 0.2
             });
         }
     };
@@ -1149,15 +1165,18 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
             >
                 {/* Mystery Packet Indicators (unknown until opened) */}
                 {dataPackets.map((packet) => {
+                    const packetSize = isMobile ? 60 : 100;
+                    const packetCenter = packetSize / 2;
+                    
                     const isWithinRadius =
                         Math.sqrt(
-                            Math.pow(packet.x + 50 - telescopePos.x, 2) +
-                                Math.pow(packet.y + 50 - telescopePos.y, 2)
+                            Math.pow(packet.x + packetCenter - telescopePos.x, 2) +
+                                Math.pow(packet.y + packetCenter - telescopePos.y, 2)
                         ) < telescopeRadius;
 
                     const distanceFromCenter = Math.sqrt(
-                        Math.pow(packet.x + 50 - telescopePos.x, 2) +
-                            Math.pow(packet.y + 50 - telescopePos.y, 2)
+                        Math.pow(packet.x + packetCenter - telescopePos.x, 2) +
+                            Math.pow(packet.y + packetCenter - telescopePos.y, 2)
                     );
                     
                     const isOnCrosshair = distanceFromCenter < 50;
@@ -1207,8 +1226,8 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                             <div
                                 className="relative flex items-center justify-center"
                                 style={{
-                                    width: "100px",
-                                    height: "100px",
+                                    width: isMobile ? "60px" : "100px",
+                                    height: isMobile ? "60px" : "100px",
                                 }}
                             >
                                 {/* Background rock image */}
@@ -1217,8 +1236,8 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                                     alt="Packet"
                                     className="absolute inset-0 cursor-pointer"
                                     style={{
-                                        width: "100px",
-                                        height: "100px",
+                                        width: isMobile ? "60px" : "100px",
+                                        height: isMobile ? "60px" : "100px",
                                         filter: `
                                             ${isOnCrosshair ? "drop-shadow(0 0 20px rgba(251, 191, 36, 1)) brightness(1.5)" : `brightness(1) drop-shadow(0 0 8px ${glowColor})`}
                                             brightness(${visibilityMultiplier})
@@ -1229,8 +1248,9 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                                 
                                 {/* Packet label overlay */}
                                 <div 
-                                    className="absolute z-10 font-['Press_Start_2P'] text-2xl pointer-events-none"
+                                    className="absolute z-10 font-['Press_Start_2P'] pointer-events-none"
                                     style={{
+                                        fontSize: isMobile ? '16px' : '24px',
                                         color: '#d1d5db',
                                         textShadow: `0 0 10px ${glowColor}, 0 0 20px ${glowColor}`,
                                     }}
@@ -1244,31 +1264,31 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                                 <div
                                     className="absolute top-0 left-0 w-full h-full flex items-center justify-center pointer-events-none"
                                 >
-                                    <svg className="w-32 h-32 -rotate-90">
+                                    <svg className={isMobile ? "w-20 h-20" : "w-32 h-32"} style={{transform: 'rotate(-90deg)'}}>
                                         <circle
-                                            cx="64"
-                                            cy="64"
-                                            r="60"
+                                            cx={isMobile ? "40" : "64"}
+                                            cy={isMobile ? "40" : "64"}
+                                            r={isMobile ? "36" : "60"}
                                             stroke="rgba(34, 197, 234, 0.3)"
                                             strokeWidth="4"
                                             fill="none"
                                         />
                                         <circle
-                                            cx="64"
-                                            cy="64"
-                                            r="60"
+                                            cx={isMobile ? "40" : "64"}
+                                            cy={isMobile ? "40" : "64"}
+                                            r={isMobile ? "36" : "60"}
                                             stroke="rgba(34, 197, 234, 1)"
                                             strokeWidth="4"
                                             fill="none"
-                                            strokeDasharray={`${2 * Math.PI * 60}`}
-                                            strokeDashoffset={`${2 * Math.PI * 60 * (1 - scanProgress / 100)}`}
+                                            strokeDasharray={`${2 * Math.PI * (isMobile ? 36 : 60)}`}
+                                            strokeDashoffset={`${2 * Math.PI * (isMobile ? 36 : 60) * (1 - scanProgress / 100)}`}
                                             className="transition-all duration-100"
                                             style={{
                                                 filter: 'drop-shadow(0 0 6px rgba(34, 197, 234, 0.8))',
                                             }}
                                         />
                                     </svg>
-                                    <span className="absolute text-cyan-400 font-['Press_Start_2P'] text-xs"
+                                    <span className={`absolute text-cyan-400 font-['Press_Start_2P'] ${isMobile ? 'text-[8px]' : 'text-xs'}`}
                                           style={{
                                               textShadow: '0 0 8px rgba(34, 197, 234, 1)',
                                           }}>
@@ -1340,20 +1360,20 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                         className="absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 pointer-events-auto"
                     >
                         <div 
-                            className="bg-linear-to-b from-orange-900 to-yellow-900 border-4 border-yellow-400 p-8 max-w-2xl mx-4"
+                            className="bg-linear-to-b from-orange-900 to-yellow-900 border-2 sm:border-4 border-yellow-400 p-4 sm:p-8 max-w-2xl mx-4 max-h-[90vh] overflow-y-auto"
                             style={{
                                 boxShadow: '0 0 40px rgba(251, 191, 36, 0.8), 0 0 80px rgba(251, 191, 36, 0.4)',
                             }}
                         >
                             {/* Title */}
-                            <div className="text-center mb-6">
-                                <p className="font-['Press_Start_2P'] text-yellow-300 text-2xl mb-2"
+                            <div className="text-center mb-4 sm:mb-6">
+                                <p className="font-['Press_Start_2P'] text-yellow-300 text-base sm:text-2xl mb-2"
                                    style={{
                                        textShadow: '0 0 15px rgba(251, 191, 36, 1)',
                                    }}>
                                     VENUS MISSION
                                 </p>
-                                <p className="font-['Press_Start_2P'] text-orange-300 text-sm"
+                                <p className="font-['Press_Start_2P'] text-orange-300 text-xs sm:text-sm"
                                    style={{
                                        textShadow: '0 0 10px rgba(251, 146, 60, 1)',
                                    }}>
@@ -1362,101 +1382,101 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                             </div>
                             
                             {/* Step Content */}
-                            <div className="min-h-75">
+                            <div className="min-h-40 sm:min-h-75">
                                 {instructionStep === 0 && (
-                                    <div className="bg-black bg-opacity-50 border-2 border-blue-400 p-6">
-                                        <p className="font-['Press_Start_2P'] text-blue-300 text-xs mb-4"
+                                    <div className="bg-black bg-opacity-50 border border-blue-400 p-3 sm:p-6">
+                                        <p className="font-['Press_Start_2P'] text-blue-300 text-[8px] sm:text-xs mb-2 sm:mb-4"
                                            style={{
                                                textShadow: '0 0 8px rgba(96, 165, 250, 1)',
                                            }}>
                                             🎯 OBJECTIVE:
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-sm leading-relaxed">
+                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed">
                                             Find all 4 DATA PACKETS to reactivate Venus's planetary core!
                                         </p>
                                     </div>
                                 )}
                                 
                                 {instructionStep === 1 && (
-                                    <div className="bg-black bg-opacity-50 border-2 border-cyan-400 p-6">
-                                        <p className="font-['Press_Start_2P'] text-cyan-300 text-xs mb-4"
+                                    <div className="bg-black bg-opacity-50 border border-cyan-400 p-3 sm:p-6">
+                                        <p className="font-['Press_Start_2P'] text-cyan-300 text-[8px] sm:text-xs mb-2 sm:mb-4"
                                            style={{
                                                textShadow: '0 0 8px rgba(34, 211, 238, 1)',
                                            }}>
                                             🔍 SCANNING:
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-sm leading-relaxed mb-4">
+                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed mb-2 sm:mb-4">
                                             Move telescope with your mouse.
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-sm leading-relaxed">
+                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed">
                                             HOLD CLICK on mystery packets to scan them.
                                         </p>
                                     </div>
                                 )}
                                 
                                 {instructionStep === 2 && (
-                                    <div className="bg-black bg-opacity-50 border-2 border-green-400 p-6">
-                                        <p className="font-['Press_Start_2P'] text-green-300 text-xs mb-4"
+                                    <div className="bg-black bg-opacity-50 border border-green-400 p-3 sm:p-6">
+                                        <p className="font-['Press_Start_2P'] text-green-300 text-[8px] sm:text-xs mb-2 sm:mb-4"
                                            style={{
                                                textShadow: '0 0 8px rgba(34, 197, 94, 1)',
                                            }}>
                                             🟢 ATMOSPHERIC PRESSURE:
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-sm leading-relaxed mb-4">
+                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed mb-2 sm:mb-4">
                                             You can ONLY SCAN when pressure is in the SAFE ZONE (40-70).
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-sm leading-relaxed">
+                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed">
                                             If pressure goes red, move to the GREEN BEACON to stabilize it!
                                         </p>
                                     </div>
                                 )}
                                 
                                 {instructionStep === 3 && (
-                                    <div className="bg-black bg-opacity-50 border-2 border-purple-400 p-6">
-                                        <p className="font-['Press_Start_2P'] text-purple-300 text-xs mb-4"
+                                    <div className="bg-black bg-opacity-50 border border-purple-400 p-3 sm:p-6">
+                                        <p className="font-['Press_Start_2P'] text-purple-300 text-[8px] sm:text-xs mb-2 sm:mb-4"
                                            style={{
                                                textShadow: '0 0 8px rgba(168, 85, 247, 1)',
                                            }}>
                                             ❓ MYSTERY PACKETS:
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-sm leading-relaxed mb-4">
+                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed mb-2 sm:mb-4">
                                             Each packet is a MYSTERY!
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-sm leading-relaxed">
+                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed">
                                             Some contain DATA (good!), others are TRAPS (bad!).
                                         </p>
                                     </div>
                                 )}
                                 
                                 {instructionStep === 4 && (
-                                    <div className="bg-black bg-opacity-50 border-2 border-red-400 p-6">
-                                        <p className="font-['Press_Start_2P'] text-red-300 text-xs mb-4"
+                                    <div className="bg-black bg-opacity-50 border border-red-400 p-3 sm:p-6">
+                                        <p className="font-['Press_Start_2P'] text-red-300 text-[8px] sm:text-xs mb-2 sm:mb-4"
                                            style={{
                                                textShadow: '0 0 8px rgba(239, 68, 68, 1)',
                                            }}>
                                             ⚠️ TRAPS:
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-sm leading-relaxed mb-4">
+                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed mb-2 sm:mb-4">
                                             If you open a trap, a FLYING BUTTON appears.
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-sm leading-relaxed">
+                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed">
                                             Click it multiple times to clear the trap!
                                         </p>
                                     </div>
                                 )}
                                 
                                 {instructionStep === 5 && (
-                                    <div className="bg-black bg-opacity-50 border-2 border-yellow-400 p-6">
-                                        <p className="font-['Press_Start_2P'] text-yellow-300 text-xs mb-4"
+                                    <div className="bg-black bg-opacity-50 border border-yellow-400 p-3 sm:p-6">
+                                        <p className="font-['Press_Start_2P'] text-yellow-300 text-[8px] sm:text-xs mb-2 sm:mb-4"
                                            style={{
                                                textShadow: '0 0 8px rgba(251, 191, 36, 1)',
                                            }}>
                                             🌞 DAY/NIGHT CYCLE:
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-sm leading-relaxed mb-4">
+                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed mb-2 sm:mb-4">
                                             Night reduces visibility.
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-sm leading-relaxed">
+                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed">
                                             Day gives you clear view.
                                         </p>
                                     </div>
@@ -1464,11 +1484,11 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                             </div>
                             
                             {/* Progress indicator */}
-                            <div className="flex justify-center gap-2 my-6">
+                            <div className="flex justify-center gap-1 sm:gap-2 my-3 sm:my-6">
                                 {[0, 1, 2, 3, 4, 5].map((step) => (
                                     <div
                                         key={step}
-                                        className={`w-3 h-3 rounded-full ${
+                                        className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${
                                             step === instructionStep ? 'bg-yellow-400' : 'bg-gray-600'
                                         }`}
                                     />
@@ -1476,7 +1496,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                             </div>
                             
                             {/* Navigation buttons */}
-                            <div className="flex justify-between items-center">
+                            <div className="flex justify-between items-center gap-2">
                                 <div>
                                     {instructionStep > 0 && (
                                         <PixelButton 
@@ -1495,7 +1515,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                                         />
                                     ) : (
                                         <PixelButton 
-                                            label="Start Mission" 
+                                            label="Start" 
                                             onClick={() => setShowInstructions(false)} 
                                             variant="primary"
                                         />
@@ -1508,14 +1528,14 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
 
                 {/* Title - Top Center (auto-hides after 3s) */}
                 {showTitle && !showInstructions && (
-                    <div className="text-center">
-                        <h2 className="font-['Press_Start_2P'] text-yellow-500 text-2xl mb-2">
+                    <div className="text-center px-4">
+                        <h2 className="font-['Press_Start_2P'] text-yellow-500 text-base sm:text-2xl mb-1 sm:mb-2">
                             CHAPTER 2: VENUS
                         </h2>
-                        <p className="font-['Press_Start_2P'] text-yellow-600 text-xs">
+                        <p className="font-['Press_Start_2P'] text-yellow-600 text-[8px] sm:text-xs">
                             The Acid Haze
                         </p>
-                        <p className="font-['Press_Start_2P'] text-gray-400 text-[10px] mt-2">
+                        <p className="font-['Press_Start_2P'] text-gray-400 text-[7px] sm:text-[10px] mt-1 sm:mt-2">
                             Hold click on packets to scan (only in safe pressure zone!)
                         </p>
                     </div>
@@ -1551,7 +1571,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                         {/* Button */}
                         <button
                             onClick={handleFlyingButtonClick}
-                            className="relative px-6 py-3 font-['Press_Start_2P'] text-xs border-4 transition-all transform hover:scale-110"
+                            className="relative px-4 py-2 sm:px-6 sm:py-3 font-['Press_Start_2P'] text-[8px] sm:text-xs border-2 sm:border-4 transition-all transform hover:scale-110 active:scale-95"
                             style={{
                                 backgroundColor: activeTrap === 'acid-mist' ? '#10b981' :
                                                activeTrap === 'broken-lens' ? '#ef4444' :
@@ -1580,7 +1600,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                         </button>
                         {/* Instruction text */}
                         <div 
-                            className="absolute top-16 left-1/2 transform -translate-x-1/2 whitespace-nowrap font-['Press_Start_2P'] text-yellow-300 text-[10px] animate-bounce"
+                            className="absolute top-12 sm:top-16 left-1/2 transform -translate-x-1/2 whitespace-nowrap font-['Press_Start_2P'] text-yellow-300 text-[7px] sm:text-[10px] animate-bounce"
                             style={{
                                 textShadow: '0 0 10px rgba(0, 0, 0, 1), 0 0 20px rgba(251, 191, 36, 0.8)',
                             }}
@@ -1591,18 +1611,18 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                 )}
 
                 {/* PRESSURE GAUGE - Top Left */}
-                <div className="absolute top-4 left-4 pointer-events-auto">
-                    <div className="bg-black border-4 border-purple-600 p-4 w-64" 
+                <div className="absolute top-1 left-1 sm:top-4 sm:left-4 pointer-events-auto">
+                    <div className={`bg-black border border-purple-600 ${isMobile ? 'p-1 w-28' : 'border-4 p-4 w-64'}`}
                          style={{
                              boxShadow: inSafeZone 
-                                 ? '0 0 20px rgba(168, 85, 247, 0.5)' 
-                                 : '0 0 20px rgba(239, 68, 68, 0.5)',
+                                 ? '0 0 10px rgba(168, 85, 247, 0.3)' 
+                                 : '0 0 10px rgba(239, 68, 68, 0.3)',
                          }}>
-                        <p className="font-['Press_Start_2P'] text-purple-400 text-xs mb-3"
+                        <p className={`font-['Press_Start_2P'] text-purple-400 ${isMobile ? 'text-[5px] mb-1' : 'text-xs mb-3'}`}
                            style={{textShadow: '0 0 8px rgba(168, 85, 247, 0.8)'}}>
-                            Atmospheric Pressure
+                            {isMobile ? 'Pressure' : 'Atmospheric Pressure'}
                         </p>
-                        <div className="relative h-8 bg-gray-800 border-2 border-gray-600 overflow-hidden">
+                        <div className={`relative ${isMobile ? 'h-4' : 'h-8'} bg-gray-800 border border-gray-600 overflow-hidden`}>
                             {/* Safe zone indicator */}
                             <div
                                 className="absolute h-full bg-green-900 opacity-30"
@@ -1635,7 +1655,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                             <div className="absolute left-[40%] top-0 h-full w-0.5 bg-white" />
                             <div className="absolute left-[70%] top-0 h-full w-0.5 bg-white" />
                         </div>
-                        <p className={`font-['Press_Start_2P'] text-[10px] mt-2 ${
+                        <p className={`font-['Press_Start_2P'] ${isMobile ? 'text-[5px] mt-0.5' : 'text-[10px] mt-2'} ${
                             inSafeZone ? 'text-green-400' : 'text-red-400 animate-pulse'
                         }`}
                            style={{
@@ -1655,75 +1675,95 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                     </div>
                 </div>
 
-                {/* DAY/NIGHT INDICATOR - Top Center Left */}
-                <div className="absolute top-4 left-80 pointer-events-auto">
-                    <div className="bg-black border-4 border-yellow-600 p-3 w-48"
+                {/* DAY/NIGHT INDICATOR - Below pressure on mobile, beside on desktop */}
+                <div className={`absolute pointer-events-auto ${isMobile ? 'top-1 left-[130px]' : 'top-4 left-80'}`}>
+                    <div className={`bg-black border border-yellow-600 ${isMobile ? 'p-1 w-20' : 'border-4 p-3 w-48'}`}
                          style={{
                              boxShadow: isDaytime 
-                                 ? '0 0 20px rgba(251, 191, 36, 0.4)' 
-                                 : '0 0 20px rgba(59, 130, 246, 0.4)',
+                                 ? '0 0 10px rgba(251, 191, 36, 0.3)' 
+                                 : '0 0 10px rgba(59, 130, 246, 0.3)',
                          }}>
-                        <p className="font-['Press_Start_2P'] text-yellow-400 text-[10px] mb-2"
-                           style={{textShadow: '0 0 6px rgba(251, 191, 36, 0.8)'}}>
-                            Venus Day/Night
-                        </p>
-                        <div className="flex items-center gap-2">
-                            <span className="text-2xl" style={{
+                        <div className="flex items-center gap-1">
+                            <span className={isMobile ? 'text-sm' : 'text-2xl'} style={{
                                 filter: isDaytime 
                                     ? 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.8))' 
                                     : 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.8))',
                             }}>
                                 {isDaytime ? '☀️' : '🌙'}
                             </span>
-                            <span className="font-['Press_Start_2P'] text-white text-xs"
+                            <span className={`font-['Press_Start_2P'] text-white ${isMobile ? 'text-[5px]' : 'text-xs'}`}
                                   style={{textShadow: '0 0 4px rgba(255, 255, 255, 0.5)'}}>
                                 {isDaytime ? 'DAY' : 'NIGHT'}
                             </span>
                         </div>
-                        <p className="font-['Press_Start_2P'] text-gray-400 text-[8px] mt-1">
-                            {isDaytime ? 'Clear view' : 'Reduced visibility'}
-                        </p>
                     </div>
                 </div>
 
                 {/* ACTIVE TRAP WARNINGS */}
                 {(pressureIsWild || heatBlastActive) && (
-                    <div className="absolute top-96 left-4 pointer-events-auto">
-                        <div className="bg-black border-4 border-orange-600 p-3 w-64"
+                    <div className={`absolute ${isMobile ? 'bottom-14 left-1' : 'top-96 left-4'} pointer-events-auto`}>
+                        <div className={`bg-black border border-orange-600 ${isMobile ? 'p-1 w-28' : 'border-4 p-3 w-64'}`}
                              style={{
-                                 boxShadow: '0 0 20px rgba(251, 146, 60, 0.6)',
+                                 boxShadow: '0 0 10px rgba(251, 146, 60, 0.4)',
                              }}>
-                            <p className="font-['Press_Start_2P'] text-orange-400 text-[10px] mb-2"
+                            <p className={`font-['Press_Start_2P'] text-orange-400 ${isMobile ? 'text-[5px] mb-0.5' : 'text-[10px] mb-2'}`}
                                style={{textShadow: '0 0 8px rgba(251, 146, 60, 1)'}}>
-                                ⚡ ACTIVE TRAPS
+                                ⚡ TRAPS
                             </p>
                             {pressureIsWild && (
-                                <p className="text-yellow-300 text-[8px] mb-1">
-                                    • Pressure fluctuations!
+                                <p className={`text-yellow-300 ${isMobile ? 'text-[4px]' : 'text-[8px]'} mb-1`}>
+                                    • Pressure!
                                 </p>
                             )}
                             {heatBlastActive && (
-                                <p className="text-red-300 text-[8px] mb-1">
-                                    • Heat blast shaking!
+                                <p className={`text-red-300 ${isMobile ? 'text-[4px]' : 'text-[8px]'} mb-1`}>
+                                    • Heat blast!
                                 </p>
                             )}
-                            <p className="text-gray-400 text-[8px] mt-2">
-                                Wait for effects to fade...
+                            <p className={`text-gray-400 ${isMobile ? 'text-[4px] mt-0.5' : 'text-[8px] mt-2'}`}>
+                                Wait for effects...
                             </p>
                         </div>
                     </div>
                 )}
 
-                {/* Info Panel - Top Right */}
-                <div className="absolute top-4 right-4 flex flex-col gap-4 w-72 pointer-events-auto">
-                    <div className="bg-black border-4 border-yellow-700 p-4"
-                         style={{
-                             boxShadow: '0 0 15px rgba(161, 98, 7, 0.5)',
-                         }}>
-                        <p className="font-['Press_Start_2P'] text-yellow-400 text-xs mb-3"
-                           style={{textShadow: '0 0 6px rgba(251, 191, 36, 0.8)'}}>
-                            Mystery Packets:
-                        </p>
+                {/* Hamburger Menu Button (Mobile Only) */}
+                {isMobile && (
+                    <button
+                        onClick={() => setIsChecklistOpen(!isChecklistOpen)}
+                        className="absolute top-1 right-1 z-50 pointer-events-auto bg-yellow-800 border border-yellow-600 p-1.5 rounded"
+                        style={{
+                            boxShadow: '0 0 6px rgba(161, 98, 7, 0.5)',
+                        }}
+                    >
+                        <div className="flex flex-col gap-0.5 w-4">
+                            <div className="h-0.5 bg-yellow-400" />
+                            <div className="h-0.5 bg-yellow-400" />
+                            <div className="h-0.5 bg-yellow-400" />
+                        </div>
+                        <span className="font-['Press_Start_2P'] text-yellow-400 text-[4px] mt-0.5 block">
+                            {dataPackets.filter(p => p.opened && p.type === 'data').length}/4
+                        </span>
+                    </button>
+                )}
+
+                {/* Info Panel - Top Right (Desktop always visible, Mobile shows when hamburger clicked) */}
+                {(!isMobile || isChecklistOpen) && (
+                    <div className={`absolute ${isMobile ? 'top-8 right-1' : 'top-4 right-4'} flex flex-col gap-1 pointer-events-auto z-40 ${isMobile ? 'w-36 max-h-[70vh] overflow-y-auto' : 'w-72 gap-4'}`}
+                         style={isMobile ? {
+                             backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                             border: '1px solid rgba(161, 98, 7, 0.8)',
+                             boxShadow: '0 0 10px rgba(0, 0, 0, 0.9)',
+                             padding: '4px',
+                         } : {}}>
+                        <div className={`bg-black border border-yellow-700 ${isMobile ? 'p-1' : 'border-4 p-4'}`}
+                             style={{
+                                 boxShadow: '0 0 8px rgba(161, 98, 7, 0.3)',
+                             }}>
+                            <p className={`font-['Press_Start_2P'] text-yellow-400 ${isMobile ? 'text-[5px] mb-1' : 'text-xs mb-3'}`}
+                               style={{textShadow: '0 0 6px rgba(251, 191, 36, 0.8)'}}>
+                                Mystery Packets:
+                            </p>
                         <div className="space-y-2">
                             {dataPackets.filter(p => p.type === 'data').map((packet) => {
                                 let statusText = '❓ UNKNOWN';
@@ -1778,7 +1818,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                                 return (
                                     <div
                                         key={`${packet.contentType}-${packet.x}`}
-                                        className={`text-[10px] font-['Press_Start_2P'] p-2 border-2 transition-all ${borderColor} ${bgColor} ${statusColor} ${packet.opened ? 'cursor-pointer hover:brightness-125' : ''}`}
+                                        className={`${isMobile ? 'text-[4px] p-0.5' : 'text-[10px] p-2'} font-['Press_Start_2P'] border transition-all ${borderColor} ${bgColor} ${statusColor} ${packet.opened ? 'cursor-pointer hover:brightness-125' : ''}`}
                                         onClick={handlePacketClick}
                                     >
                                         {statusText}
@@ -1786,8 +1826,8 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                                 );
                             })}
                         </div>
-                        <div className="mt-3 pt-3 border-t-2 border-yellow-700">
-                            <p className="text-blue-300 text-[10px] font-['Press_Start_2P']">
+                        <div className={`${isMobile ? 'mt-1 pt-1' : 'mt-3 pt-3'} border-t border-yellow-700`}>
+                            <p className={`text-blue-300 ${isMobile ? 'text-[4px]' : 'text-[10px]'} font-['Press_Start_2P']`}>
                                 Data Found: {dataPackets.filter(p => p.opened && p.type === 'data').length}/4
                             </p>
                         </div>
@@ -1795,19 +1835,19 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
 
                     {/* Recently Opened Packet */}
                     {recentlyOpenedPacket && (
-                        <div className={`bg-black border-4 p-4 animate-pulse ${recentlyOpenedPacket.type === 'data' ? 'border-blue-500' : 'border-red-500'}`}
+                        <div className={`bg-black border animate-pulse ${isMobile ? 'p-1' : 'border-4 p-4'} ${recentlyOpenedPacket.type === 'data' ? 'border-blue-500' : 'border-red-500'}`}
                              style={{
                                  boxShadow: recentlyOpenedPacket.type === 'data' 
-                                    ? '0 0 20px rgba(96, 165, 250, 0.6)' 
-                                    : '0 0 20px rgba(239, 68, 68, 0.6)',
+                                    ? '0 0 10px rgba(96, 165, 250, 0.4)' 
+                                    : '0 0 10px rgba(239, 68, 68, 0.4)',
                              }}>
-                            <p className={`font-['Press_Start_2P'] text-xs mb-2 ${recentlyOpenedPacket.type === 'data' ? 'text-blue-400' : 'text-red-400'}`}
+                            <p className={`font-['Press_Start_2P'] ${isMobile ? 'text-[4px] mb-0.5' : 'text-xs mb-2'} ${recentlyOpenedPacket.type === 'data' ? 'text-blue-400' : 'text-red-400'}`}
                                style={{textShadow: recentlyOpenedPacket.type === 'data' 
                                    ? '0 0 8px rgba(96, 165, 250, 1)' 
                                    : '0 0 8px rgba(239, 68, 68, 1)'}}>
-                                {recentlyOpenedPacket.type === 'data' ? '✓ DATA FOUND!' : '⚠ TRAP TRIGGERED!'}
+                                {recentlyOpenedPacket.type === 'data' ? '✓ DATA FOUND!' : '⚠ TRAP!'}
                             </p>
-                            <p className="text-xs text-gray-300 leading-relaxed">
+                            <p className={`${isMobile ? 'text-[4px]' : 'text-xs'} text-gray-300 leading-relaxed`}>
                                 {recentlyOpenedPacket.contentType === 'hot-potato' ? 'Hot potato data packet - handles with extreme heat!' :
                                  recentlyOpenedPacket.contentType === 'acid-clouds' ? 'Acid cloud composition analysis retrieved!' :
                                  recentlyOpenedPacket.contentType === 'slow-spinning' ? 'Venus rotation speed data collected!' :
@@ -1823,33 +1863,30 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
 
                     {/* Completion Message */}
                     {allFound && (
-                        <div className="bg-green-900 border-4 border-green-500 p-4 animate-pulse"
+                        <div className={`bg-green-900 border border-green-500 animate-pulse ${isMobile ? 'p-1' : 'border-4 p-4'}`}
                              style={{
-                                 boxShadow: '0 0 30px rgba(34, 197, 128, 0.8), 0 0 60px rgba(34, 197, 128, 0.4)',
+                                 boxShadow: '0 0 15px rgba(34, 197, 128, 0.5)',
                              }}>
-                            <p className="font-['Press_Start_2P'] text-green-300 text-xs text-center"
+                            <p className={`font-['Press_Start_2P'] text-green-300 text-center ${isMobile ? 'text-[4px]' : 'text-xs'}`}
                                style={{textShadow: '0 0 10px rgba(34, 197, 128, 1)'}}>
-                                ⭐ All Data Packets Found! ⭐
+                                ⭐ All Found! ⭐
                             </p>
-                            <p className="font-['Press_Start_2P'] text-green-200 text-[10px] text-center mt-2"
-                               style={{textShadow: '0 0 6px rgba(34, 197, 128, 0.8)'}}>
-                                Venus's Planetary Core Reactivates
-                            </p>
-                            <div className="mt-2 text-center text-2xl">
+                            <div className={`text-center ${isMobile ? 'text-sm' : 'mt-2 text-2xl'}`}>
                                 🌋✨🌋
                             </div>
                         </div>
                     )}
-                </div>
+                    </div>
+                )}
 
                 {/* Trivia Modal */}
                 {showTriviaModal && triviaContent && (
                     <div 
-                        className="absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 pointer-events-auto"
+                        className="absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 pointer-events-auto p-1 sm:p-4"
                         onClick={() => setShowTriviaModal(false)}
                     >
                         <div 
-                            className="bg-linear-to-b from-purple-900 to-blue-900 border-4 border-yellow-400 p-8 max-w-3xl mx-4 relative"
+                            className={`bg-linear-to-b from-purple-900 to-blue-900 border border-yellow-400 relative max-h-[90vh] overflow-y-auto ${isMobile ? 'p-2 mx-1 max-w-sm' : 'border-4 p-8 max-w-3xl mx-4'}`}
                             style={{
                                 boxShadow: '0 0 40px rgba(251, 191, 36, 0.8), 0 0 80px rgba(251, 191, 36, 0.4)',
                             }}
@@ -1858,7 +1895,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                             {/* Close button */}
                             <button
                                 onClick={() => setShowTriviaModal(false)}
-                                className="absolute top-2 right-2 text-yellow-400 hover:text-yellow-200 font-['Press_Start_2P'] text-xl"
+                                className="absolute top-1 right-1 sm:top-2 sm:right-2 text-yellow-400 hover:text-yellow-200 font-['Press_Start_2P'] text-sm sm:text-xl px-2"
                                 style={{
                                     textShadow: '0 0 8px rgba(251, 191, 36, 1)',
                                 }}
@@ -1867,14 +1904,14 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                             </button>
                             
                             {/* Header */}
-                            <div className="text-center mb-6">
-                                <p className="font-['Press_Start_2P'] text-yellow-300 text-sm mb-2"
+                            <div className={`text-center ${isMobile ? 'mb-2' : 'mb-6'}`}>
+                                <p className={`font-['Press_Start_2P'] text-yellow-300 ${isMobile ? 'text-[5px] mb-0.5' : 'text-sm mb-2'}`}
                                    style={{
                                        textShadow: '0 0 10px rgba(251, 191, 36, 1)',
                                    }}>
                                     DATA PACKET DISCOVERED!
                                 </p>
-                                <p className="font-['Press_Start_2P'] text-white text-2xl"
+                                <p className={`font-['Press_Start_2P'] text-white ${isMobile ? 'text-[8px]' : 'text-2xl'}`}
                                    style={{
                                        textShadow: '0 0 15px rgba(255, 255, 255, 0.8)',
                                    }}>
@@ -1883,35 +1920,33 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                             </div>
                             
                             {/* Content with Image and Description */}
-                            <div className="flex gap-6 mb-6">
+                            <div className={`flex ${isMobile ? 'flex-row gap-2 mb-2' : 'flex-col sm:flex-row gap-6 mb-6'}`}>
                                 {/* Data Packet Image */}
-                                <div className="shrink-0">
+                                <div className="shrink-0 mx-auto sm:mx-0">
                                     {triviaContent.contentType === 'slow-spinning' ? (
-                                        // Animated sprite for slow-spinning Venus
                                         <div
-                                            className="w-48 h-48 relative overflow-hidden"
+                                            className={`relative overflow-hidden ${isMobile ? 'w-20 h-20' : 'w-48 h-48'}`}
                                             style={{
                                                 filter: 'drop-shadow(0 0 20px rgba(96, 165, 250, 0.8))',
                                             }}
                                         >
                                             <div
                                                 style={{
-                                                    width: '192px',
-                                                    height: '1152px', // 6 frames x 192px each
+                                                    width: '100%',
+                                                    height: '600%', // 6 frames
                                                     backgroundImage: 'url(/assets/slow_spinning_venus.png)',
-                                                    backgroundSize: '192px 1152px',
-                                                    backgroundPosition: `0 -${venusFrame * 192}px`,
+                                                    backgroundSize: '100% 600%',
+                                                    backgroundPosition: `0 ${venusFrame * 100}%`,
                                                     backgroundRepeat: 'no-repeat',
                                                 }}
                                                 className="w-full h-full"
                                             />
                                         </div>
                                     ) : (
-                                        // Static image for other packets
                                         <img 
                                             src={triviaContent.image} 
                                             alt="Data Packet"
-                                            className="w-48 h-48 object-contain"
+                                            className={`object-contain ${isMobile ? 'w-20 h-20' : 'w-48 h-48'}`}
                                             style={{
                                                 filter: 'drop-shadow(0 0 20px rgba(96, 165, 250, 0.8))',
                                             }}
@@ -1920,8 +1955,8 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                                 </div>
                                 
                                 {/* Description */}
-                                <div className="flex-1 bg-black bg-opacity-50 border-2 border-blue-400 p-6 flex items-center">
-                                    <p className="font-['Press_Start_2P'] text-blue-200 text-base leading-relaxed"
+                                <div className={`flex-1 bg-black bg-opacity-50 border border-blue-400 flex items-center ${isMobile ? 'p-1.5' : 'border-2 p-6'}`}>
+                                    <p className={`font-['Press_Start_2P'] text-blue-200 leading-relaxed ${isMobile ? 'text-[5px]' : 'text-base'}`}
                                        style={{
                                            textShadow: '0 0 8px rgba(147, 197, 253, 0.6)',
                                        }}>
@@ -1943,10 +1978,10 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                 )}
 
                 {/* Controls - Bottom Center */}
-                <div className="absolute bottom-4 flex gap-4 pointer-events-auto">
+                <div className={`absolute ${isMobile ? 'bottom-1' : 'bottom-4'} flex flex-row gap-2 pointer-events-auto`}>
                     <PixelButton label="Back" onClick={onBack} variant="secondary" />
                     <PixelButton
-                        label="Proceed to Earth"
+                        label={isMobile ? "Next" : "Proceed to Earth"}
                         onClick={onComplete}
                         disabled={!allFound}
                     />

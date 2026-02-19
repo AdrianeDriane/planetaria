@@ -35,7 +35,11 @@ const EarthGame: React.FC<EarthGameProps> = ({ onComplete, onBack }) => {
         },
       },
       scene: [EarthScene],
-      input: { keyboard: true },
+      input: { 
+        keyboard: true,
+        touch: true,
+        activePointers: 3,
+      },
     };
 
     gameRef.current = new Phaser.Game(config);
@@ -53,7 +57,7 @@ const EarthGame: React.FC<EarthGameProps> = ({ onComplete, onBack }) => {
       <div ref={containerRef} className="h-full w-full" />
       
       {/* Navigation buttons overlay */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4">
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex flex-col sm:flex-row gap-2 sm:gap-4">
         {onBack && (
           <PixelButton 
             label="Back to Venus" 

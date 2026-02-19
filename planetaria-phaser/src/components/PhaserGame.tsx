@@ -1,28 +1,19 @@
 import { useEffect, useRef } from "react";
 import Phaser from "phaser";
 import GameScene from "../game/scenes/GameScene";
-<<<<<<< HEAD
-import VenusScene from "../game/scenes/VenusScene";
-=======
 import EarthScene from "../game/scenes/EarthScene";
->>>>>>> 03854ab8d75f4784a4da234e679f8de95e59f16b
 import { DISPLAY, PHYSICS } from "../game/config";
 import PixelButton from "./ui/PixelButton";
 
 interface PhaserGameProps {
-<<<<<<< HEAD
-    onNavigateToVenus: () => void;
-}
-
-const PhaserGame: React.FC<PhaserGameProps> = ({ onNavigateToVenus }) => {
-=======
     initialScene?: "GameScene" | "EarthScene";
+    onNavigateToVenus?: () => void;
 }
 
 const PhaserGame: React.FC<PhaserGameProps> = ({
     initialScene = "GameScene",
+    onNavigateToVenus,
 }) => {
->>>>>>> 03854ab8d75f4784a4da234e679f8de95e59f16b
     const containerRef = useRef<HTMLDivElement>(null);
     const gameRef = useRef<Phaser.Game | null>(null);
 
@@ -57,12 +48,12 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
                     debug: PHYSICS.DEBUG,
                 },
             },
-<<<<<<< HEAD
-            scene: [GameScene, VenusScene],
-=======
             scene: sceneConfig, // <--- Using our ordered array
->>>>>>> 03854ab8d75f4784a4da234e679f8de95e59f16b
-            input: { keyboard: true },
+            input: { 
+                keyboard: true,
+                touch: true,
+                activePointers: 3,
+            },
         };
 
         // 2. Create the game
@@ -82,13 +73,15 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
             <div ref={containerRef} className="w-full h-full" />
             
             {/* Navigation Overlay */}
-            <div className="absolute top-4 right-4 z-50 pointer-events-auto">
-                <PixelButton 
-                    label="Go to Venus" 
-                    onClick={onNavigateToVenus}
-                    variant="secondary"
-                />
-            </div>
+            {onNavigateToVenus && (
+                <div className="absolute top-4 right-4 z-50 pointer-events-auto">
+                    <PixelButton 
+                        label="Go to Venus" 
+                        onClick={onNavigateToVenus}
+                        variant="secondary"
+                    />
+                </div>
+            )}
         </div>
     );
 };
