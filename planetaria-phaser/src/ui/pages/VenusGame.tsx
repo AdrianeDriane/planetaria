@@ -606,6 +606,29 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
         setTelescopePos({ x, y });
     };
 
+    // Touch handlers for mobile telescope movement
+    const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+        if (!sceneRef.current) return;
+        e.preventDefault(); // Prevent page scroll while swiping
+        const touch = e.touches[0];
+        const rect = sceneRef.current.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+        setTelescopePos({ x, y });
+    };
+
+    const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+        if (!sceneRef.current) return;
+        const touch = e.touches[0];
+        const rect = sceneRef.current.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+        setTelescopePos({ x, y });
+
+        // Also trigger scanning logic on touch start (same as mousedown)
+        handleSceneMouseDown();
+    };
+
     // MECHANIC 8: Multi-step scanning - hold to scan packets
     const handleSceneMouseDown = () => {
         if (!sceneRef.current) return;
@@ -1158,10 +1181,14 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
             <div
                 ref={sceneRef}
                 className="absolute inset-0 cursor-crosshair z-20"
+                style={{ touchAction: 'none' }}
                 onMouseMove={handleSceneMouseMove}
                 onMouseDown={handleSceneMouseDown}
                 onMouseUp={handleSceneMouseUp}
                 onMouseLeave={handleSceneMouseUp}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleSceneMouseUp}
             >
                 {/* Mystery Packet Indicators (unknown until opened) */}
                 {dataPackets.map((packet) => {
@@ -1983,7 +2010,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                     <PixelButton
                         label={isMobile ? "Next" : "Proceed to Earth"}
                         onClick={onComplete}
-                        disabled={!allFound}
+                        // disabled={!allFound}
                     />
                 </div>
             </div>
