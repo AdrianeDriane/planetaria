@@ -307,6 +307,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
 
     // MECHANIC 1: Atmospheric pressure fluctuation
     useEffect(() => {
+        if (showInstructions) return;
         const interval = setInterval(() => {
             setPressure(prev => {
                 const isInSafeZone = pressure >= 40 && pressure <= 70;
@@ -334,10 +335,11 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
             });
         }, pressureIsWild ? 500 : 1000); // Faster changes when wild
         return () => clearInterval(interval);
-    }, [pressureIsWild, telescopePos, safeZonePos, pressure]);
+    }, [pressureIsWild, telescopePos, safeZonePos, pressure, showInstructions]);
 
     // Update safe zone position when pressure enters red zone
     useEffect(() => {
+        if (showInstructions) return;
         const inSafeZone = pressure >= 40 && pressure <= 70;
         if (!inSafeZone) {
             // Randomize safe zone location when pressure is red
@@ -358,7 +360,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
             }, 8000); // Move safe zone every 8 seconds (if player not there)
             return () => clearInterval(interval);
         }
-    }, [pressure, telescopePos, safeZonePos]);
+    }, [pressure, telescopePos, safeZonePos, showInstructions]);
     
     // Animate Venus sprite (6 frames) when trivia modal is showing slow-spinning content
     useEffect(() => {
@@ -374,24 +376,27 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
 
     // MECHANIC 2: Day/Night cycle (Venus has 116 Earth-day rotation)
     useEffect(() => {
+        if (showInstructions) return;
         const interval = setInterval(() => {
             setDayNightPhase(prev => (prev + 0.5) % 200); // Full cycle every 400 ticks
         }, 100);
         return () => clearInterval(interval);
-    }, []);
+    }, [showInstructions]);
 
     // MECHANIC 3: Atmospheric cloud layers scrolling
     useEffect(() => {
+        if (showInstructions) return;
         const interval = setInterval(() => {
             setCloudLayer1Offset(prev => (prev + 0.5) % 100);
             setCloudLayer2Offset(prev => (prev + 0.3) % 100);
             setCloudLayer3Offset(prev => (prev + 0.7) % 100);
         }, 50);
         return () => clearInterval(interval);
-    }, []);
+    }, [showInstructions]);
 
     // MECHANIC 4: Acid rain generation
     useEffect(() => {
+        if (showInstructions) return;
         const interval = setInterval(() => {
             if (Math.random() < 0.3) { // 30% chance each interval
                 const newDrop: AcidDrop = {
@@ -404,10 +409,11 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
             }
         }, 500);
         return () => clearInterval(interval);
-    }, []);
+    }, [showInstructions]);
 
     // MECHANIC 5: Acid rain animation (visual only, no collision)
     useEffect(() => {
+        if (showInstructions) return;
         const interval = setInterval(() => {
             setAcidDrops(prev => {
                 const updated = prev.map(drop => ({
@@ -419,7 +425,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
             });
         }, 50);
         return () => clearInterval(interval);
-    }, [telescopePos, telescopeRadius]);
+    }, [telescopePos, telescopeRadius, showInstructions]);
 
     // TRAP EFFECT: Heat blast continuous shake (visual only, no auto-clear)
     useEffect(() => {
@@ -440,14 +446,16 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
 
     // VISUAL FX: Heat wave screen distortion
     useEffect(() => {
+        if (showInstructions) return;
         const interval = setInterval(() => {
             setHeatWaveIntensity(Math.sin(Date.now() / 500) * 3 + 5);
         }, 50);
         return () => clearInterval(interval);
-    }, []);
+    }, [showInstructions]);
 
     // VISUAL FX: Lightning strikes
     useEffect(() => {
+        if (showInstructions) return;
         const interval = setInterval(() => {
             if (Math.random() < 0.15) { // 15% chance
                 const newLightning: Lightning = {
@@ -468,10 +476,11 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
             }
         }, 2000);
         return () => clearInterval(interval);
-    }, []);
+    }, [showInstructions]);
 
     // VISUAL FX: Atmospheric particles
     useEffect(() => {
+        if (showInstructions) return;
         const interval = setInterval(() => {
             // Spawn ash/dust particles
             if (Math.random() < 0.5) {
@@ -489,10 +498,11 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
             }
         }, 100);
         return () => clearInterval(interval);
-    }, []);
+    }, [showInstructions]);
 
     // VISUAL FX: Particle animation
     useEffect(() => {
+        if (showInstructions) return;
         const interval = setInterval(() => {
             setParticles(prev => 
                 prev
@@ -506,7 +516,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
             );
         }, 50);
         return () => clearInterval(interval);
-    }, []);
+    }, [showInstructions]);
 
     // MECHANIC 7: Volcanic eruptions spawning temporary packets
     // DISABLED for mystery packet system - we have a fixed set of 8 packets
@@ -599,7 +609,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
     }, []);
 
     const handleSceneMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!sceneRef.current) return;
+        if (!sceneRef.current || showInstructions) return;
         const rect = sceneRef.current.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
@@ -608,7 +618,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
 
     // Touch handlers for mobile telescope movement
     const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-        if (!sceneRef.current) return;
+        if (!sceneRef.current || showInstructions) return;
         e.preventDefault(); // Prevent page scroll while swiping
         const touch = e.touches[0];
         const rect = sceneRef.current.getBoundingClientRect();
@@ -618,7 +628,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
     };
 
     const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-        if (!sceneRef.current) return;
+        if (!sceneRef.current || showInstructions) return;
         const touch = e.touches[0];
         const rect = sceneRef.current.getBoundingClientRect();
         const x = touch.clientX - rect.left;
@@ -628,6 +638,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
 
     // Shared scan-start logic used by both desktop (mousedown) and mobile (auto-crosshair)
     const startScanning = (targetPacket: DataPacket) => {
+        if (showInstructions) return;
         // TRAP CHECK: Broken lens prevents scanning
         if (lensIsBroken) return;
 
@@ -759,7 +770,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
 
     // MECHANIC 8: Desktop - hold to scan packets (click-and-hold)
     const handleSceneMouseDown = () => {
-        if (!sceneRef.current || isMobile) return;
+        if (!sceneRef.current || isMobile || showInstructions) return;
 
         const targetPacket = dataPackets.find(packet => {
             const distance = Math.sqrt(
@@ -777,6 +788,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
     // MOBILE AUTO-SCAN: When crosshair is over a packet, scanning starts automatically
     useEffect(() => {
         if (!isMobile) return;
+        if (showInstructions) return;
         if (lensIsBroken) return;
         if (activeTrap) return;
 
@@ -807,7 +819,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                 setScanProgress(0);
             }
         }
-    }, [telescopePos, isMobile, dataPackets, lensIsBroken, activeTrap]);
+    }, [telescopePos, isMobile, dataPackets, lensIsBroken, activeTrap, showInstructions]);
 
     // Handle trap effects - now activates flying button mechanic
     const handleTrapEffect = (trapType: string) => {
