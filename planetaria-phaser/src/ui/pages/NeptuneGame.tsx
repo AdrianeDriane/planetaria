@@ -201,7 +201,7 @@ const NeptuneDisplay: React.FC<NeptuneDisplayProps> = ({
     }, []);
 
     return (
-        <div className="relative flex items-center justify-center h-[52vh] min-h-80">
+        <div className="relative flex items-center justify-center shrink-0" style={{ height: "clamp(120px, 28vh, 260px)" }}>
             <motion.div
                 className="absolute rounded-full"
                 animate={{
@@ -211,11 +211,14 @@ const NeptuneDisplay: React.FC<NeptuneDisplayProps> = ({
                               progress * 0.006})`,
                 }}
                 transition={{ duration: 0.6 }}
-                style={{ width: 320, height: 320 }}
+                style={{
+                    width: "clamp(100px, 22vw, 200px)",
+                    height: "clamp(100px, 22vw, 200px)",
+                }}
             />
 
             <motion.div
-                className="relative w-75 h-75 md:w-85 md:h-85"
+                className="relative" style={{ width: "clamp(100px, 22vw, 200px)", height: "clamp(100px, 22vw, 200px)" }}
                 animate={
                     isCompleted
                         ? { x: 0, y: 0 }
@@ -231,7 +234,7 @@ const NeptuneDisplay: React.FC<NeptuneDisplayProps> = ({
                 }}
             >
                 <svg
-                    className="absolute -inset-4 w-[calc(100%+32px)] h-[calc(100%+32px)]"
+                    className="absolute -inset-1 w-[calc(100%+8px)] h-[calc(100%+8px)]"
                     viewBox="0 0 320 320"
                 >
                     <circle
@@ -333,7 +336,7 @@ const NeptuneDisplay: React.FC<NeptuneDisplayProps> = ({
                 </motion.div>
 
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <span className="font-['Press_Start_2P'] text-[10px] md:text-xs text-blue-100 bg-slate-900/70 px-3 py-1 rounded">
+                    <span className="font-['Press_Start_2P'] text-[7px] sm:text-[8px] md:text-[9px] text-blue-100 bg-slate-900/70 px-2 py-0.5 rounded">
                         Stability {Math.round(progress)}%
                     </span>
                 </div>
@@ -376,7 +379,7 @@ const FeatureButton: React.FC<FeatureButtonProps> = ({
                     : { x: 0, backgroundColor: "rgba(30,41,59,0.95)" }
             }
             transition={{ duration: 0.45, ease: "easeInOut" }}
-            className={`font-['Press_Start_2P'] text-[10px] md:text-xs px-3 py-3 rounded-md border-2 transition-colors ${
+            className={`font-['Press_Start_2P'] text-[6px] sm:text-[7px] md:text-[8px] px-2 py-1.5 sm:px-2 sm:py-2 rounded-md border-2 transition-colors ${
                 disabled
                     ? "border-slate-700 text-slate-500 cursor-not-allowed"
                     : "border-blue-500 text-blue-100 hover:border-cyan-400"
@@ -410,14 +413,14 @@ const QuestionPanel: React.FC<QuestionPanelProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -18 }}
             transition={{ duration: 0.3 }}
-            className="w-full max-w-4xl mx-auto px-4 pb-6"
+            className="w-full max-w-3xl mx-auto px-3 sm:px-4 pb-2 md:pb-4 mt-10 sm:mt-8 md:mt-10"
         >
-            <div className="bg-slate-950/90 border border-blue-500/60 rounded-xl p-4 md:p-5">
-                <p className="font-['Press_Start_2P'] text-[10px] md:text-xs text-blue-100 leading-relaxed mb-4 text-center">
+            <div className="bg-slate-950/90 border border-blue-500/60 rounded-lg p-2 sm:p-3 md:p-4">
+                <p className="font-['Press_Start_2P'] text-[7px] sm:text-[8px] md:text-[9px] text-blue-100 leading-relaxed mb-2 sm:mb-3 text-center">
                     {question.prompt}
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2">
                     {question.options.map((option) => {
                         const feature = featuresById[option.id];
                         return (
@@ -552,7 +555,7 @@ const NeptuneMission: React.FC<NeptuneGameProps> = ({ onComplete, onBack }) => {
     };
 
     return (
-        <div className="w-screen h-screen relative overflow-hidden flex flex-col justify-between">
+        <div className="w-screen h-dvh relative overflow-hidden flex flex-col">
             <img
                 src={ASSETS.spaceBg}
                 alt="Pixel space background"
@@ -561,13 +564,16 @@ const NeptuneMission: React.FC<NeptuneGameProps> = ({ onComplete, onBack }) => {
             />
             <div className="absolute inset-0 bg-slate-950/65" />
 
-            <header className="relative z-10 px-4 pt-4 md:pt-6 text-center">
-                <h1 className="font-['Press_Start_2P'] text-[11px] md:text-sm text-cyan-200">
+            <header className="relative z-10 px-3 pt-2 sm:pt-3 md:pt-4 mt-5 flex items-center">
+                <div className="absolute left-3">
+                    <PixelButton label="Back" onClick={onBack} variant="secondary" />
+                </div>
+                <h1 className="font-['Press_Start_2P'] text-[8px] sm:text-[9px] md:text-[10px] text-cyan-200 w-full text-center">
                     Neptune: Stabilize the Storm
                 </h1>
             </header>
 
-            <main className="relative z-10 flex-1 flex flex-col justify-center">
+            <main className="relative z-10 flex-1 flex flex-col justify-center items-center gap-0 min-h-0">
                 <NeptuneDisplay
                     stabilityLevel={stabilityLevel}
                     isCompleted={isCompleted}
@@ -621,9 +627,7 @@ const NeptuneMission: React.FC<NeptuneGameProps> = ({ onComplete, onBack }) => {
                 onClose={() => setShowInfoCard(null)}
             />
 
-            <div className="relative z-20 flex justify-center gap-2 pb-3 md:pb-5">
-                <PixelButton label="Back" onClick={onBack} variant="secondary" />
-            </div>
+
         </div>
     );
 };

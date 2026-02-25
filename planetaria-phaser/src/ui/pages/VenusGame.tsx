@@ -1387,20 +1387,20 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                         className="absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 pointer-events-auto"
                     >
                         <div 
-                            className="bg-linear-to-b from-orange-900 to-yellow-900 border-2 sm:border-4 border-yellow-400 p-4 sm:p-8 max-w-2xl mx-4 max-h-[90vh] overflow-y-auto"
+                            className="bg-linear-to-b from-orange-900 to-yellow-900 border-2 sm:border-4 border-yellow-400 p-2 sm:p-8 max-w-2xl mx-2 sm:mx-4 w-[95vw] sm:w-auto max-h-[90dvh] h-[80dvh] sm:h-auto flex flex-col"
                             style={{
                                 boxShadow: '0 0 40px rgba(251, 191, 36, 0.8), 0 0 80px rgba(251, 191, 36, 0.4)',
                             }}
                         >
-                            {/* Title */}
-                            <div className="text-center mb-4 sm:mb-6">
-                                <p className="font-['Press_Start_2P'] text-yellow-300 text-base sm:text-2xl mb-2"
+                            {/* Title — fixed at top */}
+                            <div className="text-center mb-1 sm:mb-6 shrink-0">
+                                <p className="font-['Press_Start_2P'] text-yellow-300 text-[7px] sm:text-2xl mb-0.5 sm:mb-2"
                                    style={{
                                        textShadow: '0 0 15px rgba(251, 191, 36, 1)',
                                    }}>
                                     VENUS MISSION
                                 </p>
-                                <p className="font-['Press_Start_2P'] text-orange-300 text-xs sm:text-sm"
+                                <p className="font-['Press_Start_2P'] text-orange-300 text-[5px] sm:text-sm"
                                    style={{
                                        textShadow: '0 0 10px rgba(251, 146, 60, 1)',
                                    }}>
@@ -1408,122 +1408,110 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                                 </p>
                             </div>
                             
-                            {/* Step Content */}
-                            <div className="min-h-40 sm:min-h-75">
+                            {/* Step Content — scrollable when overflowing */}
+                            <div className="overflow-y-auto min-h-0 flex-1">
                                 {instructionStep === 0 && (
-                                    <div className="bg-black bg-opacity-50 border border-blue-400 p-3 sm:p-6">
-                                        <p className="font-['Press_Start_2P'] text-blue-300 text-[8px] sm:text-xs mb-2 sm:mb-4"
+                                    <div className="bg-black bg-opacity-50 border border-blue-400 p-2 sm:p-6">
+                                        <p className="font-['Press_Start_2P'] text-blue-300 text-[6px] sm:text-xs mb-1 sm:mb-4"
                                            style={{
                                                textShadow: '0 0 8px rgba(96, 165, 250, 1)',
                                            }}>
                                             🎯 OBJECTIVE:
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed">
+                                        <p className="font-['Press_Start_2P'] text-white text-[5px] sm:text-sm leading-relaxed">
                                             Find all 4 DATA PACKETS to reactivate Venus's planetary core!
                                         </p>
                                     </div>
                                 )}
                                 
                                 {instructionStep === 1 && (
-                                    <div className="bg-black bg-opacity-50 border border-cyan-400 p-3 sm:p-6">
-                                        <p className="font-['Press_Start_2P'] text-cyan-300 text-[8px] sm:text-xs mb-2 sm:mb-4"
+                                    <div className="bg-black bg-opacity-50 border border-cyan-400 p-2 sm:p-6">
+                                        <p className="font-['Press_Start_2P'] text-cyan-300 text-[6px] sm:text-xs mb-1 sm:mb-4"
                                            style={{
                                                textShadow: '0 0 8px rgba(34, 211, 238, 1)',
                                            }}>
                                             🔍 SCANNING:
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed mb-2 sm:mb-4">
+                                        <p className="font-['Press_Start_2P'] text-white text-[5px] sm:text-sm leading-relaxed mb-1 sm:mb-4">
                                             Move telescope with your mouse.
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed">
+                                        <p className="font-['Press_Start_2P'] text-white text-[5px] sm:text-sm leading-relaxed">
                                             HOLD CLICK on mystery packets to scan them.
                                         </p>
                                     </div>
                                 )}
                                 
                                 {instructionStep === 2 && (
-                                    <div className="bg-black bg-opacity-50 border border-green-400 p-3 sm:p-6">
-                                        <p className="font-['Press_Start_2P'] text-green-300 text-[8px] sm:text-xs mb-2 sm:mb-4"
+                                    <div className="bg-black bg-opacity-50 border border-green-400 p-2 sm:p-6">
+                                        <p className="font-['Press_Start_2P'] text-green-300 text-[6px] sm:text-xs mb-1 sm:mb-4"
                                            style={{
                                                textShadow: '0 0 8px rgba(34, 197, 94, 1)',
                                            }}>
                                             🟢 ATMOSPHERIC PRESSURE:
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed mb-2 sm:mb-4">
+                                        <p className="font-['Press_Start_2P'] text-white text-[5px] sm:text-sm leading-relaxed mb-1 sm:mb-4">
                                             You can ONLY SCAN when pressure is in the SAFE ZONE (40-70).
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed">
+                                        <p className="font-['Press_Start_2P'] text-white text-[5px] sm:text-sm leading-relaxed">
                                             If pressure goes red, move to the GREEN BEACON to stabilize it!
                                         </p>
                                     </div>
                                 )}
                                 
                                 {instructionStep === 3 && (
-                                    <div className="bg-black bg-opacity-50 border border-purple-400 p-3 sm:p-6">
-                                        <p className="font-['Press_Start_2P'] text-purple-300 text-[8px] sm:text-xs mb-2 sm:mb-4"
+                                    <div className="bg-black bg-opacity-50 border border-purple-400 p-2 sm:p-6">
+                                        <p className="font-['Press_Start_2P'] text-purple-300 text-[6px] sm:text-xs mb-1 sm:mb-4"
                                            style={{
                                                textShadow: '0 0 8px rgba(168, 85, 247, 1)',
                                            }}>
                                             ❓ MYSTERY PACKETS:
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed mb-2 sm:mb-4">
+                                        <p className="font-['Press_Start_2P'] text-white text-[5px] sm:text-sm leading-relaxed mb-1 sm:mb-4">
                                             Each packet is a MYSTERY!
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed">
+                                        <p className="font-['Press_Start_2P'] text-white text-[5px] sm:text-sm leading-relaxed">
                                             Some contain DATA (good!), others are TRAPS (bad!).
                                         </p>
                                     </div>
                                 )}
                                 
                                 {instructionStep === 4 && (
-                                    <div className="bg-black bg-opacity-50 border border-red-400 p-3 sm:p-6">
-                                        <p className="font-['Press_Start_2P'] text-red-300 text-[8px] sm:text-xs mb-2 sm:mb-4"
+                                    <div className="bg-black bg-opacity-50 border border-red-400 p-2 sm:p-6">
+                                        <p className="font-['Press_Start_2P'] text-red-300 text-[6px] sm:text-xs mb-1 sm:mb-4"
                                            style={{
                                                textShadow: '0 0 8px rgba(239, 68, 68, 1)',
                                            }}>
                                             ⚠️ TRAPS:
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed mb-2 sm:mb-4">
+                                        <p className="font-['Press_Start_2P'] text-white text-[5px] sm:text-sm leading-relaxed mb-1 sm:mb-4">
                                             If you open a trap, a FLYING BUTTON appears.
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed">
+                                        <p className="font-['Press_Start_2P'] text-white text-[5px] sm:text-sm leading-relaxed">
                                             Click it multiple times to clear the trap!
                                         </p>
                                     </div>
                                 )}
                                 
                                 {instructionStep === 5 && (
-                                    <div className="bg-black bg-opacity-50 border border-yellow-400 p-3 sm:p-6">
-                                        <p className="font-['Press_Start_2P'] text-yellow-300 text-[8px] sm:text-xs mb-2 sm:mb-4"
+                                    <div className="bg-black bg-opacity-50 border border-yellow-400 p-2 sm:p-6">
+                                        <p className="font-['Press_Start_2P'] text-yellow-300 text-[6px] sm:text-xs mb-1 sm:mb-4"
                                            style={{
                                                textShadow: '0 0 8px rgba(251, 191, 36, 1)',
                                            }}>
                                             🌞 DAY/NIGHT CYCLE:
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed mb-2 sm:mb-4">
+                                        <p className="font-['Press_Start_2P'] text-white text-[5px] sm:text-sm leading-relaxed mb-1 sm:mb-4">
                                             Night reduces visibility.
                                         </p>
-                                        <p className="font-['Press_Start_2P'] text-white text-xs sm:text-sm leading-relaxed">
+                                        <p className="font-['Press_Start_2P'] text-white text-[5px] sm:text-sm leading-relaxed">
                                             Day gives you clear view.
                                         </p>
                                     </div>
                                 )}
                             </div>
                             
-                            {/* Progress indicator */}
-                            <div className="flex justify-center gap-1 sm:gap-2 my-3 sm:my-6">
-                                {[0, 1, 2, 3, 4, 5].map((step) => (
-                                    <div
-                                        key={step}
-                                        className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${
-                                            step === instructionStep ? 'bg-yellow-400' : 'bg-gray-600'
-                                        }`}
-                                    />
-                                ))}
-                            </div>
-                            
-                            {/* Navigation buttons */}
-                            <div className="flex justify-between items-center gap-2">
+                            {/* Navigation buttons — fixed at bottom */}
+                            <div className="flex justify-between items-center gap-2 shrink-0">
                                 <div>
                                     {instructionStep > 0 && (
                                         <PixelButton 
