@@ -624,48 +624,29 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
         const x = touch.clientX - rect.left;
         const y = touch.clientY - rect.top;
         setTelescopePos({ x, y });
-
-        // Also trigger scanning logic on touch start (same as mousedown)
-        handleSceneMouseDown();
     };
 
-    // MECHANIC 8: Multi-step scanning - hold to scan packets
-    const handleSceneMouseDown = () => {
-        if (!sceneRef.current) return;
-
+    // Shared scan-start logic used by both desktop (mousedown) and mobile (auto-crosshair)
+    const startScanning = (targetPacket: DataPacket) => {
         // TRAP CHECK: Broken lens prevents scanning
-        if (lensIsBroken) {
-            return; // Can't scan with broken lens!
+        if (lensIsBroken) return;
+
+        // Check if pressure is in safe zone (40-70)
+        const currentInSafeZone = pressure >= 40 && pressure <= 70;
+        if (!currentInSafeZone) return;
+
+        setScanningPacket(targetPacket);
+        setScanProgress(0);
+
+        // Start scanning progress
+        if (scanningIntervalRef.current) {
+            clearInterval(scanningIntervalRef.current);
         }
 
-        // Check if we're hovering over a packet
-        const targetPacket = dataPackets.find(packet => {
-            const distance = Math.sqrt(
-                Math.pow(packet.x + 50 - telescopePos.x, 2) + 
-                Math.pow(packet.y + 50 - telescopePos.y, 2)
-            );
-            return distance < 50 && !packet.found;
-        });
-
-        if (targetPacket) {
-            // Check if pressure is in safe zone (40-70)
-            const inSafeZone = pressure >= 40 && pressure <= 70;
-            if (!inSafeZone) {
-                return; // Can't scan outside safe pressure zone
-            }
-
-            setScanningPacket(targetPacket);
-            setScanProgress(0);
-
-            // Start scanning progress
-            if (scanningIntervalRef.current) {
-                clearInterval(scanningIntervalRef.current);
-            }
-
-            scanningIntervalRef.current = window.setInterval(() => {
-                setScanProgress(prev => {
-                    const newProgress = prev + 2; // 2% per tick = 50 ticks = ~2.5 seconds
-                    if (newProgress >= 100) {
+        scanningIntervalRef.current = window.setInterval(() => {
+            setScanProgress(prev => {
+                const newProgress = prev + 2; // 2% per tick = 50 ticks = ~2.5 seconds
+                if (newProgress >= 100) {
                         // SCAN COMPLETE - OPEN THE PACKET!
                         setDataPackets(prevPackets =>
                             prevPackets.map(p =>
@@ -774,8 +755,59 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                     return newProgress;
                 });
             }, 50);
+    };
+
+    // MECHANIC 8: Desktop - hold to scan packets (click-and-hold)
+    const handleSceneMouseDown = () => {
+        if (!sceneRef.current || isMobile) return;
+
+        const targetPacket = dataPackets.find(packet => {
+            const distance = Math.sqrt(
+                Math.pow(packet.x + 50 - telescopePos.x, 2) + 
+                Math.pow(packet.y + 50 - telescopePos.y, 2)
+            );
+            return distance < 50 && !packet.found;
+        });
+
+        if (targetPacket) {
+            startScanning(targetPacket);
         }
     };
+
+    // MOBILE AUTO-SCAN: When crosshair is over a packet, scanning starts automatically
+    useEffect(() => {
+        if (!isMobile) return;
+        if (lensIsBroken) return;
+        if (activeTrap) return;
+
+        const packetSize = 60; // mobile packet size
+        const packetCenter = packetSize / 2;
+
+        const targetPacket = dataPackets.find(packet => {
+            if (packet.opened) return false;
+            const distance = Math.sqrt(
+                Math.pow(packet.x + packetCenter - telescopePos.x, 2) + 
+                Math.pow(packet.y + packetCenter - telescopePos.y, 2)
+            );
+            return distance < 50;
+        });
+
+        if (targetPacket) {
+            // Only start if not already scanning this packet
+            if (!scanningPacket || scanningPacket.id !== targetPacket.id) {
+                startScanning(targetPacket);
+            }
+        } else {
+            // Crosshair moved away from packet — cancel scan
+            if (scanningPacket) {
+                if (scanningIntervalRef.current) {
+                    clearInterval(scanningIntervalRef.current);
+                }
+                setScanningPacket(null);
+                setScanProgress(0);
+            }
+        }
+    }, [telescopePos, isMobile, dataPackets, lensIsBroken, activeTrap]);
 
     // Handle trap effects - now activates flying button mechanic
     const handleTrapEffect = (trapType: string) => {

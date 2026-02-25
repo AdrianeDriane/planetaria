@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Phaser from "phaser";
 import GameScene from "../../game/scenes/GameScene";
 import { DISPLAY, PHYSICS } from "../../game/config";
@@ -13,6 +13,7 @@ interface PhaserGameProps {
 const PhaserGame: React.FC<PhaserGameProps> = ({ onNavigateToVenus }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
+  const [isGameActive, setIsGameActive] = useState(false);
 
   // Simulate keyboard events for mobile controls
   const simulateKey = (keyCode: number, isDown: boolean) => {
@@ -67,6 +68,13 @@ const PhaserGame: React.FC<PhaserGameProps> = ({ onNavigateToVenus }) => {
 
     gameRef.current = new Phaser.Game(config);
 
+    // Listen for GameScene to start, then show virtual controls
+    gameRef.current.events.on("step", () => {
+      if (gameRef.current?.scene.isActive("GameScene") && !isGameActive) {
+        setIsGameActive(true);
+      }
+    });
+
     return () => {
       if (gameRef.current) {
         gameRef.current.destroy(true);
@@ -79,15 +87,17 @@ const PhaserGame: React.FC<PhaserGameProps> = ({ onNavigateToVenus }) => {
     <div className="h-screen w-screen bg-gray-950 relative">
       <div ref={containerRef} className="h-full w-full" />
       
-      {/* Virtual Controls for Mobile */}
-      <VirtualControls
-        onLeftDown={handleLeftDown}
-        onLeftUp={handleLeftUp}
-        onRightDown={handleRightDown}
-        onRightUp={handleRightUp}
-        onJumpDown={handleJumpDown}
-        onJumpUp={handleJumpUp}
-      />
+      {/* Virtual Controls for Mobile - only shown after intro */}
+      {isGameActive && (
+        <VirtualControls
+          onLeftDown={handleLeftDown}
+          onLeftUp={handleLeftUp}
+          onRightDown={handleRightDown}
+          onRightUp={handleRightUp}
+          onJumpDown={handleJumpDown}
+          onJumpUp={handleJumpUp}
+        />
+      )}
       
       {/* Navigation button overlay */}
       {onNavigateToVenus && (
