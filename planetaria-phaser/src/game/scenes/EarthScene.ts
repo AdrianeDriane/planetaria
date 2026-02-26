@@ -1,11 +1,19 @@
 import Phaser from "phaser";
 import { UIOverlay } from "./EarthChecklist";
+import { HoverInfo } from "./earth/HoverInfo";
 
 export default class EarthScene extends Phaser.Scene {
     private earth!: Phaser.Physics.Arcade.Sprite;
     private moon!: Phaser.GameObjects.Image;
     private sun!: Phaser.GameObjects.Image;
     private uiOverlay!: UIOverlay;
+    private hoverInfo!: HoverInfo;
+
+    private baseMoonScale: number = 1;
+    private baseSunScale: number = 1;
+
+    // Particles
+    private discoveryEmitter!: Phaser.GameObjects.Particles.ParticleEmitter;
 
     // Drag variables
     private dragStartX: number = 0;
@@ -26,6 +34,26 @@ export default class EarthScene extends Phaser.Scene {
         this.load.image("moon", "assets/moon.png");
         this.load.image("sun", "assets/sun.png");
         this.load.image("outerspace", "assets/outerspace.png");
+        
+        // Create a simple texture for particles if not exists
+        if (!this.textures.exists("sparkle")) {
+            const gfx = this.make.graphics({ x: 0, y: 0 });
+            gfx.fillStyle(0xffff00);
+            // Draw a diamond shape for sparkle
+            gfx.beginPath();
+            gfx.moveTo(5, 0);
+            gfx.lineTo(6, 4);
+            gfx.lineTo(10, 5);
+            gfx.lineTo(6, 6);
+            gfx.lineTo(5, 10);
+            gfx.lineTo(4, 6);
+            gfx.lineTo(0, 5);
+            gfx.lineTo(4, 4);
+            gfx.closePath();
+            gfx.fillPath();
+            gfx.generateTexture("sparkle", 10, 10);
+            gfx.destroy();
+        }
     }
 
     create() {
@@ -45,11 +73,23 @@ export default class EarthScene extends Phaser.Scene {
             .setDisplaySize(width, height)
             .setOrigin(1, 1);
 
+        // --- PARTICLES ---
+        this.discoveryEmitter = this.add.particles(0, 0, "sparkle", {
+            lifespan: 800,
+            speed: { min: 100, max: 200 },
+            scale: { start: 1, end: 0 },
+            gravityY: 200,
+            blendMode: 'ADD',
+            emitting: false
+        });
+
         // --- 1. THE SUN ---
         this.sun = this.add
             .image(width * 0.15, height * 0.15, "sun")
             .setDisplaySize(sunSize, sunSize)
             .setInteractive();
+        
+        this.baseSunScale = this.sun.scale;
 
         this.sun.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
             this.handleSunClick(pointer);
@@ -63,6 +103,8 @@ export default class EarthScene extends Phaser.Scene {
             .image(moonX, moonY, "moon")
             .setDisplaySize(moonSize, moonSize)
             .setInteractive();
+
+        this.baseMoonScale = this.moon.scale;
 
         this.moon.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
             this.handleMoonClick(pointer);
@@ -119,100 +161,273 @@ export default class EarthScene extends Phaser.Scene {
                         this.earth.setFrame(newFrame);
                     }
 
-                    this.handleDiscovery("movement");
+                    this.handleDiscovery("movement", pointer.x, pointer.y);
                 }
             },
         );
 
         // --- 4. UI OVERLAY ---
         this.uiOverlay = new UIOverlay(this);
+        this.hoverInfo = new HoverInfo(this);
+
+        // --- HOVER LOGIC ---
+        this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
+            this.handleHover(pointer);
+        });
+
+        // --- CHECKLIST COMPLETION ---
+        this.events.on("checklist-complete", () => {
+            console.log("Checklist complete event received via this.events");
+            // Fade out and switch scene
+            this.cameras.main.fadeOut(1000, 0, 0, 0);
+            this.cameras.main.once(
+                Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
+                () => {
+                    this.scene.start("EarthCongratulationScene");
+                },
+            );
+        });
+    }
+
+    handleHover(pointer: Phaser.Input.Pointer) {
+        // 1. Check Sun (Radius check for circle)
+        const sunRadius = (this.sun.displayWidth / 2) * 0.9; // 90% hit area
+        if (
+            Phaser.Math.Distance.Between(
+                pointer.x,
+                pointer.y,
+                this.sun.x,
+                this.sun.y,
+            ) < sunRadius
+        ) {
+            this.hoverInfo.show(pointer.x, pointer.y, "sun_position");
+            return;
+        }
+
+        // 2. Check Moon (Radius check)
+        const moonRadius = (this.moon.displayWidth / 2) * 0.9;
+        if (
+            Phaser.Math.Distance.Between(
+                pointer.x,
+                pointer.y,
+                this.moon.x,
+                this.moon.y,
+            ) < moonRadius
+        ) {
+            this.hoverInfo.show(pointer.x, pointer.y, "moon");
+            return;
+        }
+
+        // 3. Check Earth
+        // Only run pixel check if within Earth bounds
+        if (this.earth.getBounds().contains(pointer.x, pointer.y)) {
+            const textureManager = this.textures;
+            const frame = this.earth.frame;
+
+            const localX =
+                pointer.x - (this.earth.x - this.earth.displayWidth / 2);
+            const localY =
+                pointer.y - (this.earth.y - this.earth.displayHeight / 2);
+
+            const texX = Math.floor(
+                (localX / this.earth.displayWidth) * frame.width,
+            );
+            const texY = Math.floor(
+                (localY / this.earth.displayHeight) * frame.height,
+            );
+
+            const clampedTexX = Math.max(0, Math.min(texX, frame.width - 1));
+            const clampedTexY = Math.max(0, Math.min(texY, frame.height - 1));
+
+            // Use frame.x / frame.y for spritesheet offsets (Fixes rotation issue)
+            const finalX = clampedTexX + frame.x;
+            const finalY = clampedTexY + frame.y;
+
+            const pixel = textureManager.getPixel(finalX, finalY, "earth_spin");
+
+            if (pixel) {
+                const feature = this.analyzeColor(
+                    pixel.red,
+                    pixel.green,
+                    pixel.blue,
+                );
+                if (feature) {
+                    this.hoverInfo.show(pointer.x, pointer.y, feature);
+                    return;
+                }
+            }
+        }
+
+        // If nothing found
+        this.hoverInfo.hide();
     }
 
     /**
      * Translates World Click -> Texture Pixel -> Feature ID
+     * Uses 3x3 Super-sampling for robust detection
      */
     handleEarthClick(pointer: Phaser.Input.Pointer) {
-        // 1. Get the Texture Manager
         const textureManager = this.textures;
         const frame = this.earth.frame;
 
-        // 2. Calculate Local Click Position on the Sprite (0 to displayWidth)
-        // (Pointer - TopLeft of Sprite)
+        // Calculate Local Click Position on the Sprite
         const localX = pointer.x - (this.earth.x - this.earth.displayWidth / 2);
         const localY =
             pointer.y - (this.earth.y - this.earth.displayHeight / 2);
 
-        // Check if click is within sprite bounds
         if (
             localX < 0 ||
             localX > this.earth.displayWidth ||
             localY < 0 ||
             localY > this.earth.displayHeight
         ) {
-            return; // Click was outside sprite
+            return;
         }
 
-        // 3. Map Local Position to Frame Texture Coordinates
-        // (Account for scaling: e.g., if sprite is 200px but texture is 582px)
-        const texX = Math.floor(
-            (localX / this.earth.displayWidth) * frame.width,
-        );
-        const texY = Math.floor(
-            (localY / this.earth.displayHeight) * frame.height,
-        );
+        // Potential candidates found in the 3x3 grid
+        const candidates: string[] = [];
 
-        // 4. Clamp to frame bounds to ensure we stay within the current frame
-        const clampedTexX = Math.max(0, Math.min(texX, frame.width - 1));
-        const clampedTexY = Math.max(0, Math.min(texY, frame.height - 1));
+        // Sample a 3x3 grid around the click point
+        for (let ox = -1; ox <= 1; ox++) {
+            for (let oy = -1; oy <= 1; oy++) {
+                // Map Local Position + Offset to Texture Coordinates
+                const sampleLocalX = localX + ox;
+                const sampleLocalY = localY + oy;
 
-        // 5. Add the Frame Offset (Because it's a spritesheet!)
-        // cutX/cutY tells us where the current frame starts in the big image
-        const finalX = clampedTexX + frame.cutX;
-        const finalY = clampedTexY + frame.cutY;
+                const texX = Math.floor(
+                    (sampleLocalX / this.earth.displayWidth) * frame.width,
+                );
+                const texY = Math.floor(
+                    (sampleLocalY / this.earth.displayHeight) * frame.height,
+                );
 
-        // 6. Get the Pixel Color
-        // 'earth_spin' is the key we used in preload()
-        const pixel = textureManager.getPixel(finalX, finalY, "earth_spin");
+                const clampedTexX = Math.max(
+                    0,
+                    Math.min(texX, frame.width - 1),
+                );
+                const clampedTexY = Math.max(
+                    0,
+                    Math.min(texY, frame.height - 1),
+                );
 
-        if (pixel) {
-            this.analyzeColorAndTrigger(pixel.red, pixel.green, pixel.blue);
+                // Use frame.x / frame.y for spritesheet offsets
+                const finalX = clampedTexX + frame.x;
+                const finalY = clampedTexY + frame.y;
+
+                // Debug only the center pixel sample
+                if (ox === 0 && oy === 0) {
+                    console.log(
+                        `Frame: ${frame.name} | Offset: ${frame.x},${frame.y} | Click: ${finalX},${finalY}`,
+                    );
+                }
+
+                const pixel = textureManager.getPixel(
+                    finalX,
+                    finalY,
+                    "earth_spin",
+                );
+
+                if (pixel) {
+                    const feature = this.analyzeColor(
+                        pixel.red,
+                        pixel.green,
+                        pixel.blue,
+                    );
+                    if (feature) {
+                        candidates.push(feature);
+                    }
+                }
+            }
+        }
+
+        // Prioritize Features (Clouds > Life > Water)
+        if (candidates.includes("atmosphere")) {
+            this.handleDiscovery("atmosphere", pointer.x, pointer.y);
+        } else if (candidates.includes("living_things")) {
+            this.handleDiscovery("living_things", pointer.x, pointer.y);
+        } else if (candidates.includes("liquid_water")) {
+            this.handleDiscovery("liquid_water", pointer.x, pointer.y);
         }
     }
 
-    analyzeColorAndTrigger(r: number, g: number, b: number) {
-        // Ignore transparent pixels (Background stars showing through corners)
-        if (r === 0 && g === 0 && b === 0) return;
+    /**
+     * Helper: Convert RGB to HSL
+     * r, g, b: 0-255
+     * returns: { h, s, l } all in range 0-1
+     */
+    rgbToHsl(r: number, g: number, b: number) {
+        (r /= 255), (g /= 255), (b /= 255);
+        const max = Math.max(r, g, b),
+            min = Math.min(r, g, b);
+        let h = 0,
+            s = 0,
+            l = (max + min) / 2;
 
-        console.log(`Clicked Color: R${r} G${g} B${b}`);
-
-        // --- COLOR HEURISTICS ---
-
-        // 1. WHITE/GREY = CLOUDS (Atmosphere)
-        // High values in all channels
-        if (r > 200 && g > 200 && b > 200) {
-            this.handleDiscovery("atmosphere");
-            return;
+        if (max !== min) {
+            const d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+                case r:
+                    h = (g - b) / d + (g < b ? 6 : 0);
+                    break;
+                case g:
+                    h = (b - r) / d + 2;
+                    break;
+                case b:
+                    h = (r - g) / d + 4;
+                    break;
+            }
+            h /= 6;
         }
 
-        // 2. BLUE = WATER (Liquid Water)
-        // Blue is dominant
-        if (b > r + 20 && b > g + 20) {
-            this.handleDiscovery("liquid_water");
-            return;
+        return { h, s, l };
+    }
+
+    analyzeColor(r: number, g: number, b: number): string | null {
+        // Ignore transparent pixels
+        if (r === 0 && g === 0 && b === 0) return null;
+
+        const { h, s, l } = this.rgbToHsl(r, g, b);
+        const hDeg = h * 360;
+
+        // 1. ATMOSPHERE / CLOUDS
+        // Data shows clouds are very bright (L > 0.8) or grey (low S)
+        // Primary Check: Very High Lightness
+        if (l > 0.75) {
+            return "atmosphere";
+        }
+        // Secondary Check: Moderate Lightness but Greyish (White/Grey clouds)
+        if (l > 0.55 && s < 0.2) {
+             return "atmosphere";
         }
 
-        // 3. GREEN/BROWN = LAND (Living Things)
-        // Green is dominant OR Brownish (Red dominant but low Blue)
-        // Green check:
-        if (g > b + 10 && g > r - 30) {
-            this.handleDiscovery("living_things");
-            return;
+        // 2. LIQUID WATER
+        // Data shows water is Deep Blue (H ~220-240) and Saturated (S > 0.8)
+        // Range: ~170 to ~260
+        if (hDeg > 170 && hDeg < 260 && s > 0.25) {
+            return "liquid_water";
         }
-        // Brown/Earth tone check:
-        if (r > g && r > b && b < 100) {
-            this.handleDiscovery("living_things");
-            return;
+
+        // 3. LIVING THINGS (Land)
+        // IMPORTANT: Land is usually darker (L < 0.6). Bright pixels are likely clouds.
+
+        // Green Range: ~60 to ~160 (Vegetation)
+        if (hDeg >= 60 && hDeg <= 165 && s > 0.15 && l < 0.65) {
+            return "living_things";
         }
+
+        // Brown/Yellow Range: ~15 to ~60 (Desert/Dirt)
+        // Must check Lightness to avoid confused bright clouds
+        if (hDeg >= 15 && hDeg < 60 && s > 0.15 && l < 0.65) {
+             return "living_things";
+        }
+        
+        // Deep Reddish/Brown fallback (Mountains)
+        if ((hDeg < 15 || hDeg > 345) && s > 0.15 && l < 0.5) {
+            return "living_things";
+        }
+
+        return null;
     }
 
     handleMoonClick(pointer: Phaser.Input.Pointer) {
@@ -244,7 +459,7 @@ export default class EarthScene extends Phaser.Scene {
             );
             // Only trigger discovery for non-transparent pixels
             if (!(pixel.red === 0 && pixel.green === 0 && pixel.blue === 0)) {
-                this.handleDiscovery("moon");
+                this.handleDiscovery("moon", pointer.x, pointer.y);
             }
         }
     }
@@ -278,12 +493,12 @@ export default class EarthScene extends Phaser.Scene {
             );
             // Only trigger discovery for non-transparent pixels
             if (!(pixel.red === 0 && pixel.green === 0 && pixel.blue === 0)) {
-                this.handleDiscovery("sun_position");
+                this.handleDiscovery("sun_position", pointer.x, pointer.y);
             }
         }
     }
 
-    update(time: number) {}
+    update(_time: number) {}
 
     addHoverCursor(gameObject: Phaser.GameObjects.GameObject) {
         gameObject.on("pointerover", () =>
@@ -294,7 +509,12 @@ export default class EarthScene extends Phaser.Scene {
         );
     }
 
-    handleDiscovery(featureID: string) {
+    handleDiscovery(featureID: string, x?: number, y?: number) {
+        // Emit Particles if coordinates are provided
+        if (x !== undefined && y !== undefined) {
+            this.discoveryEmitter.explode(15, x, y);
+        }
+
         window.dispatchEvent(
             new CustomEvent("earth-discovery", {
                 detail: { feature: featureID },
@@ -303,17 +523,21 @@ export default class EarthScene extends Phaser.Scene {
 
         // Animations for feedback
         if (featureID === "moon") {
+            this.tweens.killTweensOf(this.moon);
+            this.moon.setScale(this.baseMoonScale);
             this.tweens.add({
                 targets: this.moon,
-                scale: this.moon.scale * 1.5,
+                scale: this.baseMoonScale * 1.5,
                 yoyo: true,
                 duration: 200,
             });
         }
         if (featureID === "sun_position") {
+            this.tweens.killTweensOf(this.sun);
+            this.sun.setScale(this.baseSunScale);
             this.tweens.add({
                 targets: this.sun,
-                scale: this.sun.scale * 1.2,
+                scale: this.baseSunScale * 1.2,
                 yoyo: true,
                 duration: 200,
             });
