@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import MainMenu from "./ui/pages/MainMenu";
-import LevelSelection from "./ui/pages/LevelSelection";
 import PhaserGame from "./ui/pages/PhaserGame";
 import { MarsRedPuzzle } from "./ui/components/MarsRedPuzzle";
 import { EventBus } from "./game/EventBus";
 
-type AppState = "menu" | "playing";
+type AppState = "menu" | "playing" | "venus" | "earth" | "uranus" | "neptune"
 
 function App() {
   const [appState, setAppState] = useState<AppState>("menu");

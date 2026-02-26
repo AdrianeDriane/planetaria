@@ -1,18 +1,72 @@
-body {
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html, body {
   margin: 0;
   padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: fixed;
   color: rgba(255, 255, 255, 0.87);
   background-color: #000000;
   font-family: Arial, Helvetica, sans-serif;
+  touch-action: manipulation;
+  overscroll-behavior: none; /* Prevent pull-to-refresh */
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 #app {
   width: 100%;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+/* Force landscape orientation on mobile */
+@media screen and (max-width: 768px) and (orientation: portrait) {
+  body::before {
+    content: "Please rotate your device";
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-family: 'Press Start 2P', monospace;
+    text-align: center;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 2rem;
+    border: 3px solid #0ec3c9;
+    width: 80%;
+    box-sizing: border-box;
+  }
+  
+  body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 9998;
+  }
+  
+  #root {
+    opacity: 0;
+  }
 }
 
 .spritePosition {

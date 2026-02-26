@@ -3,13 +3,16 @@ import Phaser from "phaser";
 import GameScene from "../game/scenes/GameScene";
 import EarthScene from "../game/scenes/EarthScene";
 import { DISPLAY, PHYSICS } from "../game/config";
+import PixelButton from "./ui/PixelButton";
 
 interface PhaserGameProps {
     initialScene?: "GameScene" | "EarthScene";
+    onNavigateToVenus?: () => void;
 }
 
 const PhaserGame: React.FC<PhaserGameProps> = ({
     initialScene = "GameScene",
+    onNavigateToVenus,
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const gameRef = useRef<Phaser.Game | null>(null);
@@ -46,7 +49,11 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
                 },
             },
             scene: sceneConfig, // <--- Using our ordered array
-            input: { keyboard: true },
+            input: { 
+                keyboard: true,
+                touch: true,
+                activePointers: 3,
+            },
         };
 
         // 2. Create the game
@@ -62,8 +69,19 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
     }, [initialScene]); // <--- Re-run this entire block when the prop changes
 
     return (
-        <div className="w-screen h-screen bg-gray-950">
+        <div className="w-screen h-screen bg-gray-950 relative pointer-events-none">
             <div ref={containerRef} className="w-full h-full" />
+            
+            {/* Navigation Overlay */}
+            {onNavigateToVenus && (
+                <div className="absolute top-4 right-4 z-50 pointer-events-auto">
+                    <PixelButton 
+                        label="Go to Venus" 
+                        onClick={onNavigateToVenus}
+                        variant="secondary"
+                    />
+                </div>
+            )}
         </div>
     );
 };

@@ -1,9 +1,28 @@
-body {
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html, body {
   margin: 0;
   padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: fixed;
   color: rgba(255, 255, 255, 0.87);
   background-color: #000000;
   font-family: Arial, Helvetica, sans-serif;
+  touch-action: manipulation;
+  overscroll-behavior: none; /* Prevent pull-to-refresh */
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 #app {

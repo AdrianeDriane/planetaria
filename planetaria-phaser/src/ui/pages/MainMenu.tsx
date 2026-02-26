@@ -172,7 +172,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onPlay }) => {
       {/* CENTRAL CONTENT */}
       <div className="z-10 flex flex-col items-center">
         {/* PLANETARIA LOGO */}
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center px-4">
           <img
             src={planetariaLogo}
             alt="Planetaria"
@@ -185,19 +185,19 @@ const MainMenu: React.FC<MainMenuProps> = ({ onPlay }) => {
         </div>
 
         {/* START PROMPT */}
-        <div className="flex flex-col items-center gap-2">
-          <p className="animate-pulse font-['Press_Start_2P'] text-sm tracking-widest text-yellow-400">
+        <div className="flex flex-col items-center gap-2 px-4">
+          <p className="animate-pulse font-['Press_Start_2P'] text-xs sm:text-sm tracking-widest text-yellow-400 text-center">
             CLICK ANYWHERE TO START
           </p>
         </div>
       </div>
 
       {/* HUD CONTAINER - Bottom Right */}
-      <div className="absolute right-8 bottom-8 z-20 flex gap-4">
+      <div className="absolute right-4 bottom-4 sm:right-8 sm:bottom-8 z-20 flex gap-2 sm:gap-4">
         {/* INFO BUTTON — Pixel Art */}
         <div
           onClick={(e) => handleHudClick(e, "OPEN_INFO")}
-          className="flex h-9 w-9 items-center justify-center border-2 border-blue-400 bg-blue-950 transition-colors duration-100 hover:border-white hover:bg-blue-900 md:h-12 md:w-12"
+          className="flex h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 items-center justify-center border-2 border-blue-400 bg-blue-950 transition-colors duration-100 hover:border-white hover:bg-blue-900 active:bg-blue-800"
           title="Game Instructions"
           style={{ imageRendering: "pixelated" }}
         >
@@ -207,10 +207,10 @@ const MainMenu: React.FC<MainMenuProps> = ({ onPlay }) => {
         {/* AUDIO TOGGLE — Pixel Art Speaker */}
         <div
           onClick={(e) => handleHudClick(e, "TOGGLE_AUDIO")}
-          className={`flex h-9 w-9 items-center justify-center border-2 transition-colors duration-100 md:h-12 md:w-12 ${
+          className={`flex h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 items-center justify-center border-2 transition-colors duration-100 ${
             isMuted
-              ? "border-red-400 bg-red-950 hover:bg-red-900"
-              : "border-green-400 bg-green-950 hover:bg-green-900"
+              ? "border-red-400 bg-red-950 hover:bg-red-900 active:bg-red-800"
+              : "border-green-400 bg-green-950 hover:bg-green-900 active:bg-green-800"
           }`}
           title={isMuted ? "Unmute Audio" : "Mute Audio"}
           style={{ imageRendering: "pixelated" }}
