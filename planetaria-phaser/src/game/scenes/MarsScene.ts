@@ -48,20 +48,13 @@ export default class MarsScene extends Phaser.Scene {
     // Flash atmosphere/camera when restored
     this.cameras.main.flash(1000, 255, 100, 50);
     
-    // Add a subtle glow to the atmosphere
+    // Added a subtle glow to the atmosphere
     this.tweens.add({
         targets: this.atmosphere,
         alpha: 0.5,
         duration: 2000,
         yoyo: true,
         repeat: -1
-    });
-
-    // Transition to Jupiter (Next Level)
-    this.time.delayedCall(4000, () => {
-        // Proceed to Jupiter
-        console.log("Proceeding to Jupiter...");
-        this.scene.start("JupiterScene"); 
     });
   }
 

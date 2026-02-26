@@ -64,5 +64,32 @@ export default class GameScene extends Phaser.Scene {
   update(_time: number, delta: number): void {
     this.player.update();
     this.starfield.update(delta);
+
+    // Transition to Venus if player reaches end of world
+    if (this.player.getSprite().x > WORLD.WIDTH - 100) {
+        this.transitionToVenus();
+    }
+  }
+
+  private transitionToVenus() {
+    // Prevent multiple triggers
+    if ((this as any).isTransitioning) return;
+    (this as any).isTransitioning = true;
+
+    // Unlock Level 2 (Venus) in local storage
+    try {
+        const STORAGE_KEY = "planetaria_progress";
+        const stored = localStorage.getItem(STORAGE_KEY);
+        let progress = stored ? JSON.parse(stored) : {};
+        progress[2] = "unlocked";
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    } catch (e) {
+        console.warn("Failed to save progress in GameScene:", e);
+    }
+
+    this.cameras.main.fadeOut(1000, 0, 0, 0);
+    this.cameras.main.once("camerafadeoutcomplete", () => {
+        this.scene.start("VenusIntroScene");
+    });
   }
 }

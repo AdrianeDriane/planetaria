@@ -10,38 +10,111 @@ import { DISPLAY, PHYSICS } from "../../game/config";
 import IntroScene from "../../game/scenes/IntroScene";
 import PixelButton from "../components/PixelButton";
 import VirtualControls from "../components/VirtualControls";
+import VenusIntroScene from "../../game/scenes/venus/VenusIntroScene";
+import JupiterIntroScene from "../../game/scenes/JupiterIntroScene";
+import UranusIntroScene from "../../game/scenes/uranus/UranusIntroScene";
+import NeptuneIntroScene from "../../game/scenes/neptune/NeptuneIntroScene";
+import { EventBus } from "../../game/EventBus";
 
 interface PhaserGameProps {
+  initialLevelId?: number;
   onNavigateToVenus?: () => void;
 }
 
-const PhaserGame: React.FC<PhaserGameProps> = ({ onNavigateToVenus }) => {
+const PhaserGame: React.FC<PhaserGameProps> = ({ 
+  initialLevelId = 1,
+  onNavigateToVenus 
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
   const [isGameActive, setIsGameActive] = useState(false);
 
+  // Mapping level ID to starting scene key
+  const getStartingScene = (id: number): string => {
+    switch (id) {
+      case 1: return "IntroScene";
+      case 2: return "VenusIntroScene";
+      case 3: return "EarthIntroScene";
+      case 4: return "MarsIntroScene";
+      case 7: return "UranusIntroScene";
+      case 8: return "NeptuneIntroScene";
+      default: return "EarthIntroScene";
+    }
+  };
+
   // Simulate keyboard events for mobile controls
   const simulateKey = (keyCode: number, isDown: boolean) => {
     if (!gameRef.current) return;
-    
-    const event = new KeyboardEvent(isDown ? 'keydown' : 'keyup', {
+
+    const event = new KeyboardEvent(isDown ? "keydown" : "keyup", {
       keyCode,
       which: keyCode,
       bubbles: true,
     });
-    
+
     window.dispatchEvent(event);
   };
 
-  const handleLeftDown = () => simulateKey(Phaser.Input.Keyboard.KeyCodes.A, true);
-  const handleLeftUp = () => simulateKey(Phaser.Input.Keyboard.KeyCodes.A, false);
-  const handleRightDown = () => simulateKey(Phaser.Input.Keyboard.KeyCodes.D, true);
-  const handleRightUp = () => simulateKey(Phaser.Input.Keyboard.KeyCodes.D, false);
-  const handleJumpDown = () => simulateKey(Phaser.Input.Keyboard.KeyCodes.W, true);
-  const handleJumpUp = () => simulateKey(Phaser.Input.Keyboard.KeyCodes.W, false);
+  const handleLeftDown = () =>
+    simulateKey(Phaser.Input.Keyboard.KeyCodes.A, true);
+  const handleLeftUp = () =>
+    simulateKey(Phaser.Input.Keyboard.KeyCodes.A, false);
+  const handleRightDown = () =>
+    simulateKey(Phaser.Input.Keyboard.KeyCodes.D, true);
+  const handleRightUp = () =>
+    simulateKey(Phaser.Input.Keyboard.KeyCodes.D, false);
+  const handleJumpDown = () =>
+    simulateKey(Phaser.Input.Keyboard.KeyCodes.W, true);
+  const handleJumpUp = () =>
+    simulateKey(Phaser.Input.Keyboard.KeyCodes.W, false);
 
   useEffect(() => {
     if (!containerRef.current || gameRef.current) return;
+
+    // Define all available scenes
+    const allScenes = [
+      VenusIntroScene,
+      EarthIntroScene,
+      EarthScene,
+      EarthCongratulationScene,
+      MarsIntroScene,
+      MarsScene,
+      GameScene,
+      IntroScene,
+      JupiterIntroScene,
+      UranusIntroScene,
+      NeptuneIntroScene,
+    ];
+
+    // Phaser starts the FIRST scene in the array. 
+    // We reorder to put the requested scene at index 0.
+    const startSceneKey = getStartingScene(initialLevelId);
+    
+    // Create a mapping of keys to constructors
+    const sceneMap: Record<string, any> = {
+        "VenusIntroScene": VenusIntroScene,
+        "EarthIntroScene": EarthIntroScene,
+        "EarthScene": EarthScene,
+        "EarthCongratulationScene": EarthCongratulationScene,
+        "MarsIntroScene": MarsIntroScene,
+        "MarsScene": MarsScene,
+        "GameScene": GameScene,
+        "IntroScene": IntroScene,
+        "JupiterIntroScene": JupiterIntroScene,
+        "UranusIntroScene": UranusIntroScene,
+        "NeptuneIntroScene": NeptuneIntroScene
+    };
+
+    const finalScenes = [...allScenes];
+    const StartSceneClass = sceneMap[startSceneKey];
+    
+    if (StartSceneClass) {
+        const index = finalScenes.indexOf(StartSceneClass);
+        if (index !== -1) {
+            finalScenes.splice(index, 1);
+            finalScenes.unshift(StartSceneClass);
+        }
+    }
 
     const config: Phaser.Types.Core.GameConfig = {
       type: Phaser.AUTO,
@@ -63,8 +136,8 @@ const PhaserGame: React.FC<PhaserGameProps> = ({ onNavigateToVenus }) => {
           debug: PHYSICS.DEBUG,
         },
       },
-      scene: [IntroScene, GameScene],
-      input: { 
+      scene: finalScenes,
+      input: {
         keyboard: true,
         touch: true,
         activePointers: 3,
@@ -72,6 +145,19 @@ const PhaserGame: React.FC<PhaserGameProps> = ({ onNavigateToVenus }) => {
     };
 
     gameRef.current = new Phaser.Game(config);
+
+    const handleSceneChange = (sceneKey: string) => {
+        if (gameRef.current) {
+            gameRef.current.scene.scenes.forEach(s => {
+                if (gameRef.current?.scene.isActive(s.scene.key)) {
+                    gameRef.current?.scene.stop(s.scene.key);
+                }
+            });
+            gameRef.current.scene.start(sceneKey);
+        }
+    };
+
+    EventBus.on("change-phaser-scene", handleSceneChange);
 
     // Listen for GameScene to start, then show virtual controls
     gameRef.current.events.on("step", () => {
@@ -81,6 +167,7 @@ const PhaserGame: React.FC<PhaserGameProps> = ({ onNavigateToVenus }) => {
     });
 
     return () => {
+      EventBus.off("change-phaser-scene", handleSceneChange);
       if (gameRef.current) {
         gameRef.current.destroy(true);
         gameRef.current = null;
@@ -89,9 +176,9 @@ const PhaserGame: React.FC<PhaserGameProps> = ({ onNavigateToVenus }) => {
   }, []);
 
   return (
-    <div className="h-screen w-screen bg-gray-950 relative">
+    <div className="relative h-screen w-screen bg-gray-950">
       <div ref={containerRef} className="h-full w-full" />
-      
+
       {/* Virtual Controls for Mobile - only shown after intro */}
       {isGameActive && (
         <VirtualControls
@@ -103,12 +190,12 @@ const PhaserGame: React.FC<PhaserGameProps> = ({ onNavigateToVenus }) => {
           onJumpUp={handleJumpUp}
         />
       )}
-      
+
       {/* Navigation button overlay */}
       {onNavigateToVenus && (
-        <div className="absolute top-4 right-4 sm:top-6 sm:right-6 pointer-events-auto z-50">
-          <PixelButton 
-            label="Go to Venus" 
+        <div className="pointer-events-auto absolute top-4 right-4 z-50 sm:top-6 sm:right-6">
+          <PixelButton
+            label="Go to Venus"
             onClick={onNavigateToVenus}
             variant="primary"
           />

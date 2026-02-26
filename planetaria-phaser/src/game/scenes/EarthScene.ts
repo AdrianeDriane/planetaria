@@ -178,6 +178,18 @@ export default class EarthScene extends Phaser.Scene {
         // --- CHECKLIST COMPLETION ---
         this.events.on("checklist-complete", () => {
             console.log("Checklist complete event received via this.events");
+
+            // Unlock Level 4 (Mars) in local storage
+            try {
+                const STORAGE_KEY = "planetaria_progress";
+                const stored = localStorage.getItem(STORAGE_KEY);
+                let progress = stored ? JSON.parse(stored) : {};
+                progress[4] = "unlocked";
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+            } catch (e) {
+                console.warn("Failed to save progress in EarthScene:", e);
+            }
+
             // Fade out and switch scene
             this.cameras.main.fadeOut(1000, 0, 0, 0);
             this.cameras.main.once(
