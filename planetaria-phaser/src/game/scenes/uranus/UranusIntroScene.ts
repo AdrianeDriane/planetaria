@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { EventBus } from "../EventBus";
+import { EventBus } from "../../EventBus";
 
 /**
  * UranusIntroScene.ts
@@ -50,7 +50,9 @@ export default class UranusIntroScene extends Phaser.Scene {
 
   private setupVisuals(width: number, height: number): void {
     // Background
-    const bg = this.add.rectangle(0, 0, width, height, COLORS.VOID_OBSIDIAN).setOrigin(0);
+    const bg = this.add
+      .rectangle(0, 0, width, height, COLORS.VOID_OBSIDIAN)
+      .setOrigin(0);
     this.spaceLayer.add(bg);
 
     // Parallax Stars
@@ -73,25 +75,25 @@ export default class UranusIntroScene extends Phaser.Scene {
 
     // Rocketship
     this.ssAstra = this.add.sprite(-300, height * 0.5, "riding_ss_astra");
-    this.ssAstra.setScale(0.4); 
-    
+    this.ssAstra.setScale(0.4);
+
     // Create Engine Flare Texture
     if (!this.textures.exists("engine_flare_uranus")) {
-        const particleGfx = this.make.graphics({x:0, y:0});
-        particleGfx.fillStyle(0x00f2ff);
-        particleGfx.fillCircle(4,4,4);
-        particleGfx.generateTexture('engine_flare_uranus', 8, 8);
-        particleGfx.destroy();
+      const particleGfx = this.make.graphics({ x: 0, y: 0 });
+      particleGfx.fillStyle(0x00f2ff);
+      particleGfx.fillCircle(4, 4, 4);
+      particleGfx.generateTexture("engine_flare_uranus", 8, 8);
+      particleGfx.destroy();
     }
-    
+
     // Engine Trail Particles
-    const particles = this.add.particles(0, 0, 'engine_flare_uranus', {
-        speed: 100,
-        scale: { start: 0.4, end: 0 },
-        blendMode: 'ADD',
-        lifespan: 500,
-        follow: this.ssAstra,
-        followOffset: { x: -60, y: 10 }
+    const particles = this.add.particles(0, 0, "engine_flare_uranus", {
+      speed: 100,
+      scale: { start: 0.4, end: 0 },
+      blendMode: "ADD",
+      lifespan: 500,
+      follow: this.ssAstra,
+      followOffset: { x: -60, y: 10 },
     });
 
     this.midLayer.add([particles, this.ssAstra]);
@@ -99,38 +101,45 @@ export default class UranusIntroScene extends Phaser.Scene {
 
   private setupLetterbox(width: number, height: number): void {
     const barHeight = height * 0.22;
-    this.letterboxBottom = this.add.rectangle(0, height - barHeight, width, barHeight, 0x000000, 0.9).setOrigin(0);
-    
-    this.narrativeText = this.add.text(width / 2, height - (barHeight / 2), "", {
-      font: "italic 18px 'Courier New'",
-      color: COLORS.TEXT_LOG,
-      align: "center",
-      wordWrap: { width: width - 80 }
-    }).setOrigin(0.5);
+    this.letterboxBottom = this.add
+      .rectangle(0, height - barHeight, width, barHeight, 0x000000, 0.9)
+      .setOrigin(0);
+
+    this.narrativeText = this.add
+      .text(width / 2, height - barHeight / 2, "", {
+        font: "italic 18px 'Courier New'",
+        color: COLORS.TEXT_LOG,
+        align: "center",
+        wordWrap: { width: width - 80 },
+      })
+      .setOrigin(0.5);
 
     this.uiLayer.add([this.letterboxBottom, this.narrativeText]);
   }
 
-  private async startCinematicSequence(width: number, height: number): Promise<void> {
+  private async startCinematicSequence(
+    width: number,
+    height: number
+  ): Promise<void> {
     this.playText("Sector 7: URANUS. The Sideways Giant.");
-    
+
     this.tweens.add({
       targets: this.ssAstra,
       x: width * 0.2,
       duration: 4000,
-      ease: "Cubic.easeOut"
+      ease: "Cubic.easeOut",
     });
 
     await this.wait(4500);
 
     this.playText("Extreme tilt detected. Gravitational pull is erratic.");
-    
+
     this.tweens.add({
       targets: this.uranus,
       x: width * 0.65,
       alpha: 1,
       duration: 5000,
-      ease: "Power2.easeInOut"
+      ease: "Power2.easeInOut",
     });
 
     await this.wait(5500);
@@ -148,22 +157,25 @@ export default class UranusIntroScene extends Phaser.Scene {
       callback: () => {
         this.narrativeText.setText(msg.substring(0, i + 1));
         i++;
-      }
+      },
     });
   }
 
   private createInteractionHint(width: number, height: number): void {
-    const hint = this.add.text(width / 2, height - 25, ">> TAP TO BEGIN STABILIZATION <<", {
-      font: "bold 14px 'Courier New'",
-      color: COLORS.TECH_CYAN
-    }).setOrigin(0.5).setAlpha(0);
+    const hint = this.add
+      .text(width / 2, height - 25, ">> TAP TO BEGIN STABILIZATION <<", {
+        font: "bold 14px 'Courier New'",
+        color: COLORS.TECH_CYAN,
+      })
+      .setOrigin(0.5)
+      .setAlpha(0);
 
     this.tweens.add({
       targets: hint,
       alpha: 1,
       yoyo: true,
       repeat: -1,
-      duration: 800
+      duration: 800,
     });
 
     this.input.once("pointerdown", () => this.finalTransition());
@@ -174,12 +186,12 @@ export default class UranusIntroScene extends Phaser.Scene {
     this.isSequenceActive = false;
 
     this.cameras.main.flash(800, 100, 200, 255);
-    
+
     this.tweens.add({
       targets: this.ssAstra,
       alpha: 0,
       scale: 0.1,
-      duration: 1000
+      duration: 1000,
     });
 
     this.tweens.add({
@@ -187,7 +199,7 @@ export default class UranusIntroScene extends Phaser.Scene {
       x: this.scale.width / 2,
       scale: 3,
       duration: 1500,
-      ease: "Cubic.easeIn"
+      ease: "Cubic.easeIn",
     });
 
     this.time.delayedCall(1200, () => {
@@ -199,6 +211,6 @@ export default class UranusIntroScene extends Phaser.Scene {
   }
 
   private wait(ms: number): Promise<void> {
-    return new Promise(resolve => this.time.delayedCall(ms, resolve));
+    return new Promise((resolve) => this.time.delayedCall(ms, resolve));
   }
 }

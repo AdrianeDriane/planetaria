@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import PixelButton from "../components/PixelButton";
 
 interface NeptuneFeature {
@@ -202,36 +201,22 @@ const NeptuneDisplay: React.FC<NeptuneDisplayProps> = ({
 
     return (
         <div className="relative flex items-center justify-center shrink-0" style={{ height: "clamp(120px, 28vh, 260px)" }}>
-            <motion.div
+            <div
                 className="absolute rounded-full"
-                animate={{
+                style={{
+                    width: "clamp(100px, 22vw, 200px)",
+                    height: "clamp(100px, 22vw, 200px)",
                     boxShadow: isCompleted
                         ? "0 0 80px rgba(96,165,250,0.9)"
                         : `0 0 ${24 + progress * 0.35}px rgba(96,165,250,${0.2 +
                               progress * 0.006})`,
-                }}
-                transition={{ duration: 0.6 }}
-                style={{
-                    width: "clamp(100px, 22vw, 200px)",
-                    height: "clamp(100px, 22vw, 200px)",
+                    transition: "box-shadow 0.6s ease-out"
                 }}
             />
 
-            <motion.div
-                className="relative" style={{ width: "clamp(100px, 22vw, 200px)", height: "clamp(100px, 22vw, 200px)" }}
-                animate={
-                    isCompleted
-                        ? { x: 0, y: 0 }
-                        : {
-                              x: [0, -2, 2, -1, 1, 0],
-                              y: [0, 1, -1, 0],
-                          }
-                }
-                transition={{
-                    duration: 1.8,
-                    repeat: isCompleted ? 0 : Infinity,
-                    ease: "easeInOut",
-                }}
+            <div
+                className={`relative ${!isCompleted ? "neptune-shake" : ""}`} 
+                style={{ width: "clamp(100px, 22vw, 200px)", height: "clamp(100px, 22vw, 200px)" }}
             >
                 <svg
                     className="absolute -inset-1 w-[calc(100%+8px)] h-[calc(100%+8px)]"
@@ -245,7 +230,7 @@ const NeptuneDisplay: React.FC<NeptuneDisplayProps> = ({
                         strokeWidth="8"
                         fill="none"
                     />
-                    <motion.circle
+                    <circle
                         cx="160"
                         cy="160"
                         r={radius}
@@ -254,9 +239,11 @@ const NeptuneDisplay: React.FC<NeptuneDisplayProps> = ({
                         strokeLinecap="round"
                         fill="none"
                         transform="rotate(-90 160 160)"
-                        animate={{ strokeDashoffset: dashOffset }}
-                        transition={{ duration: 0.5, ease: "easeOut" }}
-                        strokeDasharray={circumference}
+                        style={{ 
+                            strokeDashoffset: dashOffset,
+                            strokeDasharray: circumference,
+                            transition: "stroke-dashoffset 0.5s ease-out"
+                        }}
                     />
                     <defs>
                         <linearGradient
@@ -272,10 +259,12 @@ const NeptuneDisplay: React.FC<NeptuneDisplayProps> = ({
                     </defs>
                 </svg>
 
-                <motion.div
+                <div
                     className="absolute inset-0 rounded-full overflow-hidden border border-blue-300/20"
-                    animate={{ filter: `brightness(${brightness}) saturate(1.2)` }}
-                    transition={{ duration: 0.5 }}
+                    style={{ 
+                        filter: `brightness(${brightness}) saturate(1.2)`,
+                        transition: "filter 0.5s ease-out"
+                    }}
                 >
                     <div className="absolute inset-0 overflow-hidden">
                         <img
@@ -289,7 +278,7 @@ const NeptuneDisplay: React.FC<NeptuneDisplayProps> = ({
                         />
                     </div>
 
-                    <motion.div
+                    <div
                         className="absolute inset-0"
                         style={{
                             backgroundImage:
@@ -297,50 +286,57 @@ const NeptuneDisplay: React.FC<NeptuneDisplayProps> = ({
                             backgroundSize: "12px 12px, 10px 10px",
                             mixBlendMode: "multiply",
                             imageRendering: "pixelated",
-                        }}
-                        animate={{
                             opacity: stormOpacity,
-                            rotate: [0, -7, 5, 0],
-                            scale: [1, 1.02, 1],
-                        }}
-                        transition={{
-                            opacity: { duration: 0.5 },
-                            rotate: {
-                                duration: 8,
-                                repeat: Infinity,
-                                ease: "easeInOut",
-                            },
-                            scale: {
-                                duration: 3,
-                                repeat: Infinity,
-                                ease: "easeInOut",
-                            },
+                            animation: "neptune-storm-drift 8s ease-in-out infinite",
+                            transition: "opacity 0.5s ease-out"
                         }}
                     />
 
-                    <AnimatePresence mode="wait">
-                        <motion.div
+                    {lightPulseKey > 0 && (
+                        <div
                             key={lightPulseKey}
-                            className="absolute inset-0 pointer-events-none"
+                            className="absolute inset-0 pointer-events-none neptune-light-pulse"
                             style={{
                                 background:
                                     "linear-gradient(180deg, rgba(186,230,253,0) 15%, rgba(125,211,252,0.2) 48%, rgba(56,189,248,0.62) 100%)",
                                 mixBlendMode: "screen",
                             }}
-                            initial={{ scaleY: 0, opacity: 0, transformOrigin: "bottom" }}
-                            animate={{ scaleY: [0, 1, 1], opacity: [0, 0.95, 0] }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.85, ease: "easeOut" }}
                         />
-                    </AnimatePresence>
-                </motion.div>
+                    )}
+                </div>
 
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <span className="font-['Press_Start_2P'] text-[7px] sm:text-[8px] md:text-[9px] text-blue-100 bg-slate-900/70 px-2 py-0.5 rounded">
                         Stability {Math.round(progress)}%
                     </span>
                 </div>
-            </motion.div>
+            </div>
+            
+            <style>{`
+                @keyframes neptune-shake {
+                    0%, 100% { transform: translate(0, 0); }
+                    20% { transform: translate(-2px, 1px); }
+                    40% { transform: translate(2px, -1px); }
+                    60% { transform: translate(-1px, 0); }
+                    80% { transform: translate(1px, 0); }
+                }
+                .neptune-shake {
+                    animation: neptune-shake 1.8s ease-in-out infinite;
+                }
+                @keyframes neptune-storm-drift {
+                    0%, 100% { transform: rotate(0deg) scale(1); }
+                    33% { transform: rotate(-7deg) scale(1.02); }
+                    66% { transform: rotate(5deg) scale(1); }
+                }
+                @keyframes neptune-light-pulse {
+                    0% { transform: scaleY(0); opacity: 0; transform-origin: bottom; }
+                    50% { transform: scaleY(1); opacity: 0.95; transform-origin: bottom; }
+                    100% { transform: scaleY(1); opacity: 0; transform-origin: bottom; }
+                }
+                .neptune-light-pulse {
+                    animation: neptune-light-pulse 0.85s ease-out forwards;
+                }
+            `}</style>
         </div>
     );
 };
@@ -361,33 +357,19 @@ const FeatureButton: React.FC<FeatureButtonProps> = ({
     isWrong,
 }) => {
     return (
-        <motion.button
+        <button
             onClick={onSelect}
             disabled={disabled}
-            whileHover={disabled ? undefined : { scale: 1.02 }}
-            whileTap={disabled ? undefined : { scale: 0.98 }}
-            animate={
-                isWrong
-                    ? {
-                          x: [0, -8, 8, -6, 6, -2, 2, 0],
-                          backgroundColor: [
-                              "rgba(30,41,59,0.95)",
-                              "rgba(127,29,29,0.95)",
-                              "rgba(30,41,59,0.95)",
-                          ],
-                      }
-                    : { x: 0, backgroundColor: "rgba(30,41,59,0.95)" }
-            }
-            transition={{ duration: 0.45, ease: "easeInOut" }}
-            className={`font-['Press_Start_2P'] text-[6px] sm:text-[7px] md:text-[8px] px-2 py-1.5 sm:px-2 sm:py-2 rounded-md border-2 transition-colors ${
+            className={`font-['Press_Start_2P'] text-[6px] sm:text-[7px] md:text-[8px] px-2 py-1.5 sm:px-2 sm:py-2 rounded-md border-2 transition-all ${
                 disabled
                     ? "border-slate-700 text-slate-500 cursor-not-allowed"
-                    : "border-blue-500 text-blue-100 hover:border-cyan-400"
-            }`}
+                    : "border-blue-500 text-blue-100 hover:border-cyan-400 hover:scale-[1.02] active:scale-[0.98]"
+            } ${isWrong ? "neptune-wrong-answer" : ""}`}
+            style={{ backgroundColor: "rgba(30,41,59,0.95)" }}
         >
             {icon ? `${icon} ` : ""}
             {label}
-        </motion.button>
+        </button>
     );
 };
 
@@ -407,13 +389,8 @@ const QuestionPanel: React.FC<QuestionPanelProps> = ({
     onAnswer,
 }) => {
     return (
-        <motion.div
-            key={question.id}
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -18 }}
-            transition={{ duration: 0.3 }}
-            className="w-full max-w-3xl mx-auto px-3 sm:px-4 pb-2 md:pb-4 mt-10 sm:mt-8 md:mt-10"
+        <div
+            className="w-full max-w-3xl mx-auto px-3 sm:px-4 pb-2 md:pb-4 mt-10 sm:mt-8 md:mt-10 fade-in-up"
         >
             <div className="bg-slate-950/90 border border-blue-500/60 rounded-lg p-2 sm:p-3 md:p-4">
                 <p className="font-['Press_Start_2P'] text-[7px] sm:text-[8px] md:text-[9px] text-blue-100 leading-relaxed mb-2 sm:mb-3 text-center">
@@ -436,7 +413,7 @@ const QuestionPanel: React.FC<QuestionPanelProps> = ({
                     })}
                 </div>
             </div>
-        </motion.div>
+        </div>
     );
 };
 
@@ -446,54 +423,43 @@ interface InfoCardProps {
 }
 
 const InfoCard: React.FC<InfoCardProps> = ({ feature, onClose }) => {
+    if (!feature) return null;
+    
     return (
-        <AnimatePresence>
-            {feature && (
-                <motion.div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                >
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 fade-in">
+            <button
+                className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+                onClick={onClose}
+            />
+
+            <div
+                className="relative w-full max-w-md bg-slate-950 border border-cyan-400/70 rounded-xl overflow-hidden info-card-enter"
+            >
+                <div className="px-4 py-3 border-b border-cyan-500/40 bg-cyan-900/20">
+                    <p className="font-['Press_Start_2P'] text-[10px] md:text-xs text-cyan-300">
+                        {feature.icon} Feature Activated
+                    </p>
+                </div>
+
+                <div className="px-4 py-4 space-y-3">
+                    <h3 className="font-['Press_Start_2P'] text-[10px] md:text-xs text-blue-100">
+                        {feature.label}
+                    </h3>
+                    <p className="font-['Press_Start_2P'] text-[9px] md:text-[10px] text-slate-300 leading-relaxed">
+                        {feature.description}
+                    </p>
+                </div>
+
+                <div className="px-4 py-3 border-t border-cyan-500/30 flex justify-end">
                     <button
-                        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
                         onClick={onClose}
-                    />
-
-                    <motion.div
-                        className="relative w-full max-w-md bg-slate-950 border border-cyan-400/70 rounded-xl overflow-hidden"
-                        initial={{ opacity: 0, y: 44, scale: 0.92 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 28, scale: 0.94 }}
-                        transition={{ type: "spring", stiffness: 260, damping: 24 }}
+                        className="font-['Press_Start_2P'] text-[10px] md:text-xs px-3 py-2 rounded-md border border-cyan-400 text-cyan-200 hover:bg-cyan-900/20"
                     >
-                        <div className="px-4 py-3 border-b border-cyan-500/40 bg-cyan-900/20">
-                            <p className="font-['Press_Start_2P'] text-[10px] md:text-xs text-cyan-300">
-                                {feature.icon} Feature Activated
-                            </p>
-                        </div>
-
-                        <div className="px-4 py-4 space-y-3">
-                            <h3 className="font-['Press_Start_2P'] text-[10px] md:text-xs text-blue-100">
-                                {feature.label}
-                            </h3>
-                            <p className="font-['Press_Start_2P'] text-[9px] md:text-[10px] text-slate-300 leading-relaxed">
-                                {feature.description}
-                            </p>
-                        </div>
-
-                        <div className="px-4 py-3 border-t border-cyan-500/30 flex justify-end">
-                            <button
-                                onClick={onClose}
-                                className="font-['Press_Start_2P'] text-[10px] md:text-xs px-3 py-2 rounded-md border border-cyan-400 text-cyan-200 hover:bg-cyan-900/20"
-                            >
-                                Continue
-                            </button>
-                        </div>
-                    </motion.div>
-                </motion.div>
-            )}
-        </AnimatePresence>
+                        Continue
+                    </button>
+                </div>
+            </div>
+        </div>
     );
 };
 
@@ -580,54 +546,80 @@ const NeptuneMission: React.FC<NeptuneGameProps> = ({ onComplete, onBack }) => {
                     lightPulseKey={lightPulseKey}
                 />
 
-                <AnimatePresence mode="wait">
-                    {currentQuestion && !showInfoCard && !isCompleted && (
-                        <QuestionPanel
-                            question={currentQuestion}
-                            featuresById={featuresById}
-                            activatedFeatures={activatedFeatures}
-                            wrongOptionId={wrongOptionId}
-                            onAnswer={handleAnswer}
-                        />
-                    )}
-                </AnimatePresence>
+                {currentQuestion && !showInfoCard && !isCompleted && (
+                    <QuestionPanel
+                        key={currentQuestion.id}
+                        question={currentQuestion}
+                        featuresById={featuresById}
+                        activatedFeatures={activatedFeatures}
+                        wrongOptionId={wrongOptionId}
+                        onAnswer={handleAnswer}
+                    />
+                )}
             </main>
 
-            <AnimatePresence>
-                {isCompleted && (
-                    <motion.div
-                        className="fixed inset-0 z-40 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                    >
-                        <motion.div
-                            className="w-full max-w-xl rounded-xl border border-blue-400/70 bg-slate-950/95 p-6"
-                            initial={{ opacity: 0, y: 36, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            transition={{ duration: 0.4 }}
-                        >
-                            <p className="font-['Press_Start_2P'] text-[10px] md:text-xs text-cyan-300 text-center leading-relaxed">
-                                Planet Stabilized! You have identified the conditions that make Neptune cold, windy, and distant.
-                            </p>
+            {isCompleted && (
+                <div className="fixed inset-0 z-40 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
+                    <div className="w-full max-w-xl rounded-xl border border-blue-400/70 bg-slate-950/95 p-6 summary-card-enter">
+                        <p className="font-['Press_Start_2P'] text-[10px] md:text-xs text-cyan-300 text-center leading-relaxed">
+                            Planet Stabilized! You have identified the conditions that make Neptune cold, windy, and distant.
+                        </p>
 
-                            <div className="mt-5 flex justify-center">
-                                <PixelButton
-                                    label="Proceed to Void Boundary"
-                                    onClick={onComplete}
-                                />
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                        <div className="mt-5 flex justify-center">
+                            <PixelButton
+                                label="Proceed to Void Boundary"
+                                onClick={onComplete}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <InfoCard
                 feature={showInfoCard}
                 onClose={() => setShowInfoCard(null)}
             />
 
-
+            <style>{`
+                @keyframes fade-in {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                .fade-in {
+                    animation: fade-in 0.3s ease-out forwards;
+                }
+                @keyframes fade-in-up {
+                    from { opacity: 0; transform: translateY(24px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .fade-in-up {
+                    animation: fade-in-up 0.3s ease-out forwards;
+                }
+                @keyframes info-card-enter {
+                    from { opacity: 0; transform: translateY(44px) scale(0.92); }
+                    to { opacity: 1; transform: translateY(0) scale(1); }
+                }
+                .info-card-enter {
+                    animation: info-card-enter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+                }
+                @keyframes summary-card-enter {
+                    from { opacity: 0; transform: translateY(36px) scale(0.95); }
+                    to { opacity: 1; transform: translateY(0) scale(1); }
+                }
+                .summary-card-enter {
+                    animation: summary-card-enter 0.4s ease-out forwards;
+                }
+                @keyframes neptune-wrong-answer {
+                    0%, 100% { transform: translateX(0); background-color: rgba(30,41,59,0.95); }
+                    12.5%, 37.5%, 62.5%, 87.5% { transform: translateX(-8px); }
+                    25%, 50%, 75% { transform: translateX(8px); }
+                    0%, 50%, 100% { background-color: rgba(30,41,59,0.95); }
+                    25%, 75% { background-color: rgba(127,29,29,0.95); }
+                }
+                .neptune-wrong-answer {
+                    animation: neptune-wrong-answer 0.45s ease-in-out forwards;
+                }
+            `}</style>
         </div>
     );
 };

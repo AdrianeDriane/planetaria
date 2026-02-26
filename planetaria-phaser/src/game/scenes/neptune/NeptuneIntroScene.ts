@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { EventBus } from "../EventBus";
+import { EventBus } from "../../EventBus";
 
 /**
  * NeptuneIntroScene.ts

@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "framer-motion";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import PixelButton from "../components/PixelButton";
 
 // ─── Types ───
@@ -100,13 +99,7 @@ const UranusGame: React.FC<UranusGameProps> = ({ onComplete, onBack }) => {
     const [isChecklistOpen, setIsChecklistOpen] = useState(false);
     const [gustActive, setGustActive] = useState(false);
     const [gustKey, setGustKey] = useState(0);
-
-    const rotateValue = useMotionValue(0);
-    // Axis fades in when |rotation| > 4° and becomes clickable
-    const axisOpacity = useTransform(rotateValue, [-15, -5, -4, 4, 5, 15], [1, 1, 0, 0, 1, 1]);
-    const axisPointerEvents = useTransform(rotateValue, (v: number) =>
-        Math.abs(v) > 4 ? "auto" : "none",
-    );
+    const [rotateValue, setRotateValue] = useState(0);
 
     // Responsive
     useEffect(() => {
@@ -143,15 +136,35 @@ const UranusGame: React.FC<UranusGameProps> = ({ onComplete, onBack }) => {
         return () => clearTimeout(timeout);
     }, []);
 
-    // Slow sideways-tilt drift animation — drives rotateValue directly
+    // Slow sideways-tilt drift animation replacement
     useEffect(() => {
-        const controls = animate(rotateValue, [0, 15, 0], {
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-        });
-        return () => controls.stop();
-    }, [rotateValue]);
+        let startTime = Date.now();
+        let frame: number;
+        
+        const update = () => {
+            const elapsed = (Date.now() - startTime) / 1000;
+            const period = 10;
+            // Sine wave from 0 to 15 and back
+            const val = 7.5 + 7.5 * Math.sin((2 * Math.PI * elapsed) / period - Math.PI / 2);
+            setRotateValue(val);
+            frame = requestAnimationFrame(update);
+        };
+        
+        frame = requestAnimationFrame(update);
+        return () => cancelAnimationFrame(frame);
+    }, []);
+
+    // Axis opacity replacement logic
+    const getAxisOpacity = (v: number) => {
+        const absV = Math.abs(v);
+        if (absV <= 4) return 0;
+        if (absV >= 5) return 1;
+        // Linear fade between 4 and 5
+        return absV - 4;
+    };
+    
+    const axisOpacity = getAxisOpacity(rotateValue);
+    const axisPointerEvents = Math.abs(rotateValue) > 4 ? "auto" : "none";
 
     // Planet dimensions based on viewport
     const planetSize = isMobile ? Math.min(window.innerWidth * 0.7, 360) : 700;
@@ -271,6 +284,31 @@ const UranusGame: React.FC<UranusGameProps> = ({ onComplete, onBack }) => {
                     80%  { opacity: 0.7; }
                     100% { transform: translateX(110vw) scaleX(1.2); opacity: 0; }
                 }
+                @keyframes moon-orbit {
+                    from { transform: rotate(0deg) translateX(var(--orbit-radius)) rotate(0deg); }
+                    to   { transform: rotate(360deg) translateX(var(--orbit-radius)) rotate(-360deg); }
+                }
+                .discovery-modal-enter {
+                    animation: discovery-modal-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+                }
+                @keyframes discovery-modal-in {
+                    from { transform: scale(0.7) translateY(40px); opacity: 0; }
+                    to { transform: scale(1) translateY(0); opacity: 1; }
+                }
+                .summary-modal-enter {
+                    animation: summary-modal-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+                }
+                @keyframes summary-modal-in {
+                    from { transform: scale(0.6) translateY(60px); opacity: 0; }
+                    to { transform: scale(1) translateY(0); opacity: 1; }
+                }
+                .fade-in {
+                    animation: fade-in 0.3s ease-out forwards;
+                }
+                @keyframes fade-in {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
             `}</style>
 
             {/* ─── Ambient glow behind planet ─── */}
@@ -303,19 +341,16 @@ const UranusGame: React.FC<UranusGameProps> = ({ onComplete, onBack }) => {
                 {(() => {
                     const axisZone = zones.find((z) => z.id === "tilted")!;
                     return (
-                        <motion.button
+                        <button
                             onClick={() => handleZoneClick(axisZone)}
                             aria-label="Discover Tilted Axis"
                             style={{
                                 position: "absolute",
                                 left: "50%",
                                 top: "50%",
-                                // tall vertical hitbox extending above and below the planet
                                 width: isMobile ? 20 : 32,
                                 height: imgSize * 1.15,
-                                x: "-50%",
-                                y: "-50%",
-                                rotate: rotateValue,
+                                transform: `translate(-50%, -50%) rotate(${rotateValue}deg)`,
                                 background: "transparent",
                                 border: "none",
                                 padding: 0,
@@ -325,7 +360,7 @@ const UranusGame: React.FC<UranusGameProps> = ({ onComplete, onBack }) => {
                                 alignItems: "center",
                                 justifyContent: "center",
                                 opacity: axisOpacity,
-                                pointerEvents: axisPointerEvents,
+                                pointerEvents: axisPointerEvents as any,
                             }}
                         >
                             {/* The visible vertical line */}
@@ -341,12 +376,12 @@ const UranusGame: React.FC<UranusGameProps> = ({ onComplete, onBack }) => {
                                     pointerEvents: "none",
                                 }}
                             />
-                        </motion.button>
+                        </button>
                     );
                 })()}
 
                 {/* Uranus planet image — mix-blend-mode:multiply removes white bg */}
-                <motion.img
+                <img
                     src="/assets/uranus.png"
                     alt="Uranus"
                     className="absolute pointer-events-none"
@@ -355,9 +390,7 @@ const UranusGame: React.FC<UranusGameProps> = ({ onComplete, onBack }) => {
                         height: "auto",
                         left: "50%",
                         top: "50%",
-                        x: "-50%",
-                        y: "-50%",
-                        rotate: rotateValue,
+                        transform: `translate(-50%, -50%) rotate(${rotateValue}deg)`,
                         mixBlendMode: "multiply",
                         zIndex: 1,
                         filter: "drop-shadow(0 0 40px rgba(125,211,252,0.35))",
@@ -367,27 +400,29 @@ const UranusGame: React.FC<UranusGameProps> = ({ onComplete, onBack }) => {
                 {/* Small moons orbiting — click any to discover Moons */}
                 {[
                     { name: "Titania",  dist: 1.10, speed: 18, size: isMobile ? 10 : 20, delay: 0  },
-                    { name: "Oberon",   dist: 1.30, speed: 26, size: isMobile ? 4  : 8,  delay: 4  },
-                    { name: "Miranda",  dist: 1.50, speed: 36, size: isMobile ? 7  : 13, delay: 8  },
-                    { name: "Ariel",    dist: 1.70, speed: 22, size: isMobile ? 3  : 6,  delay: 2  },
-                    { name: "Umbriel",  dist: 1.90, speed: 30, size: isMobile ? 8  : 15, delay: 6  },
-                    { name: "Puck",     dist: 2.10, speed: 15, size: isMobile ? 2  : 4,  delay: 10 },
-                    { name: "Caliban",  dist: 2.30, speed: 42, size: isMobile ? 5  : 10,  delay: 14 },
+                    { name: "Oberon",   dist: 1.30, speed: 26, size: isMobile ? 4  : 8,  delay: -4  },
+                    { name: "Miranda",  dist: 1.50, speed: 36, size: isMobile ? 7  : 13, delay: -8  },
+                    { name: "Ariel",    dist: 1.70, speed: 22, size: isMobile ? 3  : 6,  delay: -2  },
+                    { name: "Umbriel",  dist: 1.90, speed: 30, size: isMobile ? 8  : 15, delay: -6  },
+                    { name: "Puck",     dist: 2.10, speed: 15, size: isMobile ? 2  : 4,  delay: -10 },
+                    { name: "Caliban",  dist: 2.30, speed: 42, size: isMobile ? 5  : 10,  delay: -14 },
                 ].map((m) => {
                     const moonZone = zones.find((z) => z.id === "moons")!;
-                    // 6 keyframe angles: snap zIndex at the moment the moon crosses the planet edge
-                    // t=0.30→0.31: moon enters behind (left edge) — zIndex snaps 15→0
-                    // t=0.69→0.70: moon exits front (right edge) — zIndex snaps 0→15
-                    const kAngles = [
-                        0,
-                        0.30 * 2 * Math.PI,
-                        0.31 * 2 * Math.PI,
-                        0.69 * 2 * Math.PI,
-                        0.70 * 2 * Math.PI,
-                        2 * Math.PI,
-                    ];
+                    const elapsed = (Date.now() / 1000 + m.delay) % m.speed;
+                    const progress = elapsed / m.speed;
+                    const angle = progress * 2 * Math.PI;
+                    
+                    const x = Math.cos(angle) * imgSize * 0.15 * m.dist;
+                    const y = Math.sin(angle) * imgSize * 0.03 * m.dist;
+                    
+                    // zIndex snap logic
+                    let zIndex = 15;
+                    if (progress > 0.30 && progress < 0.70) {
+                        zIndex = 0;
+                    }
+
                     return (
-                        <motion.button
+                        <button
                             key={m.name}
                             className="absolute rounded-full focus:outline-none"
                             style={{
@@ -398,21 +433,9 @@ const UranusGame: React.FC<UranusGameProps> = ({ onComplete, onBack }) => {
                                 padding: 0,
                                 left: "50%",
                                 top: "50%",
+                                transform: `translate(${x - (m.size + 10) / 2}px, ${y - (m.size + 10) / 2}px)`,
+                                zIndex: zIndex,
                                 cursor: moonZone.found ? "default" : "pointer",
-                            }}
-                            animate={{
-                                x: kAngles.map((a) => Math.cos(a) * imgSize * 0.15 * m.dist - (m.size + 10) / 2),
-                                y: kAngles.map((a) => Math.sin(a) * imgSize * 0.03 * m.dist - (m.size + 10) / 2),
-                                // enter (t=0.30): still front → snap to 0 at t=0.31 (behind planet)
-                                // exit  (t=0.69): still behind → snap to 15 at t=0.70 (front again)
-                                zIndex: [15, 15, 0, 0, 15, 15],
-                            }}
-                            transition={{
-                                duration: m.speed,
-                                delay: m.delay,
-                                repeat: Infinity,
-                                ease: "linear",
-                                times: [0, 0.30, 0.31, 0.69, 0.70, 1.0],
                             }}
                             onClick={() => handleZoneClick(moonZone)}
                             aria-label={`Moon: ${m.name}`}
@@ -429,26 +452,24 @@ const UranusGame: React.FC<UranusGameProps> = ({ onComplete, onBack }) => {
                                     pointerEvents: "none",
                                 }}
                             />
-                        </motion.button>
+                        </button>
                     );
                 })}
             </div>
 
-            {/* ─── Hit overlay — rotates with planet via shared rotateValue ─── */}
-            <motion.div
+            {/* ─── Hit overlay — rotates with planet ─── */}
+            <div
                 className="absolute pointer-events-none"
                 style={{
                     width: imgSize,
                     height: imgSize,
                     left: "50%",
                     top: "50%",
-                    x: "-50%",
-                    y: "-50%",
-                    rotate: rotateValue,
+                    transform: `translate(-50%, -50%) rotate(${rotateValue}deg)`,
                     zIndex: 20,
                 }}
             >
-                {/* Blue-Green Color — planet sphere (red annotation) */}
+                {/* Blue-Green Color — planet sphere */}
                 {(() => {
                     const zone = zones.find((z) => z.id === "color")!;
                     return (
@@ -464,7 +485,6 @@ const UranusGame: React.FC<UranusGameProps> = ({ onComplete, onBack }) => {
                                 transform: "translate(-50%, -50%)",
                                 borderRadius: "50%",
                                 background: "transparent",
-                                // border: "2px solid rgba(255,0,0,0.8)",
                                 cursor: zone.found ? "default" : "pointer",
                                 pointerEvents: "auto",
                             }}
@@ -472,7 +492,7 @@ const UranusGame: React.FC<UranusGameProps> = ({ onComplete, onBack }) => {
                     );
                 })()}
 
-                {/* Rings — vertical oval ring arc (pink annotation) */}
+                {/* Rings — vertical oval ring arc */}
                 {(() => {
                     const zone = zones.find((z) => z.id === "rings")!;
                     return (
@@ -488,14 +508,13 @@ const UranusGame: React.FC<UranusGameProps> = ({ onComplete, onBack }) => {
                                 transform: "translateX(-50%)",
                                 borderRadius: "50%",
                                 background: "transparent",
-                                // border: "2px solid rgba(255,0,255,0.8)",
                                 cursor: zone.found ? "default" : "pointer",
                                 pointerEvents: "auto",
                             }}
                         />
                     );
                 })()}
-            </motion.div>
+            </div>
 
             {/* ─── HUD: Info Badges ─── */}
             <div
@@ -539,243 +558,216 @@ const UranusGame: React.FC<UranusGameProps> = ({ onComplete, onBack }) => {
                 </button>
             )}
 
-            <AnimatePresence>
-                {(!isMobile || isChecklistOpen) && (
-                    <motion.div
-                        className={`absolute z-40 pointer-events-auto font-['Press_Start_2P'] ${
-                            isMobile
-                                ? "top-9 right-2 w-44"
-                                : "top-12 right-4 w-72"
+            {(!isMobile || isChecklistOpen) && (
+                <div
+                    className={`absolute z-40 pointer-events-auto font-['Press_Start_2P'] fade-in ${
+                        isMobile
+                            ? "top-9 right-2 w-44"
+                            : "top-12 right-4 w-72"
+                    }`}
+                    style={{ transition: "opacity 0.25s, transform 0.25s" }}
+                >
+                    <div
+                        className="bg-slate-950/95 border-2 border-cyan-600 rounded-lg overflow-hidden"
+                        style={{
+                            boxShadow:
+                                "0 0 20px rgba(34,211,238,0.2), 4px 4px 0 rgba(0,0,0,0.6)",
+                        }}
+                    >
+                        {/* Header */}
+                        <div className="bg-cyan-900/50 px-3 py-2 border-b border-cyan-700">
+                            <div
+                                className={`text-cyan-300 tracking-widest uppercase ${
+                                    isMobile ? "text-[5px]" : "text-[9px]"
+                                }`}
+                            >
+                                Discovery Checklist
+                            </div>
+                            <div
+                                className={`text-cyan-500 mt-0.5 ${
+                                    isMobile ? "text-[4px]" : "text-[7px]"
+                                }`}
+                            >
+                                {foundCount}/{zones.length} found
+                            </div>
+                            {/* Progress bar */}
+                            <div className="mt-1.5 w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-gradient-to-r from-cyan-500 to-green-400 rounded-full"
+                                    style={{ 
+                                        width: `${(foundCount / zones.length) * 100}%`,
+                                        transition: "width 0.5s ease-out"
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Items */}
+                        <ul className="p-2 space-y-1">
+                            {zones.map((z) => (
+                                <li
+                                    key={z.id}
+                                    onClick={() => z.found && setActiveDiscovery(z)}
+                                    className={`flex items-center gap-2 rounded px-2 py-1 transition-colors ${
+                                        z.found
+                                            ? "bg-green-900/20 text-green-400 cursor-pointer hover:bg-green-900/40"
+                                            : "text-cyan-400/60 cursor-default"
+                                    } ${isMobile ? "text-[4px]" : "text-[8px]"}`}
+                                >
+                                    <span className={isMobile ? "text-[6px]" : "text-xs"}>
+                                        {z.found ? "✅" : "⬜"}
+                                    </span>
+                                    <span className="tracking-wide">{z.label}</span>
+                                    {z.found && (
+                                        <span className={`ml-auto opacity-50 ${isMobile ? "text-[5px]" : "text-[7px]"}`}>▶</span>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            )}
+
+            {/* ─── Discovery Modal ─── */}
+            {activeDiscovery && !showSummary && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 fade-in">
+                    {/* Backdrop */}
+                    <div
+                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        onClick={() => setActiveDiscovery(null)}
+                    />
+
+                    <div
+                        className={`relative font-['Press_Start_2P'] discovery-modal-enter ${
+                            isMobile ? "w-[90vw] max-w-xs" : "w-96"
                         }`}
-                        initial={{ opacity: 0, x: 30 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 30 }}
-                        transition={{ duration: 0.25 }}
                     >
                         <div
-                            className="bg-slate-950/95 border-2 border-cyan-600 rounded-lg overflow-hidden"
+                            className="bg-slate-950 border-2 border-cyan-500 rounded-lg overflow-hidden"
                             style={{
                                 boxShadow:
-                                    "0 0 20px rgba(34,211,238,0.2), 4px 4px 0 rgba(0,0,0,0.6)",
+                                    "0 0 40px rgba(34,211,238,0.3), 4px 4px 0 rgba(0,0,0,0.7)",
                             }}
                         >
                             {/* Header */}
-                            <div className="bg-cyan-900/50 px-3 py-2 border-b border-cyan-700">
-                                <div
-                                    className={`text-cyan-300 tracking-widest uppercase ${
-                                        isMobile ? "text-[5px]" : "text-[9px]"
-                                    }`}
-                                >
-                                    Discovery Checklist
-                                </div>
-                                <div
-                                    className={`text-cyan-500 mt-0.5 ${
-                                        isMobile ? "text-[4px]" : "text-[7px]"
-                                    }`}
-                                >
-                                    {foundCount}/{zones.length} found
-                                </div>
-                                {/* Progress bar */}
-                                <div className="mt-1.5 w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                                    <motion.div
-                                        className="h-full bg-gradient-to-r from-cyan-500 to-green-400 rounded-full"
-                                        animate={{ width: `${(foundCount / zones.length) * 100}%` }}
-                                        transition={{ duration: 0.5 }}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Items */}
-                            <ul className="p-2 space-y-1">
-                                {zones.map((z) => (
-                                    <li
-                                        key={z.id}
-                                        onClick={() => z.found && setActiveDiscovery(z)}
-                                        className={`flex items-center gap-2 rounded px-2 py-1 transition-colors ${
-                                            z.found
-                                                ? "bg-green-900/20 text-green-400 cursor-pointer hover:bg-green-900/40"
-                                                : "text-cyan-400/60 cursor-default"
-                                        } ${isMobile ? "text-[4px]" : "text-[8px]"}`}
-                                    >
-                                        <span className={isMobile ? "text-[6px]" : "text-xs"}>
-                                            {z.found ? "✅" : "⬜"}
-                                        </span>
-                                        <span className="tracking-wide">{z.label}</span>
-                                        {z.found && (
-                                            <span className={`ml-auto opacity-50 ${isMobile ? "text-[5px]" : "text-[7px]"}`}>▶</span>
-                                        )}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* ─── Discovery Modal ─── */}
-            <AnimatePresence>
-                {activeDiscovery && !showSummary && (
-                    <motion.div
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                    >
-                        {/* Backdrop */}
-                        <div
-                            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                            onClick={() => setActiveDiscovery(null)}
-                        />
-
-                        <motion.div
-                            className={`relative font-['Press_Start_2P'] ${
-                                isMobile ? "w-[90vw] max-w-xs" : "w-96"
-                            }`}
-                            initial={{ scale: 0.7, y: 40 }}
-                            animate={{ scale: 1, y: 0 }}
-                            exit={{ scale: 0.7, y: 40 }}
-                            transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                        >
-                            <div
-                                className="bg-slate-950 border-2 border-cyan-500 rounded-lg overflow-hidden"
-                                style={{
-                                    boxShadow:
-                                        "0 0 40px rgba(34,211,238,0.3), 4px 4px 0 rgba(0,0,0,0.7)",
-                                }}
-                            >
-                                {/* Header */}
-                                <div className="bg-cyan-900/50 px-4 py-3 border-b border-cyan-700 flex items-center gap-3">
-                                    <span className={isMobile ? "text-lg" : "text-2xl"}>
-                                        {activeDiscovery.icon}
-                                    </span>
-                                    <div>
-                                        <div className="text-cyan-300 text-[8px] tracking-widest uppercase mb-0.5">
-                                            ★ Discovery ★
-                                        </div>
-                                        <div
-                                            className={`text-green-400 tracking-wide ${
-                                                isMobile ? "text-[6px]" : "text-[10px]"
-                                            }`}
-                                        >
-                                            {activeDiscovery.label}
-                                        </div>
+                            <div className="bg-cyan-900/50 px-4 py-3 border-b border-cyan-700 flex items-center gap-3">
+                                <span className={isMobile ? "text-lg" : "text-2xl"}>
+                                    {activeDiscovery.icon}
+                                </span>
+                                <div>
+                                    <div className="text-cyan-300 text-[8px] tracking-widest uppercase mb-0.5">
+                                        ★ Discovery ★
                                     </div>
-                                </div>
-
-                                {/* Body */}
-                                <div className="px-4 py-4">
-                                    <p
-                                        className={`text-cyan-200 leading-relaxed ${
-                                            isMobile ? "text-[5px]" : "text-[8px]"
+                                    <div
+                                        className={`text-green-400 tracking-wide ${
+                                            isMobile ? "text-[6px]" : "text-[10px]"
                                         }`}
                                     >
-                                        {activeDiscovery.description}
-                                    </p>
-                                </div>
-
-                                {/* Footer */}
-                                <div className="px-4 py-3 border-t border-cyan-800 flex justify-end">
-                                    <button
-                                        className={`bg-cyan-700 hover:bg-cyan-600 active:bg-cyan-800 text-white px-4 py-2 rounded border-2 border-cyan-500 transition-colors ${
-                                            isMobile ? "text-[5px]" : "text-[8px]"
-                                        } tracking-wider`}
-                                        onClick={() => setActiveDiscovery(null)}
-                                    >
-                                        GOT IT!
-                                    </button>
+                                        {activeDiscovery.label}
+                                    </div>
                                 </div>
                             </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+
+                            {/* Body */}
+                            <div className="px-4 py-4">
+                                <p
+                                    className={`text-cyan-200 leading-relaxed ${
+                                        isMobile ? "text-[5px]" : "text-[8px]"
+                                    }`}
+                                >
+                                    {activeDiscovery.description}
+                                </p>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="px-4 py-3 border-t border-cyan-800 flex justify-end">
+                                <button
+                                    className={`bg-cyan-700 hover:bg-cyan-600 active:bg-cyan-800 text-white px-4 py-2 rounded border-2 border-cyan-500 transition-colors ${
+                                        isMobile ? "text-[5px]" : "text-[8px]"
+                                    } tracking-wider`}
+                                    onClick={() => setActiveDiscovery(null)}
+                                >
+                                    GOT IT!
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ─── Summary / Completion Screen ─── */}
-            <AnimatePresence>
-                {showSummary && (
-                    <motion.div
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+            {showSummary && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 fade-in">
+                    <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
+
+                    <div
+                        className={`relative font-['Press_Start_2P'] summary-modal-enter ${
+                            isMobile ? "w-[92vw] max-w-sm" : "w-[460px]"
+                        }`}
                     >
-                        <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
-
-                        <motion.div
-                            className={`relative font-['Press_Start_2P'] ${
-                                isMobile ? "w-[92vw] max-w-sm" : "w-[460px]"
-                            }`}
-                            initial={{ scale: 0.6, y: 60 }}
-                            animate={{ scale: 1, y: 0 }}
-                            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                        <div
+                            className="bg-slate-950 border-2 border-green-500 rounded-lg overflow-hidden"
+                            style={{
+                                boxShadow:
+                                    "0 0 60px rgba(74,222,128,0.3), 4px 4px 0 rgba(0,0,0,0.7)",
+                            }}
                         >
-                            <div
-                                className="bg-slate-950 border-2 border-green-500 rounded-lg overflow-hidden"
-                                style={{
-                                    boxShadow:
-                                        "0 0 60px rgba(74,222,128,0.3), 4px 4px 0 rgba(0,0,0,0.7)",
-                                }}
-                            >
-                                {/* Header */}
-                                <div className="bg-green-900/40 px-4 py-3 border-b border-green-700 text-center">
-                                    <motion.div
-                                        className={`text-green-400 tracking-widest uppercase ${
-                                            isMobile ? "text-[7px]" : "text-xs"
-                                        }`}
-                                        animate={{ scale: [1, 1.05, 1] }}
-                                        transition={{ duration: 2, repeat: Infinity }}
-                                    >
-                                        ★ Planetary Core Reactivated ★
-                                    </motion.div>
-                                </div>
-
-                                {/* Recap */}
-                                <div className="px-4 py-4 space-y-3">
-                                    <p
-                                        className={`text-cyan-200 leading-relaxed ${
-                                            isMobile ? "text-[5px]" : "text-[8px]"
-                                        }`}
-                                    >
-                                        You&apos;ve stabilized Uranus&apos;s extreme tilt and restored its Planetary Core!
-                                        The Sideways Planet can once again roll serenely on its axis.
-                                    </p>
-
-                                    {/* Quick facts recap */}
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {zones.map((z) => (
-                                            <div
-                                                key={z.id}
-                                                className={`bg-slate-900 border border-green-800/50 rounded px-2 py-1.5 flex items-center gap-2 ${
-                                                    isMobile ? "text-[4px]" : "text-[7px]"
-                                                } text-green-300`}
-                                            >
-                                                <span>{z.icon}</span>
-                                                <span>{z.label}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* CTA */}
-                                <div className="px-4 py-3 border-t border-green-800 flex justify-center">
-                                    <PixelButton
-                                        label={isMobile ? "Next" : "Proceed to Neptune"}
-                                        onClick={onComplete}
-                                    />
+                            {/* Header */}
+                            <div className="bg-green-900/40 px-4 py-3 border-b border-green-700 text-center">
+                                <div
+                                    className={`text-green-400 tracking-widest uppercase ${
+                                        isMobile ? "text-[7px]" : "text-xs"
+                                    }`}
+                                    style={{ animation: "pulse-scale 2s infinite" }}
+                                >
+                                    ★ Planetary Core Reactivated ★
                                 </div>
                             </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+
+                            {/* Recap */}
+                            <div className="px-4 py-4 space-y-3">
+                                <p
+                                    className={`text-cyan-200 leading-relaxed ${
+                                        isMobile ? "text-[5px]" : "text-[8px]"
+                                    }`}
+                                >
+                                    You&apos;ve stabilized Uranus&apos;s extreme tilt and restored its Planetary Core!
+                                    The Sideways Planet can once again roll serenely on its axis.
+                                </p>
+
+                                {/* Quick facts recap */}
+                                <div className="grid grid-cols-2 gap-2">
+                                    {zones.map((z) => (
+                                        <div
+                                            key={z.id}
+                                            className={`bg-slate-900 border border-green-800/50 rounded px-2 py-1.5 flex items-center gap-2 ${
+                                                isMobile ? "text-[4px]" : "text-[7px]"
+                                            } text-green-300`}
+                                        >
+                                            <span>{z.icon}</span>
+                                            <span>{z.label}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* CTA */}
+                            <div className="px-4 py-3 border-t border-green-800 flex justify-center">
+                                <PixelButton
+                                    label={isMobile ? "Next" : "Proceed to Neptune"}
+                                    onClick={onComplete}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ─── Hint text ─── */}
             {!allFound && !activeDiscovery && (
-                <motion.div
+                <div
                     className="absolute bottom-16 left-1/2 z-30 pointer-events-none"
-                    style={{ x: "-50%" }}
-                    animate={{ opacity: [0.4, 0.8, 0.4] }}
-                    transition={{ duration: 3, repeat: Infinity }}
+                    style={{ transform: "translateX(-50%)", animation: "pulse-opacity 3s infinite" }}
                 >
                     <span
                         className={`font-['Press_Start_2P'] text-cyan-400/70 ${
@@ -784,7 +776,7 @@ const UranusGame: React.FC<UranusGameProps> = ({ onComplete, onBack }) => {
                     >
                         Tap the glowing zones on Uranus to discover its secrets
                     </span>
-                </motion.div>
+                </div>
             )}
 
             {/* ─── Bottom Nav ─── */}
@@ -798,9 +790,19 @@ const UranusGame: React.FC<UranusGameProps> = ({ onComplete, onBack }) => {
                 <PixelButton
                     label={isMobile ? "Next" : "Proceed to Neptune"}
                     onClick={onComplete}
-                    // disabled={!allFound}
                 />
             </div>
+            
+            <style>{`
+                @keyframes pulse-opacity {
+                    0%, 100% { opacity: 0.4; }
+                    50% { opacity: 0.8; }
+                }
+                @keyframes pulse-scale {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
+                }
+            `}</style>
         </div>
     );
 };
