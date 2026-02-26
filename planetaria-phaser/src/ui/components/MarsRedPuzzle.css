@@ -1,0 +1,656 @@
+/* ═════════════════════════════════════════════════════════════════════════════
+   MarsRedPuzzle.css — Word Scramble & Jigsaw Restoration Minigame
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+
+.mars-puzzle-root {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  font-family: "Press Start 2P", monospace;
+  color: #ffa040;
+  overflow: hidden;
+  image-rendering: pixelated;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mars-bg {
+  position: absolute;
+  inset: 0;
+  background: url("/assets/mars/mars_landscape.png") center / cover no-repeat;
+  filter: brightness(0.25);
+  z-index: 0;
+  transition: transform 0.2s;
+}
+
+.bg-shake {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* ─── Intro Phase ─── */
+.mars-intro-overlay {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.scramble-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.scramble-title {
+  font-size: clamp(12px, 2vw, 16px);
+  color: #ff6600;
+  letter-spacing: 4px;
+  animation: pulseOpacity 0.1s infinite alternate;
+}
+
+.scramble-text {
+  font-size: clamp(16px, 3vw, 24px);
+  color: #00ff00;
+  font-family: monospace;
+  letter-spacing: 8px;
+  text-shadow: 0 0 10px #00ff00;
+}
+
+.scramble-bar {
+  width: 80%;
+  max-width: 400px;
+  height: 4px;
+  background: rgba(255, 100, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.scramble-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: #ff6600;
+  animation: loadingProgress 1.5s linear forwards;
+}
+
+:root {
+  --mars-board-size: min(320px, 65vh);
+  --mars-piece-size: calc(var(--mars-board-size) / 2);
+}
+
+/* ─── Main Layout ─── */
+.mars-centered-layout {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  height: 100%;
+  width: 100%;
+  max-width: 1100px;
+  padding: 10px 40px;
+  box-sizing: border-box;
+}
+
+.mars-left-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  height: 100%;
+}
+
+.mars-right-column {
+  flex: 1.2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  height: 100%;
+}
+
+.mars-status-header {
+  margin-bottom: 5px;
+}
+
+/* ─── THE ASSEMBLY BOARD ─── */
+.mars-assembly-board {
+  position: relative;
+  width: var(--mars-board-size);
+  height: var(--mars-board-size);
+  background: rgba(20, 10, 5, 0.4);
+  border: 2px solid rgba(255, 100, 0, 0.3);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.mars-board-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.board-quadrant {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.quadrant-img,
+.mars-full-fit,
+.composite-full,
+.composite-full-three-quarters {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Forces images to fill their slot perfectly, normalizing zoom differences */
+  image-rendering: auto;
+}
+
+/* Composite layers (Absolute within board) */
+.composite-full-three-quarters {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  object-fit: cover;
+  z-index: 10;
+  margin-top: -40%;
+}
+
+.composite-half {
+  width: 100%;
+  height: 180%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  object-fit: cover;
+  z-index: 10;
+  margin-top: -35%;
+}
+
+.composite-full-three-quarters {
+  width: 100%;
+  height: 180%;
+}
+
+.composite-full {
+  width: 100%;
+  height: 120%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  object-fit: cover;
+  z-index: 10;
+  margin-top: -10%;
+}
+
+.ghost-target-indicator {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  border: 2px dashed rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+  animation: pulseOpacity 1s infinite alternate;
+  z-index: 15;
+}
+
+.board-grid-lines {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 100, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 100, 0, 0.1) 1px, transparent 1px);
+  background-size: 50% 50%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.shake-hard {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  border-color: #ff0000;
+}
+
+.mars-error-toast {
+  position: absolute;
+  top: 30%;
+  background: rgba(255, 0, 0, 0.8);
+  color: white;
+  padding: 12px 24px;
+  font-size: 10px;
+  border: 2px solid red;
+  z-index: 200;
+  animation: fadeIn 0.2s;
+}
+
+/* ─── Drag & Drop ─── */
+.held-piece-area {
+  margin-top: 5px;
+  height: calc(var(--mars-piece-size) + 20px);
+  width: calc(var(--mars-piece-size) + 20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid rgba(255, 100, 0, 0.2);
+  border-radius: 12px;
+}
+
+.draggable-piece {
+  width: var(--mars-piece-size);
+  height: var(--mars-piece-size);
+  cursor: grab;
+  background: rgba(255, 100, 0, 0.05);
+  border: 1px solid #ff6600;
+  padding: 2px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  touch-action: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box; /* Prevent padding from adding to size */
+}
+
+.draggable-piece.dragging {
+  cursor: grabbing;
+  transform: scale(1.1);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.8);
+  z-index: 9999;
+  /* Fixed size must be maintained */
+  width: var(--mars-piece-size);
+  height: var(--mars-piece-size);
+}
+
+.mars-piece-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.drag-handle {
+  position: absolute;
+  inset: 0;
+}
+
+/* ─── UI Panels ─── */
+.mars-interaction-panel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  height: 100%;
+  justify-content: center;
+}
+
+.mars-terminal-init,
+.mars-trivia-reveal,
+.mars-assembly-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 100, 0, 0.2);
+  width: 100%;
+  max-width: 400px;
+}
+
+.mars-trivia-reveal {
+  border-color: rgba(68, 255, 68, 0.2);
+}
+
+.mars-assembly-instr {
+  font-size: 8px;
+  color: #ffaa00;
+  line-height: 1.6;
+}
+
+.mars-terminal-alert {
+  font-size: 10px;
+  color: #ff3300;
+}
+
+.mars-terminal-header {
+  font-size: 12px;
+  color: #ff4400;
+  letter-spacing: 3px;
+  text-shadow: 0 0 10px rgba(255, 60, 0, 0.5);
+}
+
+.mars-scramble-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.mars-word-slots {
+  display: flex;
+  gap: 8px;
+}
+
+.mars-word-slot {
+  width: clamp(24px, 5vw, 32px);
+  height: clamp(30px, 6vh, 40px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(14px, 4vw, 18px);
+  color: #ffcc66;
+  border-bottom: 3px solid #ff6600;
+}
+
+.mars-letter-grid {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.mars-letter-tile {
+  position: relative;
+  width: clamp(50px, 12vw, 70px);
+  height: clamp(50px, 12vw, 70px);
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 10px;
+}
+
+.mars-tile-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.mars-tile-letter {
+  position: relative;
+  z-index: 1;
+  font-size: clamp(12px, 3vw, 16px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.mars-letter-tile.used {
+  opacity: 0.2;
+}
+
+.mars-undo-btn {
+  font-size: 8px;
+  color: #886644;
+  background: none;
+  border: 1px solid rgba(255, 100, 0, 0.1);
+  padding: 6px 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.mars-next-btn {
+  font-family: inherit;
+  font-size: 10px;
+  padding: 12px 24px;
+  background: linear-gradient(180deg, #ffaa44, #cc6600);
+  border: 2px solid #ff8833;
+  color: #000;
+  cursor: pointer;
+}
+
+/* ─── Win State ─── */
+.mars-win-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 60px;
+  z-index: 5;
+  width: 100%;
+  max-width: 1000px;
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+.mars-planet-assembled {
+  position: relative;
+  width: min(300px, 60vh);
+  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 20px rgba(255, 100, 0, 0.4));
+}
+
+.mars-full-overlay {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.win-content {
+  background: rgba(0, 0, 0, 0.75);
+  padding: 30px;
+  border-left: 4px solid #44aaff;
+  border-radius: 4px;
+  text-align: left;
+  max-width: 450px;
+  backdrop-filter: blur(8px);
+}
+
+.celebration-title {
+  font-size: 16px;
+  margin-bottom: 15px;
+  text-align: left;
+  color: #44aaff;
+}
+
+.mars-summary-list {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #fff;
+}
+
+.warp-btn {
+  background: linear-gradient(180deg, #44aaff, #0066cc);
+  border-color: #3388ff;
+  color: white;
+  margin-top: 16px;
+}
+
+/* ─── Celebration ─── */
+.celebration-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.5s;
+}
+
+.celebration-text {
+  font-size: 48px;
+  color: #ffd700;
+  text-shadow:
+    0 0 20px #ff6600,
+    4px 4px 0 #000;
+  animation: bounceIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.confetti-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #ff0;
+  animation: fall 3s linear infinite;
+  left: 50%;
+  top: -10px;
+}
+
+.confetti:nth-child(odd) {
+  background: #00f;
+}
+.confetti:nth-child(2n) {
+  background: #f00;
+  left: 20%;
+  animation-duration: 2.5s;
+}
+.confetti:nth-child(3n) {
+  background: #0f0;
+  left: 80%;
+  animation-duration: 3.5s;
+}
+.confetti:nth-child(4n) {
+  background: #f0f;
+  left: 40%;
+  animation-duration: 2.8s;
+}
+.confetti:nth-child(5n) {
+  background: #0ff;
+  left: 60%;
+  animation-duration: 3.2s;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(100vh) rotate(720deg);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ─── Animations ─── */
+@keyframes loadingProgress {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+@keyframes pulseOpacity {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.shake {
+  animation: shake 0.5s;
+}
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+.mars-blink {
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.mars-fade-in {
+  animation: fadeIn 1s ease-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ─── Success Toast ─── */
+.success-toast-overlay {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  pointer-events: none;
+  animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.success-toast-text {
+  font-size: 24px;
+  color: #00ff00;
+  text-shadow:
+    0 0 10px #00ff00,
+    2px 2px 0 #000;
+  white-space: nowrap;
+}
+
+@keyframes toastIn {
+  0% {
+    transform: translate(-50%, -30%) scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}

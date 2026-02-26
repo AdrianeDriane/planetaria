@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import Phaser from "phaser";
 import GameScene from "../../game/scenes/GameScene";
+import EarthScene from "../../game/scenes/EarthScene";
+import EarthIntroScene from "../../game/scenes/earth/EarthIntroScene";
+import EarthCongratulationScene from "../../game/scenes/earth/EarthCongratulationScene";
+import MarsIntroScene from "../../game/scenes/mars/MarsIntroScene";
+import MarsScene from "../../game/scenes/MarsScene";
 import { DISPLAY, PHYSICS } from "../../game/config";
 import IntroScene from "../../game/scenes/IntroScene";
 import PixelButton from "../components/PixelButton";

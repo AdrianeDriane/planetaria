@@ -8,6 +8,7 @@ interface Discovery {
 export class UIOverlay {
     private scene: Phaser.Scene;
     private discoveries: string[] = [];
+    private checklistItemContainers: Map<string, Phaser.GameObjects.Container> = new Map();
 
     // Checklist Data (Updated Labels)
     private checklistItems: Discovery[] = [
@@ -37,8 +38,12 @@ export class UIOverlay {
             const feature = e.detail.feature;
             if (!this.discoveries.includes(feature)) {
                 this.discoveries.push(feature);
-                this.updateChecklist();
-                this.showDiscoveryBox(feature);
+                this.updateChecklist(); // Re-render checkmarks
+                this.showDiscoveryBox(feature); // Show popup & fly animation
+
+                if (this.discoveries.length === this.checklistItems.length) {
+                    this.scene.events.emit("checklist-complete");
+                }
             }
         };
 
@@ -48,99 +53,67 @@ export class UIOverlay {
 
     private createChecklist() {
         const { width } = this.scene.scale;
+        this.checklistItemContainers.clear();
 
         // --- CHECKLIST PANEL CONFIGURATION ---
-        // Increased width slightly to fit longer labels like "Liquid Water (Ocean)"
-        const panelWidth = 180;
-        const panelHeight = 190;
-        const padding = 10;
-
-        // Position: Top-Right Corner
+        const panelWidth = 200;
+        const panelHeight = 220;
+        const padding = 15;
         const x = width - panelWidth / 2 - padding;
-        const y = 120;
+        const y = 130;
 
         this.checklistContainer = this.scene.add.container(x, y);
 
         // Background
-        const bg = this.scene.add.rectangle(
-            0,
-            0,
-            panelWidth,
-            panelHeight,
-            0x001111,
-            0.9,
-        );
+        const bg = this.scene.add.rectangle(0, 0, panelWidth, panelHeight, 0x001111, 0.9);
         bg.setStrokeStyle(2, 0x00ffcc);
 
         // Header
-        const headerBg = this.scene.add.rectangle(
-            0,
-            -(panelHeight / 2) + 15,
-            panelWidth,
-            24,
-            0x003333,
-        );
-        const title = this.scene.add.text(
-            0,
-            -(panelHeight / 2) + 15,
-            "EARTH SCAN",
-            {
-                font: "bold 11px 'Courier New'",
-                color: "#ccff00",
-            },
-        );
-        title.setOrigin(0.5, 0.5);
+        const headerBg = this.scene.add.rectangle(0, -(panelHeight / 2) + 18, panelWidth, 30, 0x003333);
+        const title = this.scene.add.text(0, -(panelHeight / 2) + 18, "EARTH SCAN", {
+            font: "bold 14px 'Courier New'",
+            color: "#ccff00",
+        }).setOrigin(0.5, 0.5);
 
-        // List Items
-        const childrenToAdd: Phaser.GameObjects.GameObject[] = [
-            bg,
-            headerBg,
-            title,
-        ];
+        this.checklistContainer.add([bg, headerBg, title]);
 
-        let yOffset = -(panelHeight / 2) + 40;
-        const leftAlign = -(panelWidth / 2) + 10;
+        let yOffset = -(panelHeight / 2) + 50;
+        const leftAlign = -(panelWidth / 2) + 15;
 
         this.checklistItems.forEach((item) => {
             const isFound = this.discoveries.includes(item.id);
             const color = isFound ? "#00ff00" : "#008888";
 
+            // Create a mini-container for each item to easily animate it later
+            const itemContainer = this.scene.add.container(0, 0);
+
             // Checkbox
-            const checkbox = this.scene.add.rectangle(
-                leftAlign,
-                yOffset,
-                8,
-                8,
-                0x000000,
-            );
-            checkbox.setStrokeStyle(1, isFound ? 0x00ff00 : 0x008888);
+            const checkboxSize = 12;
+            const checkbox = this.scene.add.rectangle(leftAlign, yOffset, checkboxSize, checkboxSize, 0x000000);
+            checkbox.setStrokeStyle(2, isFound ? 0x00ff00 : 0x008888);
 
             // Label
-            const label = this.scene.add.text(
-                leftAlign + 15,
-                yOffset,
-                item.label,
-                {
-                    font: "9px 'Courier New'",
-                    color: color,
-                },
-            );
-            label.setOrigin(0, 0.5);
+            const label = this.scene.add.text(leftAlign + 20, yOffset, item.label, {
+                font: "11px 'Courier New'",
+                color: color,
+            }).setOrigin(0, 0.5);
+
+            itemContainer.add([checkbox, label]);
 
             if (isFound) {
                 const checkmark = this.scene.add.text(leftAlign, yOffset, "x", {
-                    font: "bold 9px 'Courier New'",
+                    font: "bold 12px 'Courier New'",
                     color: "#00ff00",
-                });
-                checkmark.setOrigin(0.5, 0.5);
-                childrenToAdd.push(checkmark);
+                }).setOrigin(0.5, 0.5);
+                itemContainer.add(checkmark);
             }
 
-            childrenToAdd.push(checkbox, label);
-            yOffset += 22;
+            this.checklistContainer!.add(itemContainer);
+            this.checklistItemContainers.set(item.id, itemContainer);
+
+            yOffset += 26;
         });
 
-        this.checklistContainer.add(childrenToAdd);
         this.scene.add.existing(this.checklistContainer);
         this.checklistContainer.setDepth(20);
     }
@@ -156,7 +129,96 @@ export class UIOverlay {
 
         const { width, height } = this.scene.scale;
 
-        // --- UPDATED DISCOVERY TEXT ---
+        // --- 1. FLYING STAR ANIMATION ---
+        // Create a temporary star at center screen
+        const star = this.scene.add.star(width / 2, height / 2, 5, 10, 20, 0xffff00);
+        star.setDepth(100);
+
+        // Find target position
+        const targetContainer = this.checklistItemContainers.get(featureId);
+        if (targetContainer && this.checklistContainer) {
+            // Calculate absolute position: Parent Container (x,y) + Item Offset (which is 0,0 relative to parent addition order?? No wait)
+            // Actually, in createChecklist, itemContainer is added at 0,0 of parent, but its children are offset?
+            // Wait, I changed createChecklist to add itemContainer. 
+            // In the previous code: `itemContainer.add([checkbox, label])`. Checkbox is at `leftAlign, yOffset`.
+            // So the itemContainer itself is at 0,0 inside checklistContainer.
+            // But the VISUAL elements are offset.
+            // I should have positioned the container at yOffset.
+            // Let's rely on the fact that the checklist is at (checklistContainer.x, checklistContainer.y)
+            // And the items are drawn at (checkbox.x, checkbox.y) relative to that.
+            
+            // Re-calculating target position based on known layout logic
+            const panelWidth = 200;
+            const panelHeight = 220;
+            const padding = 15;
+            const checklistX = width - panelWidth / 2 - padding;
+            const checklistY = 130;
+            
+            // Find index to calculate Y offset
+            const index = this.checklistItems.findIndex(i => i.id === featureId);
+            const yOffset = -(panelHeight / 2) + 50 + (index * 26);
+            const leftAlign = -(panelWidth / 2) + 15;
+
+            const targetX = checklistX + leftAlign;
+            const targetY = checklistY + yOffset;
+
+            this.scene.tweens.add({
+                targets: star,
+                x: targetX,
+                y: targetY,
+                scale: 0.2,
+                duration: 800,
+                ease: "Power2",
+                onComplete: () => {
+                    star.destroy();
+                    // Flash the list item
+                    if (targetContainer) {
+                        // Since I re-created the list in updateChecklist, the reference might be stale?
+                        // Actually updateChecklist is called BEFORE showDiscoveryBox in the event handler.
+                        // So the map should be fresh.
+                        // BUT wait, I refactored createChecklist to use itemContainer at 0,0 and offset children.
+                        // Let's just flash the fresh container from the map.
+                        const freshContainer = this.checklistItemContainers.get(featureId);
+                        if (freshContainer) {
+                            this.scene.tweens.add({
+                                targets: freshContainer,
+                                alpha: 0.2,
+                                yoyo: true,
+                                duration: 100,
+                                repeat: 2
+                            });
+                        }
+                    }
+                }
+            });
+        } else {
+            star.destroy(); // Fallback
+        }
+
+        // --- 2. SUCCESS TEXT ---
+        const messages = ["GREAT JOB!", "GOOD JOB!", "AWESOME!", "NICE!", "FANTASTIC!", "GREAT FIND!"];
+        const msg = messages[Math.floor(Math.random() * messages.length)];
+
+        const praiseText = this.scene.add.text(width / 2, height / 2, msg, {
+            font: "bold 40px 'Courier New'",
+            color: "#00ff00",
+        });
+        praiseText.setOrigin(0.5, 0.5);
+        praiseText.setDepth(100);
+        praiseText.setStroke("#000000", 6);
+        praiseText.setScale(0.5);
+
+        this.scene.tweens.add({
+            targets: praiseText,
+            y: height / 2 - 100,
+            scale: 1.5,
+            alpha: { from: 1, to: 0 },
+            duration: 1200,
+            ease: "Back.out",
+            onComplete: () => praiseText.destroy(),
+        });
+
+        // --- 3. DISCOVERY BOX ---
         const discoveryData: Record<string, { title: string; desc: string }> = {
             liquid_water: {
                 title: "Liquid Water (Ocean)",
@@ -168,7 +230,7 @@ export class UIOverlay {
             },
             atmosphere: {
                 title: "Air / Atmosphere",
-                desc: "It has an atmosphere that supports and protects life; burns most meteors before they reach the surface; has air that living things can breathe.",
+                desc: "It has an atmosphere that supports and protects life; burns most meteors before they reach the surface.",
             },
             sun_position: {
                 title: "Position from Sun",
@@ -187,56 +249,45 @@ export class UIOverlay {
         if (!discoveryData[featureId]) return;
         const data = discoveryData[featureId];
 
-        // --- DISCOVERY BOX LAYOUT ---
-        // Increased size to fit the longer descriptions
-        const boxWidth = 260;
-        const boxHeight = 110;
-        const x = width / 2;
-        const y = height - 70;
+        const boxWidth = 320;
+        const boxHeight = 120;
+        const boxX = width / 2;
+        const boxY = height - 70;
 
-        this.discoveryBoxContainer = this.scene.add.container(x, y);
+        this.discoveryBoxContainer = this.scene.add.container(boxX, boxY);
 
         // Background
-        const bg = this.scene.add.rectangle(
-            0,
-            0,
-            boxWidth,
-            boxHeight,
-            0x002222,
-            0.95,
-        );
-        bg.setStrokeStyle(2, 0x00ff00);
+        const bg = this.scene.add.rectangle(0, 0, boxWidth, boxHeight, 0x002222, 0.95);
+        bg.setStrokeStyle(3, 0x00ff00);
 
         // Title
-        const title = this.scene.add.text(0, -35, "★ " + data.title + " ★", {
-            font: "bold 12px 'Courier New'",
+        const title = this.scene.add.text(0, -40, "★ " + data.title + " ★", {
+            font: "bold 14px 'Courier New'",
             color: "#00ff00",
-        });
-        title.setOrigin(0.5, 0.5);
+        }).setOrigin(0.5, 0.5);
 
         // Description (Word Wrapped)
-        const desc = this.scene.add.text(0, 10, data.desc, {
-            font: "11px 'Courier New'",
+        const desc = this.scene.add.text(0, 15, data.desc, {
+            font: "12px 'Courier New'",
             color: "#ffffff",
             align: "center",
-            wordWrap: { width: boxWidth - 20 },
-        });
-        desc.setOrigin(0.5, 0.5);
+            wordWrap: { width: boxWidth - 30 },
+        }).setOrigin(0.5, 0.5);
 
         this.discoveryBoxContainer.add([bg, title, desc]);
         this.scene.add.existing(this.discoveryBoxContainer);
         this.discoveryBoxContainer.setDepth(20);
 
-        // Animation: Pop in
+        // Animation: Pop in with bounce
         this.discoveryBoxContainer.setScale(0);
         this.scene.tweens.add({
             targets: this.discoveryBoxContainer,
             scale: 1,
-            duration: 200,
-            ease: "Back.out",
+            duration: 400,
+            ease: "Elastic.out",
         });
 
-        // Auto-hide after 6 seconds (increased time for reading)
+        // Auto-hide
         this.scene.time.delayedCall(6000, () => {
             if (this.discoveryBoxContainer) {
                 this.scene.tweens.add({

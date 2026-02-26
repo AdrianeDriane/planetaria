@@ -1,39 +1,48 @@
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
 import MainMenu from "./ui/pages/MainMenu";
 import PhaserGame from "./ui/pages/PhaserGame";
-import VenusGame from "./ui/pages/VenusGame";
-import EarthGame from "./ui/pages/EarthGame";
-import UranusGame from "./ui/pages/UranusGame";
-import NeptuneGame from "./ui/pages/NeptuneGame";
+import { MarsRedPuzzle } from "./ui/components/MarsRedPuzzle";
+import { EventBus } from "./game/EventBus";
 
 type AppState = "menu" | "playing" | "venus" | "earth" | "uranus" | "neptune"
 
 function App() {
-    const [appState, setAppState] = useState<AppState>("menu");
+  const [appState, setAppState] = useState<AppState>("menu");
+  const [showMarsPuzzle, setShowMarsPuzzle] = useState(false);
 
-    return (
-        <div className="min-h-screen bg-gray-950">
-            {appState === "menu" && (
-                <MainMenu onPlay={() => setAppState("playing")} />
-            )}
-            {appState === "playing" && (
-                <PhaserGame onNavigateToVenus={() => setAppState("venus")} />
-            )}
-            {appState === "venus" && (
-                <VenusGame onComplete={() => setAppState("earth")} onBack={() => setAppState("playing")} />
-            )}
-            {appState === "earth" && (
-                <EarthGame onComplete={() => setAppState("uranus")} onBack={() => setAppState("venus")} />
-            )}
-            {appState === "uranus" && (
-                <UranusGame onComplete={() => setAppState("neptune")} onBack={() => setAppState("earth")} />
-            )}
-            {appState === "neptune" && (
-                <NeptuneGame onComplete={() => setAppState("menu")} onBack={() => setAppState("uranus")} />
-            )}
-        </div>
-    );
+  useEffect(() => {
+    const showMars = () => setShowMarsPuzzle(true);
+    const hideMars = () => setShowMarsPuzzle(false);
+
+    EventBus.on("enter-mars-scene", showMars);
+    EventBus.on("leave-mars-scene", hideMars);
+
+    return () => {
+      EventBus.off("enter-mars-scene", showMars);
+      EventBus.off("leave-mars-scene", hideMars);
+    };
+  }, []);
+
+  const handleMarsPuzzleComplete = () => {
+    EventBus.emit("mars-core-reactivated");
+    setTimeout(() => setShowMarsPuzzle(false), 2000);
+  };
+
+  return (
+    <div className="relative min-h-screen bg-gray-950">
+      {appState === "menu" && (
+        <MainMenu onPlay={() => setAppState("playing")} />
+      )}
+      {appState === "playing" && (
+        <>
+          <PhaserGame />
+          {showMarsPuzzle && (
+            <MarsRedPuzzle onComplete={handleMarsPuzzleComplete} />
+          )}
+        </>
+      )}
+    </div>
+  );
 }
 
 export default App;
