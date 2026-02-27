@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Phaser from "phaser";
 import GameScene from "../../game/scenes/GameScene";
 import EarthScene from "../../game/scenes/EarthScene";
@@ -6,16 +6,6 @@ import EarthCongratulationScene from "../../game/scenes/earth/EarthCongratulatio
 import MarsScene from "../../game/scenes/MarsScene";
 import { DISPLAY, PHYSICS } from "../../game/config";
 import PixelButton from "../components/PixelButton";
-<<<<<<< Updated upstream
-import VenusScene from "../../game/scenes/VenusScene";
-import VenusIntroScene from "../../game/scenes/venus/VenusIntroScene";
-import JupiterIntroScene from "../../game/scenes/JupiterIntroScene";
-import SaturnIntroScene from "../../game/scenes/SaturnIntroScene";
-import UranusIntroScene from "../../game/scenes/uranus/UranusIntroScene";
-import NeptuneIntroScene from "../../game/scenes/neptune/NeptuneIntroScene";
-=======
-import VirtualControls from "../components/VirtualControls";
->>>>>>> Stashed changes
 import { EventBus } from "../../game/EventBus";
 
 interface PhaserGameProps {
@@ -29,42 +19,57 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
+  const [isGameActive, setIsGameActive] = useState(false);
 
   // Mapping level ID to starting scene key
   const getStartingScene = (id: number): string => {
     switch (id) {
-<<<<<<< Updated upstream
       case 1:
-        return "IntroScene";
+        return "GameScene";
       case 2:
-        return "VenusIntroScene";
+        return "GameScene"; // Venus is React-only
       case 3:
-        return "EarthIntroScene";
+        return "EarthScene";
       case 4:
-        return "MarsIntroScene";
+        return "MarsScene";
       case 5:
-        return "JupiterIntroScene";
+        return "GameScene";
       case 6:
-        return "SaturnIntroScene";
+        return "GameScene";
       case 7:
-        return "UranusIntroScene";
+        return "GameScene";
       case 8:
-        return "NeptuneIntroScene";
+        return "GameScene";
       default:
-        return "IntroScene";
-=======
-      case 1: return "GameScene";
-      case 2: return "GameScene"; // Venus is React-only
-      case 3: return "EarthScene";
-      case 4: return "MarsScene";
-      case 5: return "GameScene"; // Jupiter etc are currently GameScene or React-only
-      case 6: return "GameScene";
-      case 7: return "GameScene";
-      case 8: return "GameScene";
-      default: return "GameScene";
->>>>>>> Stashed changes
+        return "GameScene";
     }
   };
+
+  // Simulate keyboard events for mobile controls
+  const simulateKey = (keyCode: number, isDown: boolean) => {
+    if (!gameRef.current) return;
+
+    const event = new KeyboardEvent(isDown ? "keydown" : "keyup", {
+      keyCode,
+      which: keyCode,
+      bubbles: true,
+    });
+
+    window.dispatchEvent(event);
+  };
+
+  const handleLeftDown = () =>
+    simulateKey(Phaser.Input.Keyboard.KeyCodes.A, true);
+  const handleLeftUp = () =>
+    simulateKey(Phaser.Input.Keyboard.KeyCodes.A, false);
+  const handleRightDown = () =>
+    simulateKey(Phaser.Input.Keyboard.KeyCodes.D, true);
+  const handleRightUp = () =>
+    simulateKey(Phaser.Input.Keyboard.KeyCodes.D, false);
+  const handleJumpDown = () =>
+    simulateKey(Phaser.Input.Keyboard.KeyCodes.W, true);
+  const handleJumpUp = () =>
+    simulateKey(Phaser.Input.Keyboard.KeyCodes.W, false);
 
   useEffect(() => {
     if (!containerRef.current || gameRef.current) return;
@@ -72,12 +77,6 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
     // Define all available scenes
     const allScenes = [
       GameScene,
-<<<<<<< Updated upstream
-      VenusScene,
-      VenusIntroScene,
-      EarthIntroScene,
-=======
->>>>>>> Stashed changes
       EarthScene,
       EarthCongratulationScene,
       MarsScene,
@@ -89,26 +88,10 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
 
     // Create a mapping of keys to constructors
     const sceneMap: Record<string, any> = {
-<<<<<<< Updated upstream
-      IntroScene: IntroScene,
       GameScene: GameScene,
-      VenusScene: VenusScene,
-      VenusIntroScene: VenusIntroScene,
-      EarthIntroScene: EarthIntroScene,
       EarthScene: EarthScene,
       EarthCongratulationScene: EarthCongratulationScene,
-      MarsIntroScene: MarsIntroScene,
       MarsScene: MarsScene,
-      JupiterIntroScene: JupiterIntroScene,
-      SaturnIntroScene: SaturnIntroScene,
-      UranusIntroScene: UranusIntroScene,
-      NeptuneIntroScene: NeptuneIntroScene,
-=======
-        "GameScene": GameScene,
-        "EarthScene": EarthScene,
-        "EarthCongratulationScene": EarthCongratulationScene,
-        "MarsScene": MarsScene,
->>>>>>> Stashed changes
     };
 
     const finalScenes = [...allScenes];
@@ -164,6 +147,13 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
     };
 
     EventBus.on("change-phaser-scene", handleSceneChange);
+
+    // Listen for GameScene to start, then show virtual controls
+    gameRef.current.events.on("step", () => {
+      if (gameRef.current?.scene.isActive("GameScene") && !isGameActive) {
+        setIsGameActive(true);
+      }
+    });
 
     return () => {
       EventBus.off("change-phaser-scene", handleSceneChange);

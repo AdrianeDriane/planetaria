@@ -46,8 +46,6 @@ export default class VenusScene extends Phaser.Scene {
         const camera = this.cameras.main;
         camera.setBounds(0, 0, 1376, 768);
         camera.setBackgroundColor(0xd4a574);
-<<<<<<< Updated upstream
-=======
 
         // --- MISSION COMPLETE UI ---
         this.time.delayedCall(5000, () => {
@@ -91,7 +89,6 @@ export default class VenusScene extends Phaser.Scene {
                 EventBus.emit("venus-complete");
             });
         });
->>>>>>> Stashed changes
     }
 
     update(): void {

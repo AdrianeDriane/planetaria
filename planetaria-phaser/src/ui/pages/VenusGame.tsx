@@ -927,27 +927,19 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
     // Only count DATA packets for completion (4 required, traps don't count)
     const allFound = dataPackets.filter(p => p.type === 'data' && p.opened).length === 4;
 
-<<<<<<< Updated upstream
     // Show completion modal when all 4 data packets are found
     useEffect(() => {
-        if (!allFound) return;
-        // Close trivia modal if open, then show completion modal
-        setShowTriviaModal(false);
-        const timer = setTimeout(() => {
-            setShowCompletionModal(true);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [allFound]);
-=======
-    useEffect(() => {
         if (allFound) {
+            // Close trivia modal if open, then show completion modal
+            setShowTriviaModal(false);
             const timer = setTimeout(() => {
-                onComplete();
-            }, 2000);
+                setShowCompletionModal(true);
+                // Also trigger the parent onComplete after another delay if needed
+                // or just rely on the completion modal button which calls onComplete
+            }, 500);
             return () => clearTimeout(timer);
         }
-    }, [allFound, onComplete]);
->>>>>>> Stashed changes
+    }, [allFound]);
 
     const inSafeZone = pressure >= 40 && pressure <= 70;
     const isDaytime = dayNightPhase < 100;

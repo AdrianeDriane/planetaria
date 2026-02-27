@@ -152,7 +152,7 @@ export default class Terrain {
   }
 
   private drawMercurySurface(): void {
-    const { WIDTH, HEIGHT, TILE_SIZE } = WORLD;
+    const { WIDTH, HEIGHT } = WORLD;
     const gfx = this.scene.add.graphics();
     gfx.setDepth(-1);
 
