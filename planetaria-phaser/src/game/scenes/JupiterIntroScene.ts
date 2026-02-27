@@ -1,9 +1,10 @@
 import Phaser from "phaser";
+import { EventBus } from "../EventBus";
 
 /**
  * JupiterIntroScene.ts
  *
- * Final "To Be Continued" screen for the current available scenes.
+ * Cinematic intro before the Jupiter puzzle game.
  */
 
 const COLORS = {
@@ -158,7 +159,7 @@ export default class JupiterIntroScene extends Phaser.Scene {
     this.time.delayedCall(1200, () => {
       this.cameras.main.fadeOut(800, 0, 0, 0);
       this.cameras.main.once("camerafadeoutcomplete", () => {
-        this.scene.start("SaturnIntroScene");
+        EventBus.emit("enter-jupiter-game");
       });
     });
   }

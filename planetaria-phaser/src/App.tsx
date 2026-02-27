@@ -6,6 +6,7 @@ import { MarsRedPuzzle } from "./ui/components/MarsRedPuzzle";
 import VenusGame from "./ui/pages/VenusGame";
 import UranusGame from "./ui/pages/UranusGame";
 import NeptuneGame from "./ui/pages/NeptuneGame";
+import JupiterGame from "./ui/pages/JupiterGame";
 import { EventBus } from "./game/EventBus";
 
 type AppState = "menu" | "levels" | "playing";
@@ -19,6 +20,7 @@ function App() {
   const [showVenusGame, setShowVenusGame] = useState(false);
   const [showUranusGame, setShowUranusGame] = useState(false);
   const [showNeptuneGame, setShowNeptuneGame] = useState(false);
+  const [showJupiterGame, setShowJupiterGame] = useState(false);
 
   useEffect(() => {
     const enterMars = () => setShowMarsPuzzle(true);
@@ -29,6 +31,8 @@ function App() {
     const leaveUranus = () => setShowUranusGame(false);
     const enterNeptune = () => setShowNeptuneGame(true);
     const leaveNeptune = () => setShowNeptuneGame(false);
+    const enterJupiter = () => setShowJupiterGame(true);
+    const leaveJupiter = () => setShowJupiterGame(false);
 
     EventBus.on("enter-mars-scene", enterMars);
     EventBus.on("leave-mars-scene", leaveMars);
@@ -38,6 +42,8 @@ function App() {
     EventBus.on("leave-uranus-game", leaveUranus);
     EventBus.on("enter-neptune-game", enterNeptune);
     EventBus.on("leave-neptune-game", leaveNeptune);
+    EventBus.on("enter-jupiter-game", enterJupiter);
+    EventBus.on("leave-jupiter-game", leaveJupiter);
 
     return () => {
       EventBus.off("enter-mars-scene", enterMars);
@@ -48,6 +54,8 @@ function App() {
       EventBus.off("leave-uranus-game", leaveUranus);
       EventBus.off("enter-neptune-game", enterNeptune);
       EventBus.off("leave-neptune-game", leaveNeptune);
+      EventBus.off("enter-jupiter-game", enterJupiter);
+      EventBus.off("leave-jupiter-game", leaveJupiter);
     };
   }, []);
 
@@ -87,8 +95,9 @@ function App() {
 
   const handleJupiterComplete = () => {
     unlockLevel(6); // Unlock Saturn
+    EventBus.emit("jupiter-core-reactivated");
     setTimeout(() => {
-        // Since we don't have a Jupiter game yet, we just transition to Saturn
+        setShowJupiterGame(false);
         EventBus.emit("change-phaser-scene", "SaturnIntroScene");
     }, 2000);
   };
@@ -129,7 +138,7 @@ function App() {
       )}
       {appState === "playing" && (
         <>
-          <div className={showVenusGame || showMarsPuzzle || showUranusGame || showNeptuneGame ? "hidden" : "contents"}>
+          <div className={showVenusGame || showMarsPuzzle || showUranusGame || showNeptuneGame || showJupiterGame ? "hidden" : "contents"}>
             <PhaserGame initialLevelId={selectedLevelId} />
           </div>
           {showVenusGame && (
@@ -143,6 +152,9 @@ function App() {
           )}
           {showNeptuneGame && (
             <NeptuneGame onComplete={handleNeptuneComplete} onBack={() => setShowNeptuneGame(false)} />
+          )}
+          {showJupiterGame && (
+            <JupiterGame onComplete={handleJupiterComplete} />
           )}
         </>
       )}
