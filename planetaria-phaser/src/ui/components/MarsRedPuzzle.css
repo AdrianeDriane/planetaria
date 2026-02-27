@@ -7,6 +7,7 @@
 .mars-puzzle-root {
   position: fixed;
   inset: 0;
+  height: 100dvh;
   z-index: 100;
   font-family: "Press Start 2P", monospace;
   color: #ffa040;
@@ -15,6 +16,40 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* ─── Responsive adjustments ─── */
+@media (max-width: 1024px) {
+  .mars-centered-layout {
+    flex-direction: column !important;
+    padding: 10px !important;
+    gap: 15px !important;
+    justify-content: flex-start !important;
+    overflow-y: auto;
+  }
+  
+  .mars-left-column, .mars-right-column {
+    width: 100%;
+    flex: none !important;
+  }
+  
+  .mars-win-container {
+    flex-direction: column !important;
+    gap: 20px !important;
+    padding: 20px !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+  
+  .win-content {
+    border-left: none !important;
+    border-top: 4px solid #44aaff !important;
+    max-width: 100% !important;
+  }
+
+  :root {
+    --mars-board-size: min(280px, 45vh);
+  }
 }
 
 .mars-bg {

@@ -181,7 +181,7 @@ const UranusGame: React.FC<UranusGameProps> = ({ onComplete, onBack }) => {
     );
 
     return (
-        <div className="w-screen h-screen relative overflow-hidden select-none" style={{ touchAction: "none" }}>
+        <div className="w-screen h-dvh relative overflow-hidden select-none z-50" style={{ touchAction: "none" }}>
             {/* ─── Animated background ─── */}
             <div
                 className="absolute inset-0"

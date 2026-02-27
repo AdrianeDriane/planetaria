@@ -103,7 +103,7 @@ function App() {
   };
 
   return (
-    <div className="relative min-h-screen bg-gray-950">
+    <div className="relative h-dvh w-screen bg-gray-950 overflow-hidden">
       {appState === "menu" && (
         <MainMenu onPlay={() => setAppState("levels")} />
       )}
@@ -115,7 +115,9 @@ function App() {
       )}
       {appState === "playing" && (
         <>
-          <PhaserGame initialLevelId={selectedLevelId} />
+          <div className={showVenusGame || showMarsPuzzle || showUranusGame || showNeptuneGame ? "hidden" : "contents"}>
+            <PhaserGame initialLevelId={selectedLevelId} />
+          </div>
           {showVenusGame && (
             <VenusGame onComplete={handleVenusComplete} onBack={() => setShowVenusGame(false)} />
           )}

@@ -176,7 +176,7 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
   }, []);
 
   return (
-    <div className="relative h-screen w-screen bg-gray-950">
+    <div className="relative h-dvh w-screen bg-gray-950 z-50">
       <div ref={containerRef} className="h-full w-full" />
 
       {/* Virtual Controls for Mobile - only shown after intro */}

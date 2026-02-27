@@ -521,7 +521,7 @@ const NeptuneMission: React.FC<NeptuneGameProps> = ({ onComplete, onBack }) => {
     };
 
     return (
-        <div className="w-screen h-dvh relative overflow-hidden flex flex-col">
+        <div className="w-screen h-dvh relative overflow-hidden flex flex-col z-50">
             <img
                 src={ASSETS.spaceBg}
                 alt="Pixel space background"
