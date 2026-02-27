@@ -12,6 +12,7 @@ import PixelButton from "../components/PixelButton";
 import VirtualControls from "../components/VirtualControls";
 import VenusIntroScene from "../../game/scenes/venus/VenusIntroScene";
 import JupiterIntroScene from "../../game/scenes/JupiterIntroScene";
+import SaturnIntroScene from "../../game/scenes/SaturnIntroScene";
 import UranusIntroScene from "../../game/scenes/uranus/UranusIntroScene";
 import NeptuneIntroScene from "../../game/scenes/neptune/NeptuneIntroScene";
 import { EventBus } from "../../game/EventBus";
@@ -36,9 +37,11 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
       case 2: return "VenusIntroScene";
       case 3: return "EarthIntroScene";
       case 4: return "MarsIntroScene";
+      case 5: return "JupiterIntroScene";
+      case 6: return "SaturnIntroScene";
       case 7: return "UranusIntroScene";
       case 8: return "NeptuneIntroScene";
-      default: return "EarthIntroScene";
+      default: return "IntroScene";
     }
   };
 
@@ -73,15 +76,16 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
 
     // Define all available scenes
     const allScenes = [
+      IntroScene,
+      GameScene,
       VenusIntroScene,
       EarthIntroScene,
       EarthScene,
       EarthCongratulationScene,
       MarsIntroScene,
       MarsScene,
-      GameScene,
-      IntroScene,
       JupiterIntroScene,
+      SaturnIntroScene,
       UranusIntroScene,
       NeptuneIntroScene,
     ];
@@ -92,15 +96,16 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
     
     // Create a mapping of keys to constructors
     const sceneMap: Record<string, any> = {
+        "IntroScene": IntroScene,
+        "GameScene": GameScene,
         "VenusIntroScene": VenusIntroScene,
         "EarthIntroScene": EarthIntroScene,
         "EarthScene": EarthScene,
         "EarthCongratulationScene": EarthCongratulationScene,
         "MarsIntroScene": MarsIntroScene,
         "MarsScene": MarsScene,
-        "GameScene": GameScene,
-        "IntroScene": IntroScene,
         "JupiterIntroScene": JupiterIntroScene,
+        "SaturnIntroScene": SaturnIntroScene,
         "UranusIntroScene": UranusIntroScene,
         "NeptuneIntroScene": NeptuneIntroScene
     };

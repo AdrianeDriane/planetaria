@@ -77,11 +77,25 @@ function App() {
   };
 
   const handleMarsPuzzleComplete = () => {
-    unlockLevel(5); // Unlock Jupiter (progression placeholder)
-    unlockLevel(7); // Unlock Uranus
+    unlockLevel(5); // Unlock Jupiter
     EventBus.emit("mars-core-reactivated");
     setTimeout(() => {
         setShowMarsPuzzle(false);
+        EventBus.emit("change-phaser-scene", "JupiterIntroScene");
+    }, 2000);
+  };
+
+  const handleJupiterComplete = () => {
+    unlockLevel(6); // Unlock Saturn
+    setTimeout(() => {
+        // Since we don't have a Jupiter game yet, we just transition to Saturn
+        EventBus.emit("change-phaser-scene", "SaturnIntroScene");
+    }, 2000);
+  };
+
+  const handleSaturnComplete = () => {
+    unlockLevel(7); // Unlock Uranus
+    setTimeout(() => {
         EventBus.emit("change-phaser-scene", "UranusIntroScene");
     }, 2000);
   };
