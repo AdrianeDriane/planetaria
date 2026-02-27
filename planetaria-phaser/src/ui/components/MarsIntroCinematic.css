@@ -1,0 +1,335 @@
+.mars-cinematic-container {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #050000;
+  font-family: 'Courier New', Courier, monospace;
+  color: #ff4500;
+}
+
+.mars-cinematic-container.finish-fade {
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out;
+}
+
+/* Cinematic Letterboxing */
+.cinematic-letterbox {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 15vh;
+  background-color: black;
+  z-index: 2000;
+}
+.cinematic-letterbox.top { top: 0; }
+.cinematic-letterbox.bottom { bottom: 0; }
+
+/* Background & Lighting */
+.mars-cinematic-bg {
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  pointer-events: none;
+  background-image: url('/assets/outerspace.png');
+  background-size: cover;
+  background-position: center;
+  filter: contrast(1.6) brightness(0.6) sepia(0.3) hue-rotate(-30deg);
+}
+
+.red-anamorphic-flare {
+  position: absolute;
+  top: 45%;
+  left: -50%;
+  width: 200%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #ff4500, #ff8c00, transparent);
+  box-shadow: 0 0 25px 6px rgba(255, 69, 0, 0.5);
+  opacity: 0.3;
+  filter: blur(3px);
+  z-index: 5;
+  animation: mars-flare-pulse 6s infinite;
+}
+
+/* Stage & Layout */
+.mars-visual-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ship & Signals */
+.mars-ship-container {
+  position: absolute;
+  left: 5vw;
+  z-index: 100;
+  animation: mars-ship-float 6s ease-in-out infinite;
+  transition: left 10s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mars-ship-container.mars-approaching {
+  left: 30vw;
+}
+
+.mars-ship-sprite {
+  width: 22vw;
+  max-width: 160px;
+  min-width: 90px;
+  filter: drop-shadow(0 0 20px rgba(255, 69, 0, 0.4));
+}
+
+/* Mars Planet */
+.mars-planet-container {
+  position: absolute;
+  right: 10vw;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mars-sprite {
+  width: 40vw;
+  max-width: 350px;
+  min-width: 200px;
+  height: auto;
+  opacity: 0;
+  filter: drop-shadow(0 0 30px rgba(255, 69, 0, 0.3));
+  animation: mars-reveal 5s ease-out forwards 0.5s;
+}
+
+.mars-glitch {
+  animation: mars-glitch-anim 0.2s infinite;
+}
+
+/* Core Shards */
+.core-shards-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.core-shards {
+  width: 120%;
+  height: 120%;
+  object-fit: contain;
+  opacity: 0;
+  animation: shards-burst 2s cubic-bezier(0.17, 0.89, 0.32, 1.49) forwards;
+  filter: drop-shadow(0 0 15px #ff4500);
+}
+
+/* Titles */
+.mars-chapter-title {
+  position: absolute;
+  top: 15vh;
+  text-align: center;
+  z-index: 300;
+  pointer-events: none;
+  width: 100%;
+}
+
+.mars-cinematic-title-text {
+  font-size: clamp(1.8rem, 10vw, 5rem);
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  color: #fff;
+  margin: 0;
+  text-transform: uppercase;
+  text-shadow: 0 0 30px rgba(255, 69, 0, 0.8);
+  opacity: 0;
+  animation: mars-fade-in 2s ease-out forwards 0.5s;
+}
+
+.mars-cinematic-subtitle-text {
+  font-size: clamp(0.6rem, 2.5vw, 1.1rem);
+  letter-spacing: 0.6em;
+  color: #ff4500;
+  text-transform: uppercase;
+  font-weight: bold;
+  opacity: 0;
+  animation: mars-fade-in 2s ease-out forwards 1.5s;
+}
+
+/* HUD */
+.mars-hud-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1500;
+}
+
+.mars-hud-scanner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 69, 0, 0.3), transparent);
+  animation: mars-scanner-move 5s linear infinite;
+}
+
+.mars-hud-data-left {
+  position: absolute;
+  top: 13vh;
+  left: 5vw;
+  font-size: clamp(8px, 1.2vw, 11px);
+  color: rgba(255, 69, 0, 0.6);
+  letter-spacing: 1px;
+}
+
+.mars-hud-line {
+  margin-bottom: 0.3vh;
+}
+
+/* Dialogue Area */
+.mars-dialogue-area {
+  position: absolute;
+  bottom: 12vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1000;
+}
+
+.mars-dialogue-box {
+  width: 90vw;
+  max-width: 950px;
+  padding: 2vh 5vw;
+  background: rgba(15, 0, 0, 0.9);
+  border-left: 4px solid #ff4500;
+  min-height: 10vh;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.mars-dialogue-speaker {
+  font-size: clamp(8px, 1.5vw, 12px);
+  letter-spacing: 0.3em;
+  color: #ff4500;
+  margin-bottom: 1vh;
+  font-weight: 900;
+  opacity: 0.8;
+}
+
+.mars-dialogue-text {
+  font-size: clamp(0.9rem, 4vw, 1.8rem);
+  line-height: 1.3;
+  color: #ffe4e1;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .mars-chapter-title {
+    top: 13vh;
+  }
+  .mars-dialogue-area {
+    bottom: 14vh;
+  }
+  .mars-ship-container {
+    left: 2vw;
+    top: 40%;
+  }
+  .mars-planet-container {
+    right: 5vw;
+    top: 40%;
+  }
+  .mars-sprite {
+    width: 35vw;
+  }
+}
+
+.scrambled-font {
+  font-family: 'Courier New', monospace;
+  text-shadow: 2px 0 #ff0000, -2px 0 #00ffff;
+}
+
+.mars-skip-hint {
+  margin-top: 1.5vh;
+  font-size: clamp(10px, 1.5vw, 12px);
+  color: rgba(255, 69, 0, 0.5);
+  letter-spacing: 0.3em;
+  font-weight: bold;
+}
+
+.mars-skip-hitbox {
+  position: absolute;
+  inset: 0;
+  z-index: 3000;
+  background: transparent;
+  cursor: pointer;
+  border: none;
+}
+
+/* Animations */
+@keyframes mars-ship-float {
+  0%, 100% { transform: translateY(0) rotate(2deg); }
+  50% { transform: translateY(-4vh) rotate(-1deg); }
+}
+
+@keyframes mars-reveal {
+  from { opacity: 0; transform: translateX(50px) scale(0.8); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes mars-glitch-anim {
+  0% { transform: translate(0); }
+  20% { transform: translate(-3px, 3px); }
+  40% { transform: translate(-3px, -3px); }
+  60% { transform: translate(3px, 3px); }
+  80% { transform: translate(3px, -3px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes shards-burst {
+  0% { opacity: 0; transform: scale(0.2) rotate(0deg); }
+  30% { opacity: 1; }
+  100% { opacity: 0.8; transform: scale(1.1) rotate(15deg); }
+}
+
+@keyframes mars-flare-pulse {
+  0%, 100% { opacity: 0.2; transform: scaleX(1); }
+  50% { opacity: 0.5; transform: scaleX(1.1); }
+}
+
+@keyframes mars-scanner-move {
+  0% { top: 15vh; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 85vh; opacity: 0; }
+}
+
+@keyframes mars-fade-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.glitch-active {
+  animation: shake 0.5s infinite;
+}
+
+@keyframes shake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  10% { transform: translate(-1px, -2px) rotate(-1deg); }
+  20% { transform: translate(-3px, 0px) rotate(1deg); }
+  30% { transform: translate(3px, 2px) rotate(0deg); }
+  40% { transform: translate(1px, -1px) rotate(1deg); }
+  50% { transform: translate(-1px, 2px) rotate(-1deg); }
+  60% { transform: translate(-3px, 1px) rotate(0deg); }
+  70% { transform: translate(3px, 1px) rotate(-1deg); }
+  80% { transform: translate(-1px, -1px) rotate(1deg); }
+  90% { transform: translate(1px, 2px) rotate(0deg); }
+  100% { transform: translate(1px, -2px) rotate(-1deg); }
+}

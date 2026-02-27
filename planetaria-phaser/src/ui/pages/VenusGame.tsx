@@ -929,13 +929,16 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
 
     // Show completion modal when all 4 data packets are found
     useEffect(() => {
-        if (!allFound) return;
-        // Close trivia modal if open, then show completion modal
-        setShowTriviaModal(false);
-        const timer = setTimeout(() => {
-            setShowCompletionModal(true);
-        }, 500);
-        return () => clearTimeout(timer);
+        if (allFound) {
+            // Close trivia modal if open, then show completion modal
+            setShowTriviaModal(false);
+            const timer = setTimeout(() => {
+                setShowCompletionModal(true);
+                // Also trigger the parent onComplete after another delay if needed
+                // or just rely on the completion modal button which calls onComplete
+            }, 500);
+            return () => clearTimeout(timer);
+        }
     }, [allFound]);
 
     const inSafeZone = pressure >= 40 && pressure <= 70;

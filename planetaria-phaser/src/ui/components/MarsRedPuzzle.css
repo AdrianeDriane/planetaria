@@ -19,7 +19,7 @@
 }
 
 /* ─── Responsive adjustments ─── */
-@media (max-width: 1024px) {
+@media (max-width: 1024px) and (orientation: portrait) {
   .mars-centered-layout {
     flex-direction: column !important;
     padding: 10px !important;
@@ -31,6 +31,7 @@
   .mars-left-column, .mars-right-column {
     width: 100%;
     flex: none !important;
+    height: auto !important;
   }
   
   .mars-win-container {
@@ -49,6 +50,68 @@
 
   :root {
     --mars-board-size: min(280px, 45vh);
+  }
+}
+
+/* Optimized for Mobile Landscape */
+@media (max-height: 500px) and (orientation: landscape) {
+  .mars-centered-layout {
+    flex-direction: row !important;
+    padding: 5px 20px !important;
+    gap: 20px !important;
+    align-items: center !important;
+  }
+
+  .mars-left-column, .mars-right-column {
+    height: 100% !important;
+    justify-content: center !important;
+  }
+
+  .mars-interaction-panel {
+    gap: 5px !important;
+  }
+
+  .mars-terminal-init,
+  .mars-trivia-reveal,
+  .mars-assembly-panel {
+    padding: 8px !important;
+    gap: 5px !important;
+    max-width: 320px !important;
+  }
+
+  .mars-scramble-controls {
+    gap: 4px !important;
+  }
+
+  .mars-letter-grid {
+    gap: 4px !important;
+  }
+
+  :root {
+    --mars-board-size: min(220px, 70vh);
+  }
+
+  .mars-win-container {
+    gap: 20px !important;
+    padding: 15px !important;
+  }
+
+  .mars-planet-assembled {
+    width: min(180px, 60vh) !important;
+  }
+
+  .win-content {
+    padding: 15px !important;
+    max-width: 350px !important;
+  }
+
+  .celebration-title {
+    font-size: 12px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .mars-summary-list {
+    font-size: 9px !important;
   }
 }
 

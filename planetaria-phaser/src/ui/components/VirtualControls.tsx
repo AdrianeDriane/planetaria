@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React from 'react';
 
 interface VirtualControlsProps {
   onLeftDown: () => void;
@@ -17,71 +17,91 @@ const VirtualControls: React.FC<VirtualControlsProps> = ({
   onJumpDown,
   onJumpUp,
 }) => {
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
-
-  useEffect(() => {
-    // Check if device supports touch
-    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
-  }, []);
-
-  if (!isTouchDevice) {
-    return null; // Don't show controls on desktop
-  }
-
   return (
-    <div className="fixed inset-0 pointer-events-none z-50">
-      {/* Left/Right D-Pad */}
-      <div className="absolute bottom-6 left-6 flex gap-2 pointer-events-auto">
-        {/* Left Button */}
-        <button
-          onTouchStart={(e) => {
-            e.preventDefault();
-            onLeftDown();
-          }}
-          onTouchEnd={(e) => {
-            e.preventDefault();
-            onLeftUp();
-          }}
-          className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-800/70 border-4 border-gray-600 flex items-center justify-center active:bg-gray-700 active:border-gray-500 transition-colors"
-          style={{ touchAction: 'none' }}
+    <div className="virtual-controls-container">
+      <div className="movement-controls">
+        <button 
+          className="control-btn left-btn"
+          onMouseDown={onLeftDown}
+          onMouseUp={onLeftUp}
+          onMouseLeave={onLeftUp}
+          onTouchStart={(e) => { e.preventDefault(); onLeftDown(); }}
+          onTouchEnd={(e) => { e.preventDefault(); onLeftUp(); }}
         >
-          <span className="text-white text-2xl font-bold">◄</span>
+          &larr;
         </button>
-
-        {/* Right Button */}
-        <button
-          onTouchStart={(e) => {
-            e.preventDefault();
-            onRightDown();
-          }}
-          onTouchEnd={(e) => {
-            e.preventDefault();
-            onRightUp();
-          }}
-          className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-800/70 border-4 border-gray-600 flex items-center justify-center active:bg-gray-700 active:border-gray-500 transition-colors"
-          style={{ touchAction: 'none' }}
+        <button 
+          className="control-btn right-btn"
+          onMouseDown={onRightDown}
+          onMouseUp={onRightUp}
+          onMouseLeave={onRightUp}
+          onTouchStart={(e) => { e.preventDefault(); onRightDown(); }}
+          onTouchEnd={(e) => { e.preventDefault(); onRightUp(); }}
         >
-          <span className="text-white text-2xl font-bold">►</span>
+          &rarr;
         </button>
       </div>
-
-      {/* Jump Button */}
-      <div className="absolute bottom-6 right-6 pointer-events-auto">
-        <button
-          onTouchStart={(e) => {
-            e.preventDefault();
-            onJumpDown();
-          }}
-          onTouchEnd={(e) => {
-            e.preventDefault();
-            onJumpUp();
-          }}
-          className="w-20 h-20 sm:w-24 sm:h-24 bg-indigo-700/70 border-4 border-indigo-500 rounded-full flex items-center justify-center active:bg-indigo-600 active:border-indigo-400 transition-colors font-['Press_Start_2P'] text-white text-xs"
-          style={{ touchAction: 'none' }}
+      <div className="action-controls">
+        <button 
+          className="control-btn jump-btn"
+          onMouseDown={onJumpDown}
+          onMouseUp={onJumpUp}
+          onMouseLeave={onJumpUp}
+          onTouchStart={(e) => { e.preventDefault(); onJumpDown(); }}
+          onTouchEnd={(e) => { e.preventDefault(); onJumpUp(); }}
         >
           JUMP
         </button>
       </div>
+
+      <style>{`
+        .virtual-controls-container {
+          position: absolute;
+          bottom: 20px;
+          left: 0;
+          right: 0;
+          display: flex;
+          justify-content: space-between;
+          padding: 0 30px;
+          pointer-events: none;
+          z-index: 100;
+        }
+        .movement-controls, .action-controls {
+          display: flex;
+          gap: 15px;
+          pointer-events: auto;
+        }
+        .control-btn {
+          width: 60px;
+          height: 60px;
+          background: rgba(255, 255, 255, 0.2);
+          border: 2px solid rgba(255, 255, 255, 0.4);
+          border-radius: 10px;
+          color: white;
+          font-family: 'Courier New', Courier, monospace;
+          font-weight: bold;
+          font-size: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          user-select: none;
+          backdrop-filter: blur(5px);
+          transition: all 0.1s;
+        }
+        .control-btn:active {
+          background: rgba(255, 255, 255, 0.4);
+          transform: scale(0.95);
+        }
+        .jump-btn {
+          width: 80px;
+          font-size: 14px;
+        }
+        @media (min-width: 1024px) {
+          .virtual-controls-container {
+            display: none;
+          }
+        }
+      `}</style>
     </div>
   );
 };

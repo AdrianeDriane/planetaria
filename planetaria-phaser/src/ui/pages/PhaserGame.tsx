@@ -2,19 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import Phaser from "phaser";
 import GameScene from "../../game/scenes/GameScene";
 import EarthScene from "../../game/scenes/EarthScene";
-import EarthIntroScene from "../../game/scenes/earth/EarthIntroScene";
 import EarthCongratulationScene from "../../game/scenes/earth/EarthCongratulationScene";
-import MarsIntroScene from "../../game/scenes/mars/MarsIntroScene";
 import MarsScene from "../../game/scenes/MarsScene";
 import { DISPLAY, PHYSICS } from "../../game/config";
-import IntroScene from "../../game/scenes/IntroScene";
 import PixelButton from "../components/PixelButton";
-import VirtualControls from "../components/VirtualControls";
-import VenusIntroScene from "../../game/scenes/venus/VenusIntroScene";
-import JupiterIntroScene from "../../game/scenes/JupiterIntroScene";
-import SaturnIntroScene from "../../game/scenes/SaturnIntroScene";
-import UranusIntroScene from "../../game/scenes/uranus/UranusIntroScene";
-import NeptuneIntroScene from "../../game/scenes/neptune/NeptuneIntroScene";
 import { EventBus } from "../../game/EventBus";
 
 interface PhaserGameProps {
@@ -22,9 +13,9 @@ interface PhaserGameProps {
   onNavigateToVenus?: () => void;
 }
 
-const PhaserGame: React.FC<PhaserGameProps> = ({ 
+const PhaserGame: React.FC<PhaserGameProps> = ({
   initialLevelId = 1,
-  onNavigateToVenus 
+  onNavigateToVenus,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
@@ -33,15 +24,24 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
   // Mapping level ID to starting scene key
   const getStartingScene = (id: number): string => {
     switch (id) {
-      case 1: return "IntroScene";
-      case 2: return "VenusIntroScene";
-      case 3: return "EarthIntroScene";
-      case 4: return "MarsIntroScene";
-      case 5: return "JupiterIntroScene";
-      case 6: return "SaturnIntroScene";
-      case 7: return "UranusIntroScene";
-      case 8: return "NeptuneIntroScene";
-      default: return "IntroScene";
+      case 1:
+        return "GameScene";
+      case 2:
+        return "GameScene"; // Venus is React-only
+      case 3:
+        return "EarthScene";
+      case 4:
+        return "MarsScene";
+      case 5:
+        return "GameScene";
+      case 6:
+        return "GameScene";
+      case 7:
+        return "GameScene";
+      case 8:
+        return "GameScene";
+      default:
+        return "GameScene";
     }
   };
 
@@ -76,49 +76,33 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
 
     // Define all available scenes
     const allScenes = [
-      IntroScene,
       GameScene,
-      VenusIntroScene,
-      EarthIntroScene,
       EarthScene,
       EarthCongratulationScene,
-      MarsIntroScene,
       MarsScene,
-      JupiterIntroScene,
-      SaturnIntroScene,
-      UranusIntroScene,
-      NeptuneIntroScene,
     ];
 
-    // Phaser starts the FIRST scene in the array. 
+    // Phaser starts the FIRST scene in the array.
     // We reorder to put the requested scene at index 0.
     const startSceneKey = getStartingScene(initialLevelId);
-    
+
     // Create a mapping of keys to constructors
     const sceneMap: Record<string, any> = {
-        "IntroScene": IntroScene,
-        "GameScene": GameScene,
-        "VenusIntroScene": VenusIntroScene,
-        "EarthIntroScene": EarthIntroScene,
-        "EarthScene": EarthScene,
-        "EarthCongratulationScene": EarthCongratulationScene,
-        "MarsIntroScene": MarsIntroScene,
-        "MarsScene": MarsScene,
-        "JupiterIntroScene": JupiterIntroScene,
-        "SaturnIntroScene": SaturnIntroScene,
-        "UranusIntroScene": UranusIntroScene,
-        "NeptuneIntroScene": NeptuneIntroScene
+      GameScene: GameScene,
+      EarthScene: EarthScene,
+      EarthCongratulationScene: EarthCongratulationScene,
+      MarsScene: MarsScene,
     };
 
     const finalScenes = [...allScenes];
     const StartSceneClass = sceneMap[startSceneKey];
-    
+
     if (StartSceneClass) {
-        const index = finalScenes.indexOf(StartSceneClass);
-        if (index !== -1) {
-            finalScenes.splice(index, 1);
-            finalScenes.unshift(StartSceneClass);
-        }
+      const index = finalScenes.indexOf(StartSceneClass);
+      if (index !== -1) {
+        finalScenes.splice(index, 1);
+        finalScenes.unshift(StartSceneClass);
+      }
     }
 
     const config: Phaser.Types.Core.GameConfig = {
@@ -152,14 +136,14 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
     gameRef.current = new Phaser.Game(config);
 
     const handleSceneChange = (sceneKey: string) => {
-        if (gameRef.current) {
-            gameRef.current.scene.scenes.forEach(s => {
-                if (gameRef.current?.scene.isActive(s.scene.key)) {
-                    gameRef.current?.scene.stop(s.scene.key);
-                }
-            });
-            gameRef.current.scene.start(sceneKey);
-        }
+      if (gameRef.current) {
+        gameRef.current.scene.scenes.forEach((s) => {
+          if (gameRef.current?.scene.isActive(s.scene.key)) {
+            gameRef.current?.scene.stop(s.scene.key);
+          }
+        });
+        gameRef.current.scene.start(sceneKey);
+      }
     };
 
     EventBus.on("change-phaser-scene", handleSceneChange);
@@ -181,20 +165,8 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
   }, []);
 
   return (
-    <div className="relative h-dvh w-screen bg-gray-950 z-50">
+    <div className="relative z-50 h-dvh w-screen bg-gray-950">
       <div ref={containerRef} className="h-full w-full" />
-
-      {/* Virtual Controls for Mobile - only shown after intro */}
-      {isGameActive && (
-        <VirtualControls
-          onLeftDown={handleLeftDown}
-          onLeftUp={handleLeftUp}
-          onRightDown={handleRightDown}
-          onRightUp={handleRightUp}
-          onJumpDown={handleJumpDown}
-          onJumpUp={handleJumpUp}
-        />
-      )}
 
       {/* Navigation button overlay */}
       {onNavigateToVenus && (
