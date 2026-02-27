@@ -1,0 +1,348 @@
+.planet-cinematic-container {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: black;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.planet-cinematic-container.fade-out {
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out;
+}
+
+/* Cinematic Letterboxing */
+.cinematic-letterbox {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 15vh;
+  background-color: black;
+  z-index: 2000;
+}
+.cinematic-letterbox.top { top: 0; }
+.cinematic-letterbox.bottom { bottom: 0; }
+
+/* Backgrounds */
+.planet-cinematic-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('/assets/outerspace.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.25;
+  filter: brightness(0.7);
+  z-index: 1;
+}
+
+/* Twists */
+.crash-impact::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 0, 0, 0.05);
+  animation: red-alert 1s infinite;
+}
+
+@keyframes red-alert {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.2; }
+}
+
+.crash-impact {
+  filter: grayscale(0.5) contrast(1.2);
+}
+
+.impact-flash {
+  animation: screen-shake 0.2s 3;
+}
+
+@keyframes screen-shake {
+  0% { transform: translate(2px, 2px); }
+  25% { transform: translate(-2px, -2px); }
+  50% { transform: translate(2px, -2px); }
+  75% { transform: translate(-2px, 2px); }
+  100% { transform: translate(0, 0); }
+}
+
+.acid-haze::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 204, 51, 0.1);
+  backdrop-filter: blur(2px);
+  animation: acid-pulse 4s infinite;
+}
+
+@keyframes acid-pulse {
+  0%, 100% { opacity: 0.1; }
+  50% { opacity: 0.3; }
+}
+
+.gravity-pull {
+  transform: scale(1.1);
+  transition: transform 10s ease-in-out;
+}
+
+.wind-shear::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+  animation: wind-move 0.1s linear infinite;
+}
+
+@keyframes wind-move {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+.frozen-tilt {
+  filter: hue-rotate(180deg) brightness(0.8);
+}
+
+.planet-flare {
+  position: absolute;
+  top: 40%;
+  left: -50%;
+  width: 200%;
+  height: 1px;
+  opacity: 0.2;
+  box-shadow: 0 0 15px 2px white;
+  z-index: 5;
+}
+
+/* Visual Stage */
+.planet-visual-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.planet-hero-sprite {
+  width: 35vh;
+  max-width: 350px;
+  filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.2));
+  opacity: 0;
+  animation: planet-enter 5s ease-out forwards 0.5s;
+}
+
+@keyframes planet-enter {
+  from { opacity: 0; transform: translateX(100px) scale(0.8); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+.planet-hero-sprite.surging {
+  animation: cloud-pulse 2s infinite alternate;
+}
+
+@keyframes cloud-pulse {
+  from { transform: scale(1); filter: brightness(1); }
+  to { transform: scale(1.05); filter: brightness(1.2); }
+}
+
+.planet-ship-container {
+  position: absolute;
+  left: 10vw;
+  z-index: 100;
+  transition: transform 3s ease-in-out, left 8s linear;
+}
+
+.planet-ship-container.tilted {
+  transform: rotate(20deg);
+}
+
+.planet-ship-container.shaking {
+  animation: ship-shake 0.1s infinite;
+}
+
+@keyframes ship-shake {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-2px, 2px); }
+  50% { transform: translate(2px, -2px); }
+  75% { transform: translate(-2px, -2px); }
+}
+
+.planet-ship-sprite {
+  width: 18vw;
+  max-width: 150px;
+  filter: drop-shadow(0 0 15px rgba(0, 242, 255, 0.5));
+}
+
+/* Titles */
+.planet-chapter-title {
+  position: absolute;
+  top: 15vh;
+  text-align: center;
+  z-index: 300;
+  width: 100%;
+}
+
+.planet-title-text {
+  font-size: clamp(1.8rem, 8vw, 5rem);
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  color: white;
+  margin: 0;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: fade-in 2s ease-out forwards 0.5s;
+}
+
+.planet-subtitle-text {
+  font-size: clamp(0.6rem, 2vw, 1.1rem);
+  letter-spacing: 0.6em;
+  text-transform: uppercase;
+  font-weight: bold;
+  opacity: 0;
+  animation: fade-in 2s ease-out forwards 1.2s;
+}
+
+/* HUD */
+.planet-hud-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1500;
+}
+
+.planet-hud-data-left {
+  position: absolute;
+  top: 13vh;
+  left: 5vw;
+  font-size: clamp(8px, 1.2vw, 10px);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.planet-hud-scanner {
+  position: absolute;
+  top: 15vh;
+  left: 5vw;
+  right: 5vw;
+  height: 65vh;
+  border-bottom: 2px solid;
+  opacity: 0.1;
+  animation: scan-move 4s linear infinite;
+}
+
+@keyframes scan-move {
+  from { transform: translateY(-100%); opacity: 0; }
+  50% { opacity: 0.3; }
+  to { transform: translateY(0); opacity: 0; }
+}
+
+/* Dialogue */
+.planet-dialogue-area {
+  position: absolute;
+  bottom: 12vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1000;
+}
+
+.planet-dialogue-box {
+  width: 90vw;
+  max-width: 900px;
+  padding: 2vh 5vw;
+  background: rgba(0, 0, 0, 0.85);
+  border-left: 4px solid;
+  min-height: 10vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.planet-dialogue-speaker {
+  font-size: clamp(8px, 1.2vw, 11px);
+  letter-spacing: 0.2em;
+  margin-bottom: 0.5vh;
+  font-weight: 900;
+}
+
+.planet-dialogue-text {
+  font-size: clamp(0.9rem, 3.5vw, 1.7rem);
+  line-height: 1.3;
+  color: #f0f9ff;
+  font-weight: 400;
+}
+
+.planet-start-button {
+  margin-top: 2vh;
+  background: transparent;
+  border: 1px solid;
+  padding: 8px 25px;
+  font-size: clamp(10px, 1.5vw, 13px);
+  font-weight: bold;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  animation: fade-in 1s forwards;
+}
+
+.planet-start-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+  .planet-chapter-title {
+    top: 13vh;
+  }
+  .planet-dialogue-area {
+    bottom: 14vh;
+  }
+  .planet-hero-sprite {
+    width: 30vh;
+  }
+  .planet-ship-sprite {
+    width: 25vw;
+  }
+}
+
+.planet-start-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Twists overlays */
+.frost-overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, transparent, rgba(255, 255, 255, 0.2));
+    backdrop-filter: contrast(1.2) brightness(1.1);
+    pointer-events: none;
+    animation: frost-pulse 5s infinite;
+}
+
+@keyframes frost-pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.8; }
+}
+
+.dust-particles {
+    position: absolute;
+    inset: -50px;
+    background-image: radial-gradient(circle, white 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.3;
+    animation: dust-move 20s linear infinite;
+}
+
+@keyframes dust-move {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

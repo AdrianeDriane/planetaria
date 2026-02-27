@@ -927,6 +927,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
     // Only count DATA packets for completion (4 required, traps don't count)
     const allFound = dataPackets.filter(p => p.type === 'data' && p.opened).length === 4;
 
+<<<<<<< Updated upstream
     // Show completion modal when all 4 data packets are found
     useEffect(() => {
         if (!allFound) return;
@@ -937,6 +938,16 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
         }, 500);
         return () => clearTimeout(timer);
     }, [allFound]);
+=======
+    useEffect(() => {
+        if (allFound) {
+            const timer = setTimeout(() => {
+                onComplete();
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [allFound, onComplete]);
+>>>>>>> Stashed changes
 
     const inSafeZone = pressure >= 40 && pressure <= 70;
     const isDaytime = dayNightPhase < 100;

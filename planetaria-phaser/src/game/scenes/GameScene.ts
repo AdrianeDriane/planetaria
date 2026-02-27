@@ -3,6 +3,7 @@ import { WORLD, CAMERA } from "../config";
 import { GameStarfield } from "../world/GridBackground";
 import Terrain from "../world/Terrain";
 import Player from "../entities/Player";
+import { EventBus } from "../EventBus";
 
 const SHIP_TEXTURE = "game_ss_astra";
 const SHIP_ASSET = "assets/ui/ss_astra.png";
@@ -1387,7 +1388,13 @@ export default class GameScene extends Phaser.Scene {
         console.warn("Failed to save progress in GameScene:", e);
       }
 
+<<<<<<< Updated upstream
       this.scene.start("VenusIntroScene");
+=======
+    this.cameras.main.fadeOut(1000, 0, 0, 0);
+    this.cameras.main.once("camerafadeoutcomplete", () => {
+        EventBus.emit("mercury-complete");
+>>>>>>> Stashed changes
     });
   }
 }

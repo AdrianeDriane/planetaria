@@ -1,0 +1,316 @@
+.congrat-container {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: black;
+  font-family: 'Courier New', Courier, monospace;
+  color: #00ffcc;
+}
+
+/* Cinematic Letterboxing */
+.cinematic-letterbox {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 12vh;
+  background-color: black;
+  z-index: 3000;
+  transition: height 2s ease-in-out;
+}
+.cinematic-letterbox.top { top: 0; }
+.cinematic-letterbox.bottom { bottom: 0; }
+
+/* Background & Atmosphere */
+.congrat-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('/assets/outerspace.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.3;
+  filter: contrast(1.2) brightness(0.7);
+  animation: slow-pan 60s linear infinite;
+}
+
+@keyframes slow-pan {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+
+.majestic-flare {
+  position: absolute;
+  top: 35%;
+  left: -50%;
+  width: 200%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00ffcc, #ffffff, #00ffcc, transparent);
+  box-shadow: 0 0 25px 5px rgba(0, 255, 204, 0.4);
+  opacity: 0.3;
+  filter: blur(2px);
+  z-index: 5;
+  animation: flare-shimmer 10s infinite;
+}
+
+@keyframes flare-shimmer {
+  0%, 100% { opacity: 0.2; transform: scaleX(1) translateY(0); }
+  50% { opacity: 0.5; transform: scaleX(1.05) translateY(-5px); }
+}
+
+/* Earth Visuals */
+.earth-hero-container {
+  position: relative;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 15s cubic-bezier(0.1, 0, 0.2, 1);
+}
+
+.majestic-zoom {
+  transform: scale(1.3) translateY(-20px);
+}
+
+.earth-hero-sprite {
+  width: 45vh;
+  max-width: 450px;
+  filter: drop-shadow(0 0 40px rgba(0, 255, 204, 0.4));
+  animation: earth-majestic-rotate 120s linear infinite;
+}
+
+@keyframes earth-majestic-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.earth-glow-aura {
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 255, 204, 0.2) 0%, transparent 70%);
+  animation: aura-pulse 4s ease-in-out infinite;
+}
+
+@keyframes aura-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+/* Ship Visuals */
+.congrat-ship-container {
+  position: absolute;
+  left: -20vw;
+  top: 55%;
+  z-index: 100;
+  animation: ship-majestic-flyby 20s linear forwards 2s;
+}
+
+@keyframes ship-majestic-flyby {
+  0% { left: -20vw; transform: scale(0.6) rotate(5deg); }
+  100% { left: 120vw; transform: scale(0.4) rotate(10deg); }
+}
+
+.congrat-ship-sprite {
+  width: 15vw;
+  max-width: 120px;
+  filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.5));
+}
+
+.engine-glow {
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  width: 40px;
+  height: 20px;
+  background: #00ffff;
+  filter: blur(10px);
+  border-radius: 50%;
+  opacity: 0.6;
+}
+
+/* Titles */
+.hero-title-area {
+  position: absolute;
+  top: 15vh;
+  text-align: center;
+  z-index: 500;
+  pointer-events: none;
+  width: 100%;
+}
+
+.hero-main-title {
+  font-size: clamp(1.5rem, 8vw, 4.5rem);
+  font-weight: 900;
+  letter-spacing: 0.4em;
+  color: white;
+  margin: 0;
+  text-transform: uppercase;
+  text-shadow: 0 0 30px rgba(0, 255, 204, 0.8);
+  opacity: 0;
+  animation: fade-in-up 3s ease-out forwards 1s;
+}
+
+.hero-sub-title {
+  font-size: clamp(0.5rem, 1.5vw, 0.9rem);
+  letter-spacing: 0.3em;
+  color: #00ffcc;
+  font-weight: bold;
+  opacity: 0;
+  animation: fade-in-up 3s ease-out forwards 2s;
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Dialogue Box */
+.congrat-dialogue-area {
+  position: absolute;
+  bottom: 12vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1000;
+}
+
+.congrat-dialogue-box {
+  width: 90vw;
+  max-width: 850px;
+  padding: 2vh 5vw;
+  background: rgba(0, 10, 10, 0.85);
+  border-top: 2px solid rgba(0, 255, 204, 0.3);
+  border-bottom: 2px solid rgba(0, 255, 204, 0.3);
+  min-height: 8vh;
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.congrat-dialogue-speaker {
+  font-size: clamp(8px, 1.5vw, 12px);
+  letter-spacing: 0.3em;
+  color: #00ffcc;
+  margin-bottom: 1vh;
+  font-weight: 900;
+  opacity: 0.7;
+}
+
+.congrat-dialogue-text {
+  font-size: clamp(0.85rem, 3.2vw, 1.6rem);
+  line-height: 1.3;
+  color: #ffffff;
+  font-weight: 300;
+  text-align: center;
+}
+
+.cursor {
+  opacity: 0;
+}
+.cursor.typing {
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+/* Warp Button */
+.warp-button {
+  margin-top: 3vh;
+  background: transparent;
+  border: 1px solid #00ffcc;
+  padding: 12px 35px;
+  color: #00ffcc;
+  font-family: 'Courier New', monospace;
+  font-weight: 900;
+  letter-spacing: 0.25em;
+  font-size: clamp(10px, 2vw, 14px);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+  animation: fade-in 1s forwards;
+}
+
+.warp-button:hover {
+  background: #00ffcc;
+  color: black;
+  box-shadow: 0 0 30px rgba(0, 255, 204, 0.6);
+}
+
+.warp-button-glimmer {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: button-glimmer 3s infinite;
+}
+
+@keyframes button-glimmer {
+  0% { left: -100%; }
+  30% { left: 100%; }
+  100% { left: 100%; }
+}
+
+/* Sector Status */
+.sector-status {
+  position: absolute;
+  bottom: 15vh;
+  right: 5vw;
+  text-align: right;
+  font-size: 10px;
+  color: rgba(0, 255, 204, 0.5);
+  letter-spacing: 2px;
+  z-index: 1000;
+}
+
+/* Warp Effects */
+.warp-flash {
+  animation: warp-sequence 2s forwards;
+}
+
+@keyframes warp-sequence {
+  0% { filter: brightness(1); }
+  50% { filter: brightness(10); transform: scale(1.1); }
+  100% { filter: brightness(0); background: white; }
+}
+
+.ship-blast-off {
+  animation: ship-blast 0.8s cubic-bezier(0.9, 0, 0.1, 1) forwards !important;
+}
+
+@keyframes ship-blast {
+  to { transform: translateX(200vw) scaleX(3) scaleY(0.5); opacity: 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .hero-title-area {
+    top: 13vh;
+  }
+  .congrat-dialogue-area {
+    bottom: 14vh;
+  }
+  .earth-hero-sprite {
+    width: 35vh;
+  }
+  .sector-status {
+    bottom: 15vh;
+    right: 5vw;
+    font-size: 8px;
+  }
+}

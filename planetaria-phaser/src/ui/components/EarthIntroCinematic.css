@@ -1,0 +1,274 @@
+.cinematic-container {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: black;
+  font-family: 'Courier New', Courier, monospace;
+  color: #22d3ee;
+}
+
+.cinematic-container.finish-fade {
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out;
+}
+
+/* Cinematic Letterboxing */
+.cinematic-letterbox {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 15vh;
+  background-color: black;
+  z-index: 2000;
+}
+.cinematic-letterbox.top { top: 0; }
+.cinematic-letterbox.bottom { bottom: 0; }
+
+/* Background & Lighting */
+.cinematic-bg {
+  position: absolute;
+  inset: 0;
+  opacity: 0.4;
+  pointer-events: none;
+  background-image: url('/assets/outerspace.png');
+  background-size: cover;
+  background-position: center;
+  filter: contrast(1.4) brightness(0.8);
+}
+
+.anamorphic-flare {
+  position: absolute;
+  top: 40%;
+  left: -50%;
+  width: 200%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #22d3ee, transparent);
+  box-shadow: 0 0 15px 4px rgba(34, 211, 238, 0.4);
+  opacity: 0.2;
+  filter: blur(2px);
+  z-index: 5;
+  animation: flare-pulse 8s infinite;
+}
+
+/* Stage & Layout */
+.visual-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ship & Signals */
+.ship-container {
+  position: absolute;
+  left: 10vw;
+  z-index: 100;
+  animation: ship-float 8s ease-in-out infinite;
+  transition: left 8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ship-container.approaching {
+  left: 35vw;
+}
+
+.ship-sprite {
+  width: 25vw;
+  max-width: 180px;
+  min-width: 100px;
+  filter: drop-shadow(0 0 15px rgba(0, 242, 255, 0.5));
+}
+
+.signal-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.signal-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 3px solid #22d3ee;
+  opacity: 0;
+  pointer-events: none;
+  width: 40px;
+  height: 40px;
+  transform: translate(-50%, -50%);
+  animation: signal-wave 3s infinite;
+}
+.ring-1 { animation-delay: 0s; }
+.ring-2 { animation-delay: 0.7s; }
+.ring-3 { animation-delay: 1.4s; }
+
+/* Earth */
+.earth-container {
+  position: absolute;
+  right: 12vw;
+  z-index: 50;
+}
+
+.earth-choked {
+  width: 45vw;
+  max-width: 380px;
+  min-width: 220px;
+  height: auto;
+  opacity: 0;
+  animation: earth-reveal 4s ease-out forwards 1s, earth-pulse 6s ease-in-out infinite 5s;
+}
+
+/* Titles */
+.chapter-title {
+  position: absolute;
+  top: 20vh;
+  text-align: center;
+  z-index: 300;
+  pointer-events: none;
+}
+
+.cinematic-title-text {
+  font-size: clamp(2rem, 8vw, 4.5rem);
+  font-weight: 900;
+  letter-spacing: 0.4em;
+  color: white;
+  margin: 0;
+  text-transform: uppercase;
+  text-shadow: 0 0 20px rgba(0, 242, 255, 0.6);
+  opacity: 0;
+  animation: fade-in 2s ease-out forwards 0.5s;
+}
+
+.cinematic-subtitle-text {
+  font-size: clamp(0.7rem, 2vw, 1.1rem);
+  letter-spacing: 0.8em;
+  color: #22d3ee;
+  text-transform: uppercase;
+  font-weight: bold;
+  opacity: 0;
+  animation: fade-in 2s ease-out forwards 1.2s;
+}
+
+/* HUD */
+.hud-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1500;
+}
+
+.hud-scanner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.4), transparent);
+  animation: scanner-move 6s linear infinite;
+}
+
+.hud-data-left {
+  position: absolute;
+  top: 18vh;
+  left: 5vw;
+  font-size: clamp(10px, 1.5vw, 12px);
+  color: rgba(34, 211, 238, 0.6);
+  letter-spacing: 2px;
+}
+
+/* Dialogue Area */
+.dialogue-area {
+  position: absolute;
+  bottom: 18vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1000;
+}
+
+.dialogue-box {
+  width: 85vw;
+  max-width: 900px;
+  padding: 2.5vh 5vw;
+  background: rgba(0, 0, 0, 0.8);
+  border-left: 5px solid #22d3ee;
+  min-height: 12vh;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 1);
+}
+
+.dialogue-speaker {
+  font-size: clamp(10px, 1.5vw, 14px);
+  letter-spacing: 0.4em;
+  color: #22d3ee;
+  margin-bottom: 1vh;
+  font-weight: 900;
+  opacity: 0.8;
+}
+
+.dialogue-text {
+  font-size: clamp(1.1rem, 3.5vw, 1.8rem);
+  line-height: 1.4;
+  color: #f0f9ff;
+  font-weight: 500;
+}
+
+.skip-hint {
+  margin-top: 1vh;
+  font-size: clamp(10px, 1.5vw, 12px);
+  color: rgba(34, 211, 238, 0.4);
+  letter-spacing: 0.2em;
+  font-weight: bold;
+}
+
+.skip-hitbox {
+  position: absolute;
+  inset: 0;
+  z-index: 3000;
+  background: transparent;
+  cursor: pointer;
+  border: none;
+}
+
+/* Animations */
+@keyframes ship-float {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-3vh) rotate(1deg); }
+}
+
+@keyframes signal-wave {
+  0% { width: 10px; height: 10px; opacity: 1; border-width: 5px; }
+  100% { width: 600px; height: 600px; opacity: 0; border-width: 1px; }
+}
+
+@keyframes earth-reveal {
+  from { opacity: 0; transform: scale(0.6) rotate(-15deg); }
+  to { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@keyframes earth-pulse {
+  0%, 100% { filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.2)) brightness(1); }
+  50% { filter: drop-shadow(0 0 30px rgba(168, 85, 247, 0.5)) brightness(1.1); }
+}
+
+@keyframes flare-pulse {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes scanner-move {
+  0% { top: 15vh; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 85vh; opacity: 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

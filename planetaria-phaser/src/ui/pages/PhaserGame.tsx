@@ -2,19 +2,20 @@ import { useEffect, useRef } from "react";
 import Phaser from "phaser";
 import GameScene from "../../game/scenes/GameScene";
 import EarthScene from "../../game/scenes/EarthScene";
-import EarthIntroScene from "../../game/scenes/earth/EarthIntroScene";
 import EarthCongratulationScene from "../../game/scenes/earth/EarthCongratulationScene";
-import MarsIntroScene from "../../game/scenes/mars/MarsIntroScene";
 import MarsScene from "../../game/scenes/MarsScene";
 import { DISPLAY, PHYSICS } from "../../game/config";
-import IntroScene from "../../game/scenes/IntroScene";
 import PixelButton from "../components/PixelButton";
+<<<<<<< Updated upstream
 import VenusScene from "../../game/scenes/VenusScene";
 import VenusIntroScene from "../../game/scenes/venus/VenusIntroScene";
 import JupiterIntroScene from "../../game/scenes/JupiterIntroScene";
 import SaturnIntroScene from "../../game/scenes/SaturnIntroScene";
 import UranusIntroScene from "../../game/scenes/uranus/UranusIntroScene";
 import NeptuneIntroScene from "../../game/scenes/neptune/NeptuneIntroScene";
+=======
+import VirtualControls from "../components/VirtualControls";
+>>>>>>> Stashed changes
 import { EventBus } from "../../game/EventBus";
 
 interface PhaserGameProps {
@@ -32,6 +33,7 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
   // Mapping level ID to starting scene key
   const getStartingScene = (id: number): string => {
     switch (id) {
+<<<<<<< Updated upstream
       case 1:
         return "IntroScene";
       case 2:
@@ -50,6 +52,17 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
         return "NeptuneIntroScene";
       default:
         return "IntroScene";
+=======
+      case 1: return "GameScene";
+      case 2: return "GameScene"; // Venus is React-only
+      case 3: return "EarthScene";
+      case 4: return "MarsScene";
+      case 5: return "GameScene"; // Jupiter etc are currently GameScene or React-only
+      case 6: return "GameScene";
+      case 7: return "GameScene";
+      case 8: return "GameScene";
+      default: return "GameScene";
+>>>>>>> Stashed changes
     }
   };
 
@@ -58,19 +71,16 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
 
     // Define all available scenes
     const allScenes = [
-      IntroScene,
       GameScene,
+<<<<<<< Updated upstream
       VenusScene,
       VenusIntroScene,
       EarthIntroScene,
+=======
+>>>>>>> Stashed changes
       EarthScene,
       EarthCongratulationScene,
-      MarsIntroScene,
       MarsScene,
-      JupiterIntroScene,
-      SaturnIntroScene,
-      UranusIntroScene,
-      NeptuneIntroScene,
     ];
 
     // Phaser starts the FIRST scene in the array.
@@ -79,6 +89,7 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
 
     // Create a mapping of keys to constructors
     const sceneMap: Record<string, any> = {
+<<<<<<< Updated upstream
       IntroScene: IntroScene,
       GameScene: GameScene,
       VenusScene: VenusScene,
@@ -92,6 +103,12 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
       SaturnIntroScene: SaturnIntroScene,
       UranusIntroScene: UranusIntroScene,
       NeptuneIntroScene: NeptuneIntroScene,
+=======
+        "GameScene": GameScene,
+        "EarthScene": EarthScene,
+        "EarthCongratulationScene": EarthCongratulationScene,
+        "MarsScene": MarsScene,
+>>>>>>> Stashed changes
     };
 
     const finalScenes = [...allScenes];
