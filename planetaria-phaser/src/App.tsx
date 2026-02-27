@@ -196,7 +196,7 @@ function App() {
       setShowVenusGame(true);
     } else if (currentPlanet === "jupiter") {
       // Since Jupiter game is not implemented, go to Saturn
-      handleJupiterComplete();
+      setShowJupiterGame(true);
     } else if (currentPlanet === "saturn") {
       // Since Saturn game is not implemented, go to Uranus
       handleSaturnComplete();
@@ -264,13 +264,13 @@ function App() {
       )}
       {appState === "playing" && (
         <>
-          <div className={showVenusGame || showMarsPuzzle || showUranusGame || showNeptuneGame || showJupiterGame ? "hidden" : "contents"}>
           <div
             className={
               showVenusGame ||
               showMarsPuzzle ||
               showUranusGame ||
               showNeptuneGame ||
+              showJupiterGame ||
               showEarthCinematic ||
               showEarthGame ||
               showMarsCinematic ||
