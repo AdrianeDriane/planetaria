@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import PixelStarfield from "../components/PixelStarfield";
-import planetariaLogo from "/assets/ui/planetaria_logo.png";
+import spaceOdysseyLogo from "/assets/ui/space_odyssey_logo.png";
 
 interface MainMenuProps {
   onPlay: () => void;
@@ -174,7 +174,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onPlay }) => {
         {/* PLANETARIA LOGO */}
         <div className="flex items-center justify-center px-4">
           <img
-            src={planetariaLogo}
+            src={spaceOdysseyLogo}
             alt="Planetaria"
             className="animate-logo-breathe -mt-16 h-auto w-80 max-w-[80vw] gap-10 md:w-120"
             style={{

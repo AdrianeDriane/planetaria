@@ -42,6 +42,12 @@ export default class Player {
   // Timer for brief transitional states (launch / landing)
   private stateTimer: Phaser.Time.TimerEvent | null = null;
 
+  // External input for mobile controls
+  private externalMoveLeft: boolean = false;
+  private externalMoveRight: boolean = false;
+  private externalJump: boolean = false;
+  private lastExternalJump: boolean = false;
+
   constructor(private scene: Phaser.Scene) {
     this.sprite = this.createSprite();
     this.body = this.setupPhysics();
@@ -60,6 +66,20 @@ export default class Player {
 
   getSprite(): Phaser.GameObjects.Sprite {
     return this.sprite;
+  }
+
+  // --- External Input API (for mobile controls) ---
+
+  setMoveLeft(pressed: boolean): void {
+    this.externalMoveLeft = pressed;
+  }
+
+  setMoveRight(pressed: boolean): void {
+    this.externalMoveRight = pressed;
+  }
+
+  setJump(pressed: boolean): void {
+    this.externalJump = pressed;
   }
 
   static preload(scene: Phaser.Scene): void {
@@ -140,26 +160,37 @@ export default class Player {
   // --- Private: Movement -----------------------------------------------------
 
   private handleMovement(): void {
+    // Combine keyboard and external (mobile) inputs
+    const moveLeft = this.keys.A.isDown || this.externalMoveLeft;
+    const moveRight = this.keys.D.isDown || this.externalMoveRight;
+
     // --- Horizontal (always allowed, even in air) ---
-    if (this.keys.A.isDown) {
+    if (moveLeft) {
       this.body.setVelocityX(-PLAYER.SPEED);
-    } else if (this.keys.D.isDown) {
+    } else if (moveRight) {
       this.body.setVelocityX(PLAYER.SPEED);
     } else {
       this.body.setVelocityX(0);
     }
 
     // --- Jump (only from ground, not during landing) ---
+    // Use edge detection for external jump to prevent continuous jumping
     const isOnGround = this.body.blocked.down;
+    const jumpJustPressed =
+      (this.keys.W.isDown && Phaser.Input.Keyboard.JustDown(this.keys.W)) ||
+      (this.externalJump && !this.lastExternalJump);
 
     if (
-      this.keys.W.isDown &&
+      jumpJustPressed &&
       isOnGround &&
       this.state !== PlayerState.JUMP_LAUNCH &&
       this.state !== PlayerState.LANDING
     ) {
       this.enterState(PlayerState.JUMP_LAUNCH);
     }
+
+    // Track last external jump state for edge detection
+    this.lastExternalJump = this.externalJump;
   }
 
   // --- Private: State Machine ------------------------------------------------

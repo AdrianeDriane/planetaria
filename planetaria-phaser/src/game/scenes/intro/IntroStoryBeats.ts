@@ -1,5 +1,4 @@
 import { StoryBeat } from "./IntroTypes";
-
 /**
  * IntroStoryBeats.ts
  *
@@ -11,33 +10,33 @@ export const STORY_BEATS: StoryBeat[] = [
   {
     id: "void_approach",
     text:
-      "At the edge of the Solar System, something stirs…\n" +
-      "A formless darkness — the Void Devourer — has begun consuming everything in its path.\n" +
-      "Pluto is gone. Neptune trembles.",
+      "At the edge of our Solar System, a dark force is waking up.\n" +
+      "This 'Void Devourer' is swallowing everything in its path.\n" +
+      "Pluto is already gone, and Neptune is next.",
   },
   {
     id: "planetary_cores",
     text:
-      "Ancient records speak of Planetary Cores — primordial energy sources buried deep within each world.\n" +
-      "If all eight cores are reactivated, they will generate a shield powerful enough to repel the Void Devourer.",
+      "To stop it, you must find the Planetary Cores—ancient energy sources hidden inside every world.\n" +
+      "If you turn on all eight cores, they will create a shield to drive the darkness away.",
   },
   {
     id: "ss_astra",
     text:
-      "Aboard the research vessel S.S. Astra, a young Galactic Cadet is on a routine training mission near Mercury.\n" +
-      "Nothing about today was supposed to be extraordinary.",
+      "You are a Galactic Cadet on a research Spaceship.\n" +
+      "You were on a simple training mission near Mercury when the trouble began.",
   },
   {
     id: "shockwave",
     text:
-      "Without warning, a shockwave tears across the system.\n" +
-      "The Void Devourer has reached Uranus. Its gravitational death-pulse slams into the Astra.",
+      "Suddenly, a massive shockwave hits the ship.\n" +
+      "The Void Devourer has reached Uranus, and its power is tearing the Spaceship apart.",
   },
   {
     id: "crash",
     text:
-      "Systems fail. Alarms scream.\n" +
-      "The S.S. Astra spirals downward and crash-lands on the scorched surface of Mercury.\n" +
-      "The journey begins here.",
+      "Alarms scream as your ship lose control.\n" +
+      "The Spaceship crashes onto the rocky surface of Mercury.\n" +
+      "The mission to save the Solar System starts now.",
   },
 ];
