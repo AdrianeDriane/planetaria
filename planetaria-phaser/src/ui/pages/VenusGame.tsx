@@ -52,23 +52,26 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
     const volcanicTimerRef = useRef<number | null>(null);
     const acidRainTimerRef = useRef<number | null>(null);
 
-    // Helper function to generate non-overlapping positions (in percentages)
+    // Helper function to generate non-overlapping positions
     const generateNonOverlappingPosition = (existingPositions: { x: number; y: number }[]) => {
-        const MIN_DISTANCE_PCT = 15;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const MIN_DISTANCE = Math.min(vw, vh) * 0.15; // Scale min distance to viewport
         const MAX_ATTEMPTS = 50;
-        const PADDING = 10; // 10% padding from edges
+        const PADDING = 60; // Keep packets away from edges
         
         for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
             const newPos = {
-                x: Math.random() * (100 - PADDING * 2) + PADDING,
-                y: Math.random() * (100 - PADDING * 2) + PADDING
+                x: Math.random() * (vw - PADDING * 2) + PADDING,
+                y: Math.random() * (vh - PADDING * 2) + PADDING
             };
             
+            // Check if this position is far enough from all existing positions
             const isFarEnough = existingPositions.every(pos => {
                 const distance = Math.sqrt(
                     Math.pow(newPos.x - pos.x, 2) + Math.pow(newPos.y - pos.y, 2)
                 );
-                return distance >= MIN_DISTANCE_PCT;
+                return distance >= MIN_DISTANCE;
             });
             
             if (isFarEnough) {
@@ -76,160 +79,165 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
             }
         }
         
+        // Fallback: return a position even if overlap (shouldn't happen with MAX_ATTEMPTS=50)
         return {
-            x: Math.random() * (100 - PADDING * 2) + PADDING,
-            y: Math.random() * (100 - PADDING * 2) + PADDING
+            x: Math.random() * (vw - PADDING * 2) + PADDING,
+            y: Math.random() * (vh - PADDING * 2) + PADDING
         };
     };
 
-    // Generate initial packet data with percentage positions
-    const [dataPackets, setDataPackets] = useState<DataPacket[]>(() => {
-        const positions: { x: number; y: number }[] = [
-            { x: 25, y: 30 }, // top-left
-            { x: 70, y: 60 }, // bottom-right
-            { x: 40, y: 75 }, // bottom-center
-            { x: 80, y: 35 }, // top-right
-        ];
+    // Generate positions for all packets
+    const positions: { x: number; y: number }[] = [];
+    
+    // Viewport-relative positions for data packets (distributed across screen)
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    positions.push({ x: vw * 0.25, y: vh * 0.3 });   // top-left area
+    positions.push({ x: vw * 0.7, y: vh * 0.6 });    // bottom-right area
+    positions.push({ x: vw * 0.4, y: vh * 0.7 });    // bottom-center
+    positions.push({ x: vw * 0.8, y: vh * 0.35 });   // top-right area
+    
+    // Generate non-overlapping positions for trap packets (7 total for variety)
+    for (let i = 0; i < 7; i++) {
+        positions.push(generateNonOverlappingPosition(positions));
+    }
 
-        for (let i = 0; i < 7; i++) {
-            positions.push(generateNonOverlappingPosition(positions));
-        }
-
-        return [
-            {
-                id: "packet-1",
-                x: positions[0].x,
-                y: positions[0].y,
-                image: "/assets/hot_potato_venus.png",
-                type: 'data',
-                contentType: 'hot-potato',
-                title: "Hot Potato",
-                description: "Venus is the hottest planet - over 900°F! It's like a giant pizza oven in space!",
-                found: false,
-                opened: false,
-            },
-            {
-                id: "packet-2",
-                x: positions[1].x,
-                y: positions[1].y,
-                image: "/assets/acid_cloud_venus.png",
-                type: 'data',
-                contentType: 'acid-clouds',
-                title: "Acid Clouds",
-                description: "It doesn't rain water on Venus; it rains sulfuric acid that would melt your skin!",
-                found: false,
-                opened: false,
-            },
-            {
-                id: "packet-3",
-                x: positions[2].x,
-                y: positions[2].y,
-                image: "/assets/slow_spinning_venus.png",
-                type: 'data',
-                contentType: 'slow-spinning',
-                title: "Slow Spinning Venus",
-                description: "Venus spins so slowly, one day lasts 243 Earth days - longer than its year!",
-                found: false,
-                opened: false,
-            },
-            {
-                id: "packet-4",
-                x: positions[3].x,
-                y: positions[3].y,
-                image: "/assets/venus_rock.png",
-                type: 'data',
-                contentType: 'rocks',
-                title: "Rocky Surface",
-                description: "Venus has a rocky surface with 1,600+ volcanoes and the same gravity as Earth!",
-                found: false,
-                opened: false,
-            },
-            {
-                id: "trap-1",
-                x: positions[4].x,
-                y: positions[4].y,
-                image: "/assets/data_packet_venus.png",
-                type: 'trap',
-                contentType: 'broken-lens',
-                title: "⚠ Lens Fracture Trap",
-                description: "A micrometeorite struck your telescope lens! Scanning is disabled until you repair it.",
-                found: false,
-                opened: false,
-            },
-            {
-                id: "trap-2",
-                x: positions[5].x,
-                y: positions[5].y,
-                image: "/assets/data_packet_venus.png",
-                type: 'trap',
-                contentType: 'acid-mist',
-                title: "⚠ Acid Vapor Trap",
-                description: "Concentrated sulfuric acid vapor engulfs your telescope! Visibility severely reduced.",
-                found: false,
-                opened: false,
-            },
-            {
-                id: "trap-3",
-                x: positions[6].x,
-                y: positions[6].y,
-                image: "/assets/data_packet_venus.png",
-                type: 'trap',
-                contentType: 'pressure-spike',
-                title: "⚠ Pressure Anomaly",
-                description: "Atmospheric pressure fluctuations go haywire! Safe zone becomes unpredictable.",
-                found: false,
-                opened: false,
-            },
-            {
-                id: "trap-4",
-                x: positions[7].x,
-                y: positions[7].y,
-                image: "/assets/data_packet_venus.png",
-                type: 'trap',
-                contentType: 'heat-blast',
-                title: "⚠ Thermal Shockwave",
-                description: "A wave of extreme heat distorts your instruments and shakes your equipment!",
-                found: false,
-                opened: false,
-            },
-            {
-                id: "trap-5",
-                x: positions[8].x,
-                y: positions[8].y,
-                image: "/assets/data_packet_venus.png",
-                type: 'trap',
-                contentType: 'volcanic-ash',
-                title: "⚠ Volcanic Ash Cloud",
-                description: "A volcanic eruption blankets your view in ash particles!",
-                found: false,
-                opened: false,
-            },
-            {
-                id: "trap-6",
-                x: positions[9].x,
-                y: positions[9].y,
-                image: "/assets/data_packet_venus.png",
-                type: 'trap',
-                contentType: 'broken-lens',
-                title: "⚠ Lens Crack Trap",
-                description: "Another lens fracture! Equipment needs immediate repair.",
-                found: false,
-                opened: false,
-            },
-            {
-                id: "trap-7",
-                x: positions[10].x,
-                y: positions[10].y,
-                image: "/assets/data_packet_venus.png",
-                type: 'trap',
-                contentType: 'acid-mist',
-                title: "⚠ Acid Fog Trap",
-                description: "Dense sulfuric fog rolls in, severely limiting visibility!",
-                found: false,
-                opened: false,
-            },
-        ];
-    });
+    const [dataPackets, setDataPackets] = useState<DataPacket[]>([
+        // DATA PACKETS (need to collect all 4)
+        {
+            id: "packet-1",
+            x: positions[0].x,
+            y: positions[0].y,
+            image: "/assets/hot_potato_venus.png",
+            type: 'data',
+            contentType: 'hot-potato',
+            title: "Hot Potato",
+            description: "Venus is the hottest planet - over 900°F! It's like a giant pizza oven in space!",
+            found: false,
+            opened: false,
+        },
+        {
+            id: "packet-2",
+            x: positions[1].x,
+            y: positions[1].y,
+            image: "/assets/acid_cloud_venus.png",
+            type: 'data',
+            contentType: 'acid-clouds',
+            title: "Acid Clouds",
+            description: "It doesn't rain water on Venus; it rains sulfuric acid that would melt your skin!",
+            found: false,
+            opened: false,
+        },
+        {
+            id: "packet-3",
+            x: positions[2].x,
+            y: positions[2].y,
+            image: "/assets/slow_spinning_venus.png",
+            type: 'data',
+            contentType: 'slow-spinning',
+            title: "Slow Spinning Venus",
+            description: "Venus spins so slowly, one day lasts 243 Earth days - longer than its year!",
+            found: false,
+            opened: false,
+        },
+        {
+            id: "packet-4",
+            x: positions[3].x,
+            y: positions[3].y,
+            image: "/assets/venus_rock.png",
+            type: 'data',
+            contentType: 'rocks',
+            title: "Rocky Surface",
+            description: "Venus has a rocky surface with 1,600+ volcanoes and the same gravity as Earth!",
+            found: false,
+            opened: false,
+        },
+        // TRAP PACKETS (use pre-generated non-overlapping positions)
+        {
+            id: "trap-1",
+            x: positions[4].x,
+            y: positions[4].y,
+            image: "/assets/data_packet_venus.png",
+            type: 'trap',
+            contentType: 'broken-lens',
+            title: "⚠ Lens Fracture Trap",
+            description: "A micrometeorite struck your telescope lens! Scanning is disabled until you repair it.",
+            found: false,
+            opened: false,
+        },
+        {
+            id: "trap-2",
+            x: positions[5].x,
+            y: positions[5].y,
+            image: "/assets/data_packet_venus.png",
+            type: 'trap',
+            contentType: 'acid-mist',
+            title: "⚠ Acid Vapor Trap",
+            description: "Concentrated sulfuric acid vapor engulfs your telescope! Visibility severely reduced.",
+            found: false,
+            opened: false,
+        },
+        {
+            id: "trap-3",
+            x: positions[6].x,
+            y: positions[6].y,
+            image: "/assets/data_packet_venus.png",
+            type: 'trap',
+            contentType: 'pressure-spike',
+            title: "⚠ Pressure Anomaly",
+            description: "Atmospheric pressure fluctuations go haywire! Safe zone becomes unpredictable.",
+            found: false,
+            opened: false,
+        },
+        {
+            id: "trap-4",
+            x: positions[7].x,
+            y: positions[7].y,
+            image: "/assets/data_packet_venus.png",
+            type: 'trap',
+            contentType: 'heat-blast',
+            title: "⚠ Thermal Shockwave",
+            description: "A wave of extreme heat distorts your instruments and shakes your equipment!",
+            found: false,
+            opened: false,
+        },
+        {
+            id: "trap-5",
+            x: positions[8].x,
+            y: positions[8].y,
+            image: "/assets/data_packet_venus.png",
+            type: 'trap',
+            contentType: 'volcanic-ash',
+            title: "⚠ Volcanic Ash Cloud",
+            description: "A volcanic eruption blankets your view in ash particles!",
+            found: false,
+            opened: false,
+        },
+        {
+            id: "trap-6",
+            x: positions[9].x,
+            y: positions[9].y,
+            image: "/assets/data_packet_venus.png",
+            type: 'trap',
+            contentType: 'broken-lens',
+            title: "⚠ Lens Crack Trap",
+            description: "Another lens fracture! Equipment needs immediate repair.",
+            found: false,
+            opened: false,
+        },
+        {
+            id: "trap-7",
+            x: positions[10].x,
+            y: positions[10].y,
+            image: "/assets/data_packet_venus.png",
+            type: 'trap',
+            contentType: 'acid-mist',
+            title: "⚠ Acid Fog Trap",
+            description: "Dense sulfuric fog rolls in, severely limiting visibility!",
+            found: false,
+            opened: false,
+        },
+    ]);
 
     const [telescopePos, setTelescopePos] = useState({ x: 200, y: 200 });
     const [showTitle, setShowTitle] = useState(true);
@@ -269,6 +277,9 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
     // Instructions modal (shows at start)
     const [showInstructions, setShowInstructions] = useState(true);
     const [instructionStep, setInstructionStep] = useState(0);
+
+    // Completion modal (shows when all 4 data packets are found)
+    const [showCompletionModal, setShowCompletionModal] = useState(false);
     
     // Detect mobile screen size changes
     useEffect(() => {
@@ -765,15 +776,11 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
         if (!sceneRef.current || isMobile || showInstructions) return;
 
         const targetPacket = dataPackets.find(packet => {
-            // Convert % to px for distance calculation
-            const pxX = (packet.x / 100) * window.innerWidth;
-            const pxY = (packet.y / 100) * window.innerHeight;
-
             const distance = Math.sqrt(
-                Math.pow(pxX - telescopePos.x, 2) + 
-                Math.pow(pxY - telescopePos.y, 2)
+                Math.pow(packet.x + 50 - telescopePos.x, 2) + 
+                Math.pow(packet.y + 50 - telescopePos.y, 2)
             );
-            return distance < 50 && !packet.opened;
+            return distance < 50 && !packet.found;
         });
 
         if (targetPacket) {
@@ -788,15 +795,14 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
         if (lensIsBroken) return;
         if (activeTrap) return;
 
+        const packetSize = 60; // mobile packet size
+        const packetCenter = packetSize / 2;
+
         const targetPacket = dataPackets.find(packet => {
             if (packet.opened) return false;
-            // Convert % to px for distance calculation
-            const pxX = (packet.x / 100) * window.innerWidth;
-            const pxY = (packet.y / 100) * window.innerHeight;
-
             const distance = Math.sqrt(
-                Math.pow(pxX - telescopePos.x, 2) + 
-                Math.pow(pxY - telescopePos.y, 2)
+                Math.pow(packet.x + packetCenter - telescopePos.x, 2) + 
+                Math.pow(packet.y + packetCenter - telescopePos.y, 2)
             );
             return distance < 50;
         });
@@ -920,12 +926,24 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
 
     // Only count DATA packets for completion (4 required, traps don't count)
     const allFound = dataPackets.filter(p => p.type === 'data' && p.opened).length === 4;
+
+    // Show completion modal when all 4 data packets are found
+    useEffect(() => {
+        if (!allFound) return;
+        // Close trivia modal if open, then show completion modal
+        setShowTriviaModal(false);
+        const timer = setTimeout(() => {
+            setShowCompletionModal(true);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [allFound]);
+
     const inSafeZone = pressure >= 40 && pressure <= 70;
     const isDaytime = dayNightPhase < 100;
 
     return (
         <div
-            className="w-screen h-dvh relative overflow-hidden bg-black z-50"
+            className="w-screen h-screen relative overflow-hidden bg-black"
             style={{
                 transform: `translate(${screenShake.x}px, ${screenShake.y}px)`,
                 transition: 'transform 0.05s',
@@ -1274,9 +1292,8 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                             key={`${packet.contentType}-${packet.x}`}
                             className="absolute transition-all opacity-100"
                             style={{
-                                left: `${packet.x}%`,
-                                top: `${packet.y}%`,
-                                transform: "translate(-50%, -50%)",
+                                left: `${packet.x}px`,
+                                top: `${packet.y}px`,
                                 animation: 'shimmer 0.8s ease-in-out infinite',
                             }}
                         >
@@ -1933,6 +1950,73 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
                             </div>
                         </div>
                     )}
+                    </div>
+                )}
+
+                {/* Stage Complete Modal */}
+                {showCompletionModal && (
+                    <div
+                        className="absolute inset-0 bg-black bg-opacity-85 flex items-center justify-center z-50 pointer-events-auto p-1 sm:p-4"
+                    >
+                        <div
+                            className={`bg-linear-to-b from-green-900 to-teal-900 border border-green-400 relative ${isMobile ? 'p-3 mx-2 max-w-sm w-full' : 'border-4 p-8 max-w-2xl mx-4 w-full'}`}
+                            style={{
+                                boxShadow: '0 0 40px rgba(34, 197, 128, 0.8), 0 0 80px rgba(34, 197, 128, 0.4)',
+                            }}
+                        >
+                            {/* Stars / celebration */}
+                            <div className={`text-center ${isMobile ? 'mb-2' : 'mb-4'}`}>
+                                <div className={`${isMobile ? 'text-2xl mb-1' : 'text-4xl mb-3'}`}>🌟 🚀 🌟</div>
+                                <p
+                                    className={`font-['Press_Start_2P'] text-green-300 ${isMobile ? 'text-[7px]' : 'text-lg'}`}
+                                    style={{ textShadow: '0 0 12px rgba(34, 197, 128, 1)' }}
+                                >
+                                    MISSION COMPLETE!
+                                </p>
+                            </div>
+
+                            {/* Divider */}
+                            <div className={`border-t border-green-600 ${isMobile ? 'my-2' : 'my-4'}`} />
+
+                            {/* Summary */}
+                            <div className={`bg-black bg-opacity-50 border border-green-700 ${isMobile ? 'p-2 mb-3' : 'border-2 p-4 mb-6'}`}>
+                                <p
+                                    className={`font-['Press_Start_2P'] text-green-200 leading-relaxed text-center ${isMobile ? 'text-[5px]' : 'text-xs'}`}
+                                    style={{ textShadow: '0 0 8px rgba(134, 239, 172, 0.6)' }}
+                                >
+                                    All 4 data packets recovered from Venus orbit.
+                                    {!isMobile && '\n'}The S.S. Astra is ready to plot a course to Earth.
+                                </p>
+                            </div>
+
+                            {/* Collected packets list */}
+                            <div className={`grid grid-cols-2 gap-2 ${isMobile ? 'mb-3' : 'mb-6'}`}>
+                                {dataPackets.filter(p => p.type === 'data').map(p => (
+                                    <div
+                                        key={p.id}
+                                        className={`flex items-center gap-2 bg-black bg-opacity-40 border border-green-800 ${isMobile ? 'p-1' : 'p-2'}`}
+                                    >
+                                        <span className={`${isMobile ? 'text-base' : 'text-xl'}`}>
+                                            {p.contentType === 'hot-potato' ? '🔥' :
+                                             p.contentType === 'acid-clouds' ? '☁️' :
+                                             p.contentType === 'slow-spinning' ? '🌀' : '🪨'}
+                                        </span>
+                                        <p className={`font-['Press_Start_2P'] text-green-300 ${isMobile ? 'text-[4px]' : 'text-[9px]'}`}>
+                                            {p.title}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Proceed button */}
+                            <div className="text-center">
+                                <PixelButton
+                                    label={isMobile ? 'Next Planet →' : 'Proceed to Earth →'}
+                                    onClick={onComplete}
+                                    variant="primary"
+                                />
+                            </div>
+                        </div>
                     </div>
                 )}
 
