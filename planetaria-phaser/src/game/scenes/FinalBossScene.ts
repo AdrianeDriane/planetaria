@@ -7,8 +7,6 @@ import { EventBus } from "../EventBus";
 const CORRECT_TO_WIN = 12;
 /** Total number of lives (one per planet) */
 const MAX_LIVES = 8;
-/** Total questions available */
-const TOTAL_QUESTIONS = 20;
 
 // ─── Quiz Data ───
 
@@ -16,31 +14,31 @@ interface QuizQuestion {
   question: string;
   options: string[];
   correctIndex: number;
-  planet: string; // which planet this question is about
+  planet: string;
 }
 
 /**
  * 20 questions across all 8 planets.
  * Ordered from easier to slightly harder (6th-grade appropriate).
- * Each planet gets 2–3 questions.
+ * Correct answers are distributed across A (0), B (1), C (2), D (3).
  */
 const QUESTIONS: QuizQuestion[] = [
   // ── Mercury (2) ──
   {
     question: "Mercury is the _____ planet from the Sun.",
-    options: ["Closest", "Farthest", "Third", "Fifth"],
-    correctIndex: 0,
+    options: ["Farthest", "Third", "Closest", "Fifth"],
+    correctIndex: 2, // C
     planet: "Mercury",
   },
   {
     question: "Why does Mercury have almost no atmosphere?",
     options: [
-      "It's too cold",
       "Its gravity is too weak to hold gas",
+      "It's too cold",
       "It has too much water",
       "It spins too fast",
     ],
-    correctIndex: 1,
+    correctIndex: 0, // A
     planet: "Mercury",
   },
 
@@ -48,33 +46,33 @@ const QUESTIONS: QuizQuestion[] = [
   {
     question:
       "Venus is often called Earth's _____ because of its similar size.",
-    options: ["Brother", "Twin", "Copy", "Shadow"],
-    correctIndex: 1,
+    options: ["Shadow", "Copy", "Brother", "Twin"],
+    correctIndex: 3, // D
     planet: "Venus",
   },
   {
     question: "What makes Venus the hottest planet in our solar system?",
     options: [
+      "It has active volcanoes everywhere",
       "It's closest to the Sun",
       "Its thick atmosphere traps heat",
-      "It has active volcanoes everywhere",
       "It has no water at all",
     ],
-    correctIndex: 1,
+    correctIndex: 2, // C
     planet: "Venus",
   },
 
   // ── Earth (3) ──
   {
     question: "What percentage of Earth's surface is covered by water?",
-    options: ["About 50%", "About 71%", "About 90%", "About 30%"],
-    correctIndex: 1,
+    options: ["About 71%", "About 50%", "About 90%", "About 30%"],
+    correctIndex: 0, // A
     planet: "Earth",
   },
   {
     question: "Earth's atmosphere is mostly made of which gas?",
-    options: ["Oxygen", "Carbon dioxide", "Nitrogen", "Hydrogen"],
-    correctIndex: 2,
+    options: ["Oxygen", "Carbon dioxide", "Hydrogen", "Nitrogen"],
+    correctIndex: 3, // D
     planet: "Earth",
   },
   {
@@ -85,71 +83,71 @@ const QUESTIONS: QuizQuestion[] = [
       "The clouds",
       "The mountains",
     ],
-    correctIndex: 1,
+    correctIndex: 1, // B
     planet: "Earth",
   },
 
   // ── Mars (3) ──
   {
     question: "Mars is known as the _____ Planet.",
-    options: ["Blue", "Red", "Green", "Gold"],
-    correctIndex: 1,
+    options: ["Blue", "Green", "Red", "Gold"],
+    correctIndex: 2, // C
     planet: "Mars",
   },
   {
     question: "What is the tallest volcano in the solar system, found on Mars?",
-    options: ["Mount Everest", "Olympus Mons", "Mauna Kea", "Valles Marineris"],
-    correctIndex: 1,
+    options: ["Mount Everest", "Valles Marineris", "Mauna Kea", "Olympus Mons"],
+    correctIndex: 3, // D
     planet: "Mars",
   },
   {
     question: "Mars has two small moons. What are they called?",
     options: [
-      "Titan and Europa",
       "Phobos and Deimos",
+      "Titan and Europa",
       "Io and Ganymede",
       "Luna and Sol",
     ],
-    correctIndex: 1,
+    correctIndex: 0, // A
     planet: "Mars",
   },
 
   // ── Jupiter (3) ──
   {
     question: "Jupiter is the _____ planet in our solar system.",
-    options: ["Smallest", "Hottest", "Largest", "Closest"],
-    correctIndex: 2,
+    options: ["Smallest", "Hottest", "Closest", "Largest"],
+    correctIndex: 3, // D
     planet: "Jupiter",
   },
   {
     question: "What is Jupiter's Great Red Spot?",
     options: [
       "A giant volcano",
+      "A crater from an asteroid",
       "A massive storm",
       "A red ocean",
-      "A crater from an asteroid",
     ],
-    correctIndex: 1,
+    correctIndex: 2, // C
     planet: "Jupiter",
   },
   {
     question: "How many Earth-sized planets could fit inside Jupiter?",
-    options: ["About 50", "About 500", "About 1,300", "About 10,000"],
-    correctIndex: 2,
+    options: ["About 1,300", "About 500", "About 50", "About 10,000"],
+    correctIndex: 0, // A
     planet: "Jupiter",
   },
 
   // ── Saturn (2) ──
   {
     question: "Saturn's rings are mostly made of what material?",
-    options: ["Rock and metal", "Gas clouds", "Ice particles", "Liquid lava"],
-    correctIndex: 2,
+    options: ["Gas clouds", "Ice particles", "Rock and metal", "Liquid lava"],
+    correctIndex: 1, // B
     planet: "Saturn",
   },
   {
     question: "Saturn is so light that it could theoretically _____ in water.",
-    options: ["Sink", "Float", "Dissolve", "Freeze"],
-    correctIndex: 1,
+    options: ["Freeze", "Dissolve", "Sink", "Float"],
+    correctIndex: 3, // D
     planet: "Saturn",
   },
 
@@ -157,48 +155,48 @@ const QUESTIONS: QuizQuestion[] = [
   {
     question: "What makes Uranus unique among all the planets?",
     options: [
+      "It has the most rings",
       "It has no moons",
       "It rotates on its side",
-      "It has the most rings",
       "It's the hottest planet",
     ],
-    correctIndex: 1,
+    correctIndex: 2, // C
     planet: "Uranus",
   },
   {
     question: "What gives Uranus its blue-green color?",
     options: [
-      "Water on the surface",
       "Methane in the atmosphere",
+      "Water on the surface",
       "Copper in the rocks",
       "Reflected light from Neptune",
     ],
-    correctIndex: 1,
+    correctIndex: 0, // A
     planet: "Uranus",
   },
 
   // ── Neptune (3) ──
   {
     question: "Neptune has the strongest _____ in the solar system.",
-    options: ["Gravity", "Winds", "Magnetic field", "Tides"],
-    correctIndex: 1,
+    options: ["Gravity", "Tides", "Magnetic field", "Winds"],
+    correctIndex: 3, // D
     planet: "Neptune",
   },
   {
     question: "How long does it take Neptune to orbit the Sun once?",
     options: [
       "12 Earth years",
-      "84 Earth years",
       "165 Earth years",
+      "84 Earth years",
       "365 Earth days",
     ],
-    correctIndex: 2,
+    correctIndex: 1, // B
     planet: "Neptune",
   },
   {
     question: "Neptune is classified as what type of planet?",
-    options: ["Rocky planet", "Gas giant", "Ice giant", "Dwarf planet"],
-    correctIndex: 2,
+    options: ["Ice giant", "Rocky planet", "Gas giant", "Dwarf planet"],
+    correctIndex: 0, // A
     planet: "Neptune",
   },
 ];
@@ -234,6 +232,20 @@ const PLANET_BEAM_COLORS: Record<string, number> = {
   Neptune: 0x6366f1,
 };
 
+// ─── Star interface for animated background ───
+
+interface BGStar {
+  x: number;
+  y: number;
+  speed: number;
+  size: number;
+  brightness: number;
+  color: number;
+  baseAlpha: number;
+  twinkleSpeed: number;
+  twinkleOffset: number;
+}
+
 // ─── Scene ───
 
 export default class FinalBossScene extends Phaser.Scene {
@@ -253,6 +265,7 @@ export default class FinalBossScene extends Phaser.Scene {
   /** Boss sprite — replace texture key with your asset */
   private bossSprite!: Phaser.GameObjects.Sprite;
   private bossInitialX: number = 0;
+  private bossAura!: Phaser.GameObjects.Circle;
 
   // UI elements
   private bossHealthBar!: Phaser.GameObjects.Graphics;
@@ -264,8 +277,21 @@ export default class FinalBossScene extends Phaser.Scene {
   private feedbackText!: Phaser.GameObjects.Text;
   private questionCounter!: Phaser.GameObjects.Text;
 
-  // Background
-  private stars: Phaser.GameObjects.Circle[] = [];
+  // Background starfield
+  private bgStars: BGStar[] = [];
+  private starRT!: Phaser.GameObjects.RenderTexture;
+  private starGfx!: Phaser.GameObjects.Graphics;
+  private elapsed: number = 0;
+
+  // Intensity effects
+  private screenShakeIntensity: number = 0;
+  private warningOverlay!: Phaser.GameObjects.Rectangle;
+  private voidParticles!: Phaser.GameObjects.Particles.ParticleEmitter;
+
+  // Star colors
+  private static STAR_COLORS = [
+    0xffffff, 0xc8c8ff, 0xffdcb4, 0xb4b4ff, 0xffb4b4, 0xb4ffdc, 0xdcc8ff,
+  ];
 
   constructor() {
     super("FinalBossScene");
@@ -287,7 +313,6 @@ export default class FinalBossScene extends Phaser.Scene {
     // ║  Planet life icon:                                            ║
     // ║    this.load.image("life_icon", "assets/ui/life_planet.png");║
     // ╚═══════════════════════════════════════════════════════════════╝
-    // We generate placeholder textures in create() if not loaded
   }
 
   // ─── Create ───
@@ -305,7 +330,9 @@ export default class FinalBossScene extends Phaser.Scene {
     this.isGameOver = false;
     this.optionButtons = [];
     this.livesIcons = [];
-    this.stars = [];
+    this.bgStars = [];
+    this.elapsed = 0;
+    this.screenShakeIntensity = 0;
 
     // Shuffle questions
     this.shuffledQuestions = Phaser.Utils.Array.Shuffle([...QUESTIONS]);
@@ -314,7 +341,9 @@ export default class FinalBossScene extends Phaser.Scene {
     this.createPlaceholderTextures();
 
     // Build the scene
-    this.createBackground(width, height);
+    this.createStarfield(width, height);
+    this.createWarningOverlay(width, height);
+    this.createVoidParticles(width, height);
     this.createBoss(width, height);
     this.createPlayer(width, height);
     this.createBossHealthBar(width, height);
@@ -326,24 +355,239 @@ export default class FinalBossScene extends Phaser.Scene {
     this.startIntro(width, height);
   }
 
+  // ─── Update (called every frame) ───
+
+  update(_time: number, delta: number): void {
+    this.elapsed += delta;
+    this.updateStarfield(delta);
+    this.updateAmbientShake(delta);
+    this.updateBossIdle(delta);
+  }
+
+  // ─── Animated Starfield Background ───
+
+  private createStarfield(width: number, height: number): void {
+    this.starRT = this.add
+      .renderTexture(0, 0, width, height)
+      .setOrigin(0)
+      .setDepth(-10)
+      .setScrollFactor(0);
+
+    this.starGfx = this.add.graphics().setVisible(false);
+
+    // Seeded RNG for consistency
+    let seed = 42;
+    const rng = () => {
+      seed = (seed * 16807) % 2147483647;
+      return (seed - 1) / 2147483646;
+    };
+
+    // Normal stars
+    for (let i = 0; i < 300; i++) {
+      this.bgStars.push({
+        x: rng() * width,
+        y: rng() * height,
+        speed: 0.15 + rng() * 0.6,
+        size: rng() < 0.7 ? 1 : rng() < 0.9 ? 1.5 : 2,
+        brightness: 0.15 + rng() * 0.55,
+        color:
+          FinalBossScene.STAR_COLORS[
+            Math.floor(rng() * FinalBossScene.STAR_COLORS.length)
+          ],
+        baseAlpha: 0.15 + rng() * 0.55,
+        twinkleSpeed: 1.5 + rng() * 3,
+        twinkleOffset: rng() * Math.PI * 2,
+      });
+    }
+
+    // Brighter accent stars
+    for (let i = 0; i < 25; i++) {
+      this.bgStars.push({
+        x: rng() * width,
+        y: rng() * height,
+        speed: 0.08 + rng() * 0.25,
+        size: 2.5,
+        brightness: 0.5 + rng() * 0.5,
+        color:
+          FinalBossScene.STAR_COLORS[
+            Math.floor(rng() * FinalBossScene.STAR_COLORS.length)
+          ],
+        baseAlpha: 0.5 + rng() * 0.5,
+        twinkleSpeed: 1 + rng() * 2,
+        twinkleOffset: rng() * Math.PI * 2,
+      });
+    }
+  }
+
+  private updateStarfield(delta: number): void {
+    const { width, height } = this.scale;
+    const dt = delta / 16.667;
+    const time = this.elapsed / 1000;
+
+    // Star drift speeds increase as boss health drops (battle intensifies)
+    const intensityMul = 1 + (1 - this.bossHealth / CORRECT_TO_WIN) * 2;
+    const dx = -0.25 * intensityMul;
+    const dy = -0.12 * intensityMul;
+
+    this.starRT.clear();
+    this.starGfx.clear();
+
+    // Deep space base
+    this.starGfx.fillStyle(0x000008, 1);
+    this.starGfx.fillRect(0, 0, width, height);
+
+    // Red nebula intensifies as fight progresses
+    const nebulaAlpha = 0.03 + (1 - this.bossHealth / CORRECT_TO_WIN) * 0.06;
+    const nebs = [
+      { x: width * 0.7, y: height * 0.3, r: 120, c: 0x501020, a: nebulaAlpha },
+      {
+        x: width * 0.85,
+        y: height * 0.5,
+        r: 90,
+        c: 0x3c0a14,
+        a: nebulaAlpha * 0.8,
+      },
+      { x: width * 0.15, y: height * 0.25, r: 80, c: 0x142850, a: 0.035 },
+      { x: width * 0.4, y: height * 0.7, r: 60, c: 0x143c3c, a: 0.025 },
+    ];
+    for (const n of nebs) {
+      this.starGfx.fillStyle(n.c, n.a);
+      this.starGfx.fillCircle(n.x, n.y, n.r);
+      this.starGfx.fillStyle(n.c, n.a * 1.3);
+      this.starGfx.fillCircle(n.x, n.y, n.r * 0.6);
+    }
+
+    // Move and draw stars with twinkle
+    for (const s of this.bgStars) {
+      s.x += dx * s.speed * dt;
+      s.y += dy * s.speed * dt;
+
+      // Wrap around viewport
+      if (s.x < -2) s.x += width + 4;
+      if (s.x > width + 2) s.x -= width + 4;
+      if (s.y < -2) s.y += height + 4;
+      if (s.y > height + 2) s.y -= height + 4;
+
+      // Twinkle effect
+      const twinkle =
+        s.baseAlpha *
+        (0.6 + 0.4 * Math.sin(time * s.twinkleSpeed + s.twinkleOffset));
+
+      if (s.size > 2) {
+        this.starGfx.fillStyle(s.color, twinkle * 0.15);
+        this.starGfx.fillCircle(s.x, s.y, 3);
+        this.starGfx.fillStyle(s.color, twinkle);
+        this.starGfx.fillPoint(s.x, s.y, 2);
+        this.starGfx.fillStyle(0xffffff, twinkle * 0.8);
+        this.starGfx.fillPoint(s.x, s.y, 1);
+      } else {
+        this.starGfx.fillStyle(s.color, twinkle);
+        this.starGfx.fillPoint(s.x, s.y, s.size);
+      }
+    }
+
+    this.starRT.draw(this.starGfx);
+  }
+
+  // ─── Ambient Intensity Effects ───
+
+  private createWarningOverlay(width: number, height: number): void {
+    // Red warning flash overlay — used for wrong answers and intensity
+    this.warningOverlay = this.add
+      .rectangle(0, 0, width, height, 0xff0000, 0)
+      .setOrigin(0)
+      .setDepth(28)
+      .setBlendMode(Phaser.BlendModes.ADD);
+  }
+
+  private createVoidParticles(width: number, height: number): void {
+    // Ambient void particles drifting from the right (boss side)
+    if (!this.textures.exists("void_dust")) {
+      const gfx = this.make.graphics({ x: 0, y: 0 });
+      gfx.fillStyle(0xef4444, 0.6);
+      gfx.fillCircle(3, 3, 3);
+      gfx.generateTexture("void_dust", 6, 6);
+      gfx.destroy();
+    }
+
+    this.voidParticles = this.add
+      .particles(width + 10, height / 2, "void_dust", {
+        x: { min: width * 0.6, max: width + 20 },
+        y: { min: 0, max: height },
+        speedX: { min: -40, max: -15 },
+        speedY: { min: -10, max: 10 },
+        scale: { start: 0.4, end: 0 },
+        alpha: { start: 0.3, end: 0 },
+        blendMode: "ADD",
+        lifespan: { min: 2000, max: 4000 },
+        frequency: 200,
+        quantity: 1,
+      })
+      .setDepth(3);
+  }
+
+  private updateAmbientShake(_delta: number): void {
+    // Constant subtle screen vibration that increases as boss weakens
+    const healthPercent = this.bossHealth / CORRECT_TO_WIN;
+    const baseShake = (1 - healthPercent) * 0.3; // 0 to 0.3 pixels
+
+    if (baseShake > 0.05 && !this.isGameOver) {
+      const ox = (Math.random() - 0.5) * baseShake * 2;
+      const oy = (Math.random() - 0.5) * baseShake * 2;
+      this.cameras.main.setScroll(ox, oy);
+    }
+
+    // Pulse the warning overlay slightly at low boss health
+    if (healthPercent < 0.4 && !this.isGameOver) {
+      const pulse = Math.sin(this.elapsed / 800) * 0.015 * (1 - healthPercent);
+      this.warningOverlay.setAlpha(Math.max(0, pulse));
+    }
+
+    // Increase void particle rate as battle intensifies
+    if (this.voidParticles) {
+      const freq = Math.max(40, 200 - (1 - healthPercent) * 160);
+      this.voidParticles.frequency = freq;
+    }
+  }
+
+  private updateBossIdle(_delta: number): void {
+    // Boss continuous menacing bob and pulse
+    if (this.bossSprite && !this.isGameOver) {
+      const time = this.elapsed / 1000;
+      const bobY = Math.sin(time * 1.2) * 4;
+      const bobX = Math.sin(time * 0.7) * 2;
+      this.bossSprite.y = this.scale.height * 0.38 + bobY;
+      this.bossSprite.x = this.bossInitialX + bobX;
+
+      // Pulsing scale
+      const pulse = 1.7 + Math.sin(time * 2) * 0.1;
+      this.bossSprite.setScale(pulse);
+
+      // Aura follows boss
+      if (this.bossAura) {
+        this.bossAura.setPosition(this.bossSprite.x, this.bossSprite.y);
+        const auraAlpha = 0.06 + Math.sin(time * 1.5) * 0.04;
+        this.bossAura.setAlpha(auraAlpha);
+        const auraScale = 1.0 + Math.sin(time * 1.8) * 0.15;
+        this.bossAura.setScale(auraScale);
+      }
+    }
+  }
+
   // ─── Placeholder Texture Generation ───
 
   private createPlaceholderTextures(): void {
     // ╔═══════════════════════════════════════════════════════════════╗
     // ║  PLAYER SHIP PLACEHOLDER                                     ║
-    // ║  This creates a simple triangle ship shape.                  ║
     // ║  To replace: load your image in preload() with key           ║
     // ║  "boss_player" and remove this block.                        ║
     // ╚═══════════════════════════════════════════════════════════════╝
     if (!this.textures.exists("boss_player")) {
       const playerGfx = this.make.graphics({ x: 0, y: 0 });
-      // Ship body
       playerGfx.fillStyle(0x3b82f6);
       playerGfx.fillTriangle(60, 30, 0, 0, 0, 60);
-      // Engine glow
       playerGfx.fillStyle(0x22d3ee);
       playerGfx.fillRect(0, 22, 8, 16);
-      // Cockpit
       playerGfx.fillStyle(0xbae6fd);
       playerGfx.fillTriangle(50, 30, 30, 22, 30, 38);
       playerGfx.generateTexture("boss_player", 64, 64);
@@ -352,27 +596,21 @@ export default class FinalBossScene extends Phaser.Scene {
 
     // ╔═══════════════════════════════════════════════════════════════╗
     // ║  BOSS (VOID DEVOURER) PLACEHOLDER                           ║
-    // ║  This creates a menacing dark circle with red accents.       ║
     // ║  To replace: load your image in preload() with key           ║
     // ║  "boss_enemy" and remove this block.                         ║
     // ╚═══════════════════════════════════════════════════════════════╝
     if (!this.textures.exists("boss_enemy")) {
       const bossGfx = this.make.graphics({ x: 0, y: 0 });
-      // Dark body
       bossGfx.fillStyle(0x1a0000);
       bossGfx.fillCircle(64, 64, 60);
-      // Red outer ring
       bossGfx.lineStyle(4, 0xef4444);
       bossGfx.strokeCircle(64, 64, 58);
-      // Inner red glow
       bossGfx.fillStyle(0x450a0a);
       bossGfx.fillCircle(64, 64, 40);
-      // Evil eye
       bossGfx.fillStyle(0xef4444);
       bossGfx.fillCircle(64, 64, 14);
       bossGfx.fillStyle(0xfca5a5);
       bossGfx.fillCircle(60, 60, 5);
-      // Dark tendrils (simple lines)
       bossGfx.lineStyle(3, 0x7f1d1d);
       for (let i = 0; i < 8; i++) {
         const angle = (i / 8) * Math.PI * 2;
@@ -388,7 +626,6 @@ export default class FinalBossScene extends Phaser.Scene {
 
     // ╔═══════════════════════════════════════════════════════════════╗
     // ║  LIFE ICON PLACEHOLDER                                       ║
-    // ║  Small colored circle representing a planet life.            ║
     // ║  To replace: load your image in preload() with key           ║
     // ║  "life_icon" and remove this block.                          ║
     // ╚═══════════════════════════════════════════════════════════════╝
@@ -421,53 +658,9 @@ export default class FinalBossScene extends Phaser.Scene {
     }
   }
 
-  // ─── Background ───
-
-  private createBackground(width: number, height: number): void {
-    // Deep space gradient background
-    this.add.rectangle(0, 0, width, height, COLORS.VOID_BG).setOrigin(0);
-
-    // Add a subtle red nebula effect for the boss area
-    const nebula = this.add.graphics();
-    nebula.fillGradientStyle(
-      0x1a0000,
-      0x1a0000,
-      COLORS.VOID_BG,
-      COLORS.VOID_BG,
-      0.3,
-      0.3,
-      0,
-      0
-    );
-    nebula.fillRect(width * 0.5, 0, width * 0.5, height);
-
-    // Parallax stars
-    for (let i = 0; i < 80; i++) {
-      const star = this.add.circle(
-        Phaser.Math.Between(0, width),
-        Phaser.Math.Between(0, height),
-        Phaser.Math.FloatBetween(0.5, 2),
-        0xffffff,
-        Phaser.Math.FloatBetween(0.1, 0.5)
-      );
-      this.stars.push(star);
-
-      // Twinkle animation
-      this.tweens.add({
-        targets: star,
-        alpha: Phaser.Math.FloatBetween(0.05, 0.2),
-        duration: Phaser.Math.Between(1500, 4000),
-        yoyo: true,
-        repeat: -1,
-        delay: Phaser.Math.Between(0, 2000),
-      });
-    }
-  }
-
   // ─── Boss ───
 
   private createBoss(width: number, height: number): void {
-    // Boss starts off-screen to the right
     this.bossInitialX = width * 0.78;
 
     // ╔═══════════════════════════════════════════════════════════════╗
@@ -480,36 +673,11 @@ export default class FinalBossScene extends Phaser.Scene {
       .setScale(1.8)
       .setDepth(5);
 
-    // Boss idle animation — menacing pulse
-    this.tweens.add({
-      targets: this.bossSprite,
-      scaleX: 1.9,
-      scaleY: 1.7,
-      duration: 2000,
-      yoyo: true,
-      repeat: -1,
-      ease: "Sine.easeInOut",
-    });
-
     // Boss red glow aura
-    const aura = this.add
-      .circle(this.bossSprite.x, this.bossSprite.y, 80, COLORS.BOSS_RED, 0.08)
-      .setDepth(4);
-
-    this.tweens.add({
-      targets: aura,
-      alpha: 0.15,
-      scaleX: 1.3,
-      scaleY: 1.3,
-      duration: 1500,
-      yoyo: true,
-      repeat: -1,
-    });
-
-    // Bind aura position to boss
-    this.events.on("update", () => {
-      aura.setPosition(this.bossSprite.x, this.bossSprite.y);
-    });
+    this.bossAura = this.add
+      .circle(this.bossSprite.x, this.bossSprite.y, 90, COLORS.BOSS_RED, 0.08)
+      .setDepth(4)
+      .setBlendMode(Phaser.BlendModes.ADD);
   }
 
   // ─── Player ───
@@ -603,7 +771,6 @@ export default class FinalBossScene extends Phaser.Scene {
         barHeight - 4,
         3
       );
-      // Inner glow
       this.bossHealthBar.fillStyle(0xfca5a5, 0.3);
       this.bossHealthBar.fillRoundedRect(
         barX + 2,
@@ -615,27 +782,28 @@ export default class FinalBossScene extends Phaser.Scene {
     }
   }
 
-  // ─── Lives Display ───
+  // ─── Lives Display (vertical, bottom-left) ───
 
-  private createLivesDisplay(width: number, height: number): void {
-    const startX = 16;
-    const y = height - 24;
+  private createLivesDisplay(_width: number, height: number): void {
+    const x = 22;
+    const startY = height - 30;
 
     // Label
     this.add
-      .text(startX, y - 14, "SOLAR SHIELD", {
+      .text(x, startY - MAX_LIVES * 26 - 12, "SHIELD", {
         fontFamily: "'Press Start 2P', monospace",
-        fontSize: "6px",
+        fontSize: "5px",
         color: COLORS.TEXT_GRAY,
       })
+      .setOrigin(0.5)
       .setDepth(20);
 
     // ╔═══════════════════════════════════════════════════════════════╗
-    // ║  LIFE ICONS                                                  ║
+    // ║  LIFE ICONS — arranged vertically, bottom-left               ║
     // ║  Uses "life_icon" texture key.                               ║
     // ║  Each icon represents one planet/life.                       ║
     // ║  To use custom planet sprites per life, change the texture   ║
-    // ║  key for each icon individually.                             ║
+    // ║  key for each icon individually below.                       ║
     // ╚═══════════════════════════════════════════════════════════════╝
     const planetNames = [
       "Mercury",
@@ -649,25 +817,23 @@ export default class FinalBossScene extends Phaser.Scene {
     ];
 
     for (let i = 0; i < MAX_LIVES; i++) {
+      // Bottom icon = index 0 (Mercury), top icon = index 7 (Neptune)
+      const yPos = startY - i * 26;
+
       const icon = this.add
-        .sprite(startX + i * 28 + 10, y, "life_icon")
+        .sprite(x, yPos, "life_icon")
         .setScale(1)
         .setDepth(20);
 
-      // Tooltip on hover (planet name)
-      icon.setInteractive({ useHandCursor: false });
-      const tooltip = this.add
-        .text(icon.x, icon.y - 16, planetNames[i], {
+      // Planet name label next to icon
+      this.add
+        .text(x + 16, yPos, planetNames[i].substring(0, 3).toUpperCase(), {
           fontFamily: "'Press Start 2P', monospace",
-          fontSize: "5px",
-          color: "#94a3b8",
+          fontSize: "4px",
+          color: "#64748b",
         })
-        .setOrigin(0.5)
-        .setDepth(21)
-        .setVisible(false);
-
-      icon.on("pointerover", () => tooltip.setVisible(true));
-      icon.on("pointerout", () => tooltip.setVisible(false));
+        .setOrigin(0, 0.5)
+        .setDepth(20);
 
       this.livesIcons.push(icon);
     }
@@ -676,25 +842,25 @@ export default class FinalBossScene extends Phaser.Scene {
   // ─── Question UI ───
 
   private createQuestionUI(width: number, height: number): void {
-    // Question counter (top-left)
+    // Question counter (top-left, offset from lives)
     this.questionCounter = this.add
-      .text(16, 16, "", {
+      .text(60, 16, "", {
         fontFamily: "'Press Start 2P', monospace",
         fontSize: "7px",
         color: COLORS.TEXT_CYAN,
       })
       .setDepth(20);
 
-    // Question text (bottom area)
-    const questionY = height * 0.62;
+    // Question text — positioned in the middle area, above the options
+    const questionY = height * 0.52;
 
     this.questionText = this.add
       .text(width / 2, questionY, "", {
         fontFamily: "'Press Start 2P', monospace",
-        fontSize: "9px",
+        fontSize: "8px",
         color: COLORS.TEXT_WHITE,
         align: "center",
-        wordWrap: { width: width - 60 },
+        wordWrap: { width: width * 0.75 },
         lineSpacing: 6,
       })
       .setOrigin(0.5, 0)
@@ -703,7 +869,7 @@ export default class FinalBossScene extends Phaser.Scene {
 
   private createFeedbackText(width: number, height: number): void {
     this.feedbackText = this.add
-      .text(width / 2, height * 0.55, "", {
+      .text(width / 2, height * 0.47, "", {
         fontFamily: "'Press Start 2P', monospace",
         fontSize: "10px",
         color: COLORS.TEXT_WHITE,
@@ -717,6 +883,27 @@ export default class FinalBossScene extends Phaser.Scene {
   // ─── Intro Sequence ───
 
   private startIntro(width: number, height: number): void {
+    // Title text
+    const titleText = this.add
+      .text(width / 2, height * 0.15, "FINAL STAND", {
+        fontFamily: "'Press Start 2P', monospace",
+        fontSize: "14px",
+        color: "#ef4444",
+        align: "center",
+      })
+      .setOrigin(0.5)
+      .setDepth(30)
+      .setAlpha(0);
+
+    this.tweens.add({
+      targets: titleText,
+      alpha: 1,
+      duration: 800,
+      hold: 1500,
+      yoyo: true,
+      onComplete: () => titleText.destroy(),
+    });
+
     // Fly player in from the left
     this.tweens.add({
       targets: this.playerShip,
@@ -725,20 +912,22 @@ export default class FinalBossScene extends Phaser.Scene {
       ease: "Cubic.easeOut",
     });
 
-    // Bring boss in from the right
+    // Bring boss in from the right with dramatic entrance
     this.tweens.add({
       targets: this.bossSprite,
       x: this.bossInitialX,
       duration: 2500,
       ease: "Back.easeOut",
       delay: 800,
+      onComplete: () => {
+        // Boss entrance shake
+        this.cameras.main.shake(600, 0.008);
+        this.cameras.main.flash(300, 40, 0, 0);
+      },
     });
 
-    // Flash screen
-    this.cameras.main.flash(500, 40, 0, 0);
-
     // Start the battle after intro
-    this.time.delayedCall(3500, () => {
+    this.time.delayedCall(4000, () => {
       this.showQuestion();
     });
   }
@@ -752,7 +941,6 @@ export default class FinalBossScene extends Phaser.Scene {
 
     // Check if we've run out of questions
     if (this.currentQuestionIndex >= this.shuffledQuestions.length) {
-      // If boss still alive but questions exhausted, player loses
       this.triggerGameOver(false);
       return;
     }
@@ -764,29 +952,41 @@ export default class FinalBossScene extends Phaser.Scene {
       `Q${this.questionsAnswered + 1}  |  ${this.correctAnswers}/${CORRECT_TO_WIN} hits`
     );
 
-    // Show question text
+    // Show question text with typewriter-like pop
     this.questionText.setText(q.question);
     this.questionText.setAlpha(0);
+    this.questionText.setScale(0.9);
     this.tweens.add({
       targets: this.questionText,
       alpha: 1,
+      scaleX: 1,
+      scaleY: 1,
       duration: 300,
+      ease: "Back.easeOut",
     });
 
     // Clear old option buttons
     this.optionButtons.forEach((btn) => btn.destroy());
     this.optionButtons = [];
 
-    // Create option buttons
-    const optionStartY = height * 0.75;
-    const optionWidth = Math.min(width - 40, 380);
-    const optionHeight = 32;
-    const optionGap = 8;
+    // Create option buttons — 2x2 grid layout to avoid overflow
+    const gridCols = 2;
+    const gridRows = 2;
+    const optionWidth = Math.min((width - 80) / 2, 200);
+    const optionHeight = 36;
+    const gapX = 10;
+    const gapY = 8;
+    const gridWidth = gridCols * optionWidth + (gridCols - 1) * gapX;
+    const gridStartX = (width - gridWidth) / 2;
+    const gridStartY = height * 0.68;
 
     q.options.forEach((optionText, i) => {
-      const y = optionStartY + i * (optionHeight + optionGap);
+      const col = i % gridCols;
+      const row = Math.floor(i / gridCols);
+      const x = gridStartX + col * (optionWidth + gapX) + optionWidth / 2;
+      const y = gridStartY + row * (optionHeight + gapY) + optionHeight / 2;
 
-      const container = this.add.container(width / 2, y).setDepth(20);
+      const container = this.add.container(x, y).setDepth(20);
 
       // Button background
       const bg = this.add
@@ -809,25 +1009,25 @@ export default class FinalBossScene extends Phaser.Scene {
         );
 
       // Option label
-      const label = String.fromCharCode(65 + i); // A, B, C, D
+      const label = String.fromCharCode(65 + i);
       const text = this.add
         .text(0, 0, `${label}. ${optionText}`, {
           fontFamily: "'Press Start 2P', monospace",
-          fontSize: "7px",
+          fontSize: "6px",
           color: "#e2e8f0",
           align: "center",
-          wordWrap: { width: optionWidth - 24 },
+          wordWrap: { width: optionWidth - 16 },
         })
         .setOrigin(0.5);
 
       container.add([bg, text]);
 
-      // Make interactive
+      // Hit zone
       const hitZone = this.add
         .rectangle(0, 0, optionWidth, optionHeight)
         .setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
-        .setAlpha(0.001); // invisible hit area
+        .setAlpha(0.001);
 
       container.add(hitZone);
 
@@ -851,6 +1051,7 @@ export default class FinalBossScene extends Phaser.Scene {
               optionHeight,
               6
             );
+          container.setScale(1.03);
         }
       });
 
@@ -873,6 +1074,7 @@ export default class FinalBossScene extends Phaser.Scene {
               optionHeight,
               6
             );
+          container.setScale(1);
         }
       });
 
@@ -882,13 +1084,17 @@ export default class FinalBossScene extends Phaser.Scene {
         this.handleAnswer(i, q, bg, optionWidth, optionHeight);
       });
 
-      // Fade in
+      // Staggered entry animation
       container.setAlpha(0);
+      container.setScale(0.8);
       this.tweens.add({
         targets: container,
         alpha: 1,
-        duration: 200,
-        delay: i * 80,
+        scaleX: 1,
+        scaleY: 1,
+        duration: 250,
+        delay: i * 100,
+        ease: "Back.easeOut",
       });
 
       this.optionButtons.push(container);
@@ -968,21 +1174,29 @@ export default class FinalBossScene extends Phaser.Scene {
     this.drawBossHealth(barX, 20, barWidth, 16);
     this.bossHealthText.setText(`${this.bossHealth}/${CORRECT_TO_WIN}`);
 
-    // Boss hit reaction
+    // Boss hit reaction — violent shake
     this.tweens.add({
       targets: this.bossSprite,
-      x: this.bossSprite.x + 15,
+      x: this.bossSprite.x + 20,
       tint: 0xffffff,
-      duration: 100,
+      duration: 60,
       yoyo: true,
-      repeat: 2,
+      repeat: 4,
       onComplete: () => {
         this.bossSprite.clearTint();
       },
     });
 
     // Camera shake
-    this.cameras.main.shake(200, 0.005);
+    this.cameras.main.shake(300, 0.008);
+
+    // Boss roar / red flash
+    this.warningOverlay.setAlpha(0.1);
+    this.tweens.add({
+      targets: this.warningOverlay,
+      alpha: 0,
+      duration: 500,
+    });
 
     // Check win condition
     if (this.bossHealth <= 0) {
@@ -1010,28 +1224,62 @@ export default class FinalBossScene extends Phaser.Scene {
     // Boss attack animation — lunges toward player with sparks
     this.bossAttackAnimation();
 
-    // Remove a life icon
-    if (this.livesIcons.length > this.lives) {
-      const lostIcon = this.livesIcons[this.lives];
+    // Remove a life icon (remove from top = Neptune first)
+    const iconIndex = this.lives; // after decrement, this is the index to remove
+    if (iconIndex >= 0 && iconIndex < this.livesIcons.length) {
+      const lostIcon = this.livesIcons[iconIndex];
       if (lostIcon) {
+        // Dramatic destruction animation
         this.tweens.add({
           targets: lostIcon,
           alpha: 0,
-          scaleX: 2,
-          scaleY: 2,
+          scaleX: 2.5,
+          scaleY: 2.5,
           tint: 0xff0000,
-          duration: 400,
+          duration: 500,
           ease: "Back.easeIn",
           onComplete: () => {
             lostIcon.setVisible(false);
           },
         });
+
+        // Spark burst at the lost icon
+        this.add
+          .particles(lostIcon.x, lostIcon.y, "spark_particle", {
+            speed: { min: 40, max: 120 },
+            scale: { start: 0.5, end: 0 },
+            blendMode: "ADD",
+            lifespan: 500,
+            tint: [0xef4444, 0xfca5a5],
+            quantity: 6,
+            emitting: false,
+          })
+          .explode(6)
+          .setDepth(21);
       }
     }
 
-    // Camera shake (stronger)
-    this.cameras.main.shake(300, 0.01);
-    this.cameras.main.flash(200, 60, 0, 0);
+    // Heavy camera shake
+    this.cameras.main.shake(500, 0.015);
+    // Red flash
+    this.cameras.main.flash(300, 80, 0, 0);
+    // Warning overlay pulse
+    this.warningOverlay.setAlpha(0.15);
+    this.tweens.add({
+      targets: this.warningOverlay,
+      alpha: 0,
+      duration: 800,
+      ease: "Cubic.easeOut",
+    });
+
+    // Player ship recoil
+    this.tweens.add({
+      targets: this.playerShip,
+      x: this.playerShip.x - 12,
+      duration: 100,
+      yoyo: true,
+      repeat: 1,
+    });
 
     // Check lose condition
     if (this.lives <= 0) {
@@ -1058,41 +1306,64 @@ export default class FinalBossScene extends Phaser.Scene {
     const endX = this.bossSprite.x;
     const endY = this.bossSprite.y;
 
+    // Player recoil from firing
+    this.tweens.add({
+      targets: this.playerShip,
+      x: this.playerShip.x - 8,
+      duration: 80,
+      yoyo: true,
+    });
+
     // Main beam line
     const beam = this.add.graphics().setDepth(15);
-    beam.lineStyle(4, beamColor, 0.9);
-    beam.lineBetween(startX, startY, startX, startY);
 
-    // Animate beam extending to boss
     const beamProgress = { t: 0 };
     this.tweens.add({
       targets: beamProgress,
       t: 1,
-      duration: 300,
+      duration: 250,
       ease: "Cubic.easeOut",
       onUpdate: () => {
         const cx = Phaser.Math.Linear(startX, endX, beamProgress.t);
         const cy = Phaser.Math.Linear(startY, endY, beamProgress.t);
         beam.clear();
+        // Outer glow
+        beam.lineStyle(12, beamColor, 0.15);
+        beam.lineBetween(startX, startY, cx, cy);
+        // Core beam
         beam.lineStyle(4, beamColor, 0.9);
         beam.lineBetween(startX, startY, cx, cy);
-        // Glow line
-        beam.lineStyle(8, beamColor, 0.2);
+        // Inner bright core
+        beam.lineStyle(2, 0xffffff, 0.6);
         beam.lineBetween(startX, startY, cx, cy);
       },
       onComplete: () => {
         // Impact burst at boss position
         this.add
           .particles(endX, endY, "beam_particle", {
-            speed: { min: 80, max: 200 },
-            scale: { start: 0.6, end: 0 },
+            speed: { min: 80, max: 250 },
+            scale: { start: 0.8, end: 0 },
             blendMode: "ADD",
-            lifespan: 400,
+            lifespan: 500,
             tint: beamColor,
-            quantity: 12,
+            quantity: 16,
             emitting: false,
           })
-          .explode(12);
+          .explode(16);
+
+        // Impact flash
+        const flash = this.add
+          .circle(endX, endY, 30, 0xffffff, 0.5)
+          .setDepth(16)
+          .setBlendMode(Phaser.BlendModes.ADD);
+        this.tweens.add({
+          targets: flash,
+          alpha: 0,
+          scaleX: 2,
+          scaleY: 2,
+          duration: 300,
+          onComplete: () => flash.destroy(),
+        });
 
         // Fade beam
         this.tweens.add({
@@ -1104,7 +1375,7 @@ export default class FinalBossScene extends Phaser.Scene {
       },
     });
 
-    // Planet name flash near the beam
+    // Planet name flash
     const planetLabel = this.add
       .text(startX + 40, startY - 20, `${planet} ENERGY!`, {
         fontFamily: "'Press Start 2P', monospace",
@@ -1117,10 +1388,10 @@ export default class FinalBossScene extends Phaser.Scene {
     this.tweens.add({
       targets: planetLabel,
       alpha: 1,
-      y: startY - 35,
+      y: startY - 40,
       duration: 400,
       yoyo: true,
-      hold: 300,
+      hold: 400,
       onComplete: () => planetLabel.destroy(),
     });
   }
@@ -1128,45 +1399,72 @@ export default class FinalBossScene extends Phaser.Scene {
   // ─── Boss Attack Animation ───
 
   private bossAttackAnimation(): void {
-    const { width } = this.scale;
-
-    // Boss lunges toward player
+    // Boss lunges aggressively toward player
+    const originalX = this.bossSprite.x;
     this.tweens.add({
       targets: this.bossSprite,
-      x: this.bossSprite.x - 60,
-      duration: 200,
+      x: originalX - 80,
+      duration: 150,
       ease: "Cubic.easeOut",
       yoyo: true,
-      hold: 100,
+      hold: 80,
+      onYoyo: () => {
+        // At the closest point, spawn spark barrage
+        const sparks = this.add.particles(
+          this.bossSprite.x - 30,
+          this.bossSprite.y,
+          "spark_particle",
+          {
+            speed: { min: 150, max: 350 },
+            angle: { min: 155, max: 205 },
+            scale: { start: 1, end: 0 },
+            blendMode: "ADD",
+            lifespan: 700,
+            tint: [0xef4444, 0xfca5a5, 0xff6b6b, 0xfbbf24],
+            quantity: 14,
+            emitting: false,
+          }
+        );
+        sparks.explode(14);
+
+        // Secondary smaller burst
+        this.time.delayedCall(100, () => {
+          this.add
+            .particles(
+              this.bossSprite.x - 50,
+              this.bossSprite.y + 10,
+              "spark_particle",
+              {
+                speed: { min: 100, max: 250 },
+                angle: { min: 140, max: 220 },
+                scale: { start: 0.6, end: 0 },
+                blendMode: "ADD",
+                lifespan: 500,
+                tint: [0xff0000, 0xff4444],
+                quantity: 8,
+                emitting: false,
+              }
+            )
+            .explode(8);
+        });
+      },
     });
 
-    // Spark particles from boss toward player
-    const sparks = this.add.particles(
-      this.bossSprite.x - 40,
-      this.bossSprite.y,
-      "spark_particle",
-      {
-        speed: { min: 150, max: 300 },
-        angle: { min: 160, max: 200 },
-        scale: { start: 0.8, end: 0 },
-        blendMode: "ADD",
-        lifespan: 600,
-        tint: [0xef4444, 0xfca5a5, 0xff6b6b],
-        quantity: 8,
-        emitting: false,
-      }
-    );
-    sparks.explode(8);
+    // Boss temporarily turns brighter/angrier
+    this.bossSprite.setTint(0xff4444);
+    this.time.delayedCall(400, () => {
+      this.bossSprite.clearTint();
+    });
 
-    // Impact flash on player
-    this.time.delayedCall(250, () => {
+    // Impact on player
+    this.time.delayedCall(300, () => {
       this.tweens.add({
         targets: this.playerShip,
         tint: 0xff0000,
-        x: this.playerShip.x - 8,
-        duration: 100,
+        x: this.playerShip.x - 10,
+        duration: 80,
         yoyo: true,
-        repeat: 2,
+        repeat: 3,
         onComplete: () => {
           this.playerShip.clearTint();
         },
@@ -1177,22 +1475,21 @@ export default class FinalBossScene extends Phaser.Scene {
   // ─── Feedback Text ───
 
   private showFeedback(message: string, color: string): void {
+    const baseY = this.scale.height * 0.47;
     this.feedbackText.setText(message);
     this.feedbackText.setColor(color);
     this.feedbackText.setAlpha(1);
-    this.feedbackText.setScale(1.2);
+    this.feedbackText.setScale(1.3);
+    this.feedbackText.setY(baseY);
 
     this.tweens.add({
       targets: this.feedbackText,
       alpha: 0,
       scaleX: 1,
       scaleY: 1,
-      y: this.feedbackText.y - 15,
-      duration: 1000,
+      y: baseY - 20,
+      duration: 1200,
       ease: "Cubic.easeOut",
-      onComplete: () => {
-        this.feedbackText.y += 15; // reset position
-      },
     });
   }
 
@@ -1203,6 +1500,8 @@ export default class FinalBossScene extends Phaser.Scene {
       this.tweens.add({
         targets: btn,
         alpha: 0,
+        scaleX: 0.8,
+        scaleY: 0.8,
         duration: 200,
         onComplete: () => btn.destroy(),
       });
@@ -1224,35 +1523,70 @@ export default class FinalBossScene extends Phaser.Scene {
 
     const { width, height } = this.scale;
 
+    // Stop ambient effects
+    if (this.voidParticles) this.voidParticles.stop();
+    this.cameras.main.setScroll(0, 0);
+    this.warningOverlay.setAlpha(0);
+
     // Boss death animation
     this.cameras.main.flash(600, 255, 100, 100);
 
     // Boss shakes violently
     this.tweens.add({
       targets: this.bossSprite,
-      x: this.bossSprite.x + 5,
-      duration: 50,
+      x: this.bossSprite.x + 6,
+      duration: 40,
       yoyo: true,
-      repeat: 15,
+      repeat: 20,
+    });
+
+    // Boss flash tint rapidly
+    let flashCount = 0;
+    const flashTimer = this.time.addEvent({
+      delay: 80,
+      repeat: 12,
+      callback: () => {
+        flashCount++;
+        this.bossSprite.setTint(flashCount % 2 === 0 ? 0xffffff : 0xff0000);
+      },
     });
 
     // Boss explodes after shaking
-    this.time.delayedCall(1000, () => {
-      // Explosion particles
-      this.add
-        .particles(this.bossSprite.x, this.bossSprite.y, "spark_particle", {
-          speed: { min: 100, max: 400 },
-          scale: { start: 1.5, end: 0 },
-          blendMode: "ADD",
-          lifespan: 1000,
-          tint: [0xef4444, 0xfca5a5, 0xff6b6b, 0xfbbf24, 0xffffff],
-          quantity: 30,
-          emitting: false,
-        })
-        .explode(30);
+    this.time.delayedCall(1200, () => {
+      flashTimer.destroy();
+      this.bossSprite.clearTint();
 
-      // Screen flash
-      this.cameras.main.flash(800, 255, 200, 200);
+      // Multiple explosion bursts
+      for (let i = 0; i < 3; i++) {
+        this.time.delayedCall(i * 200, () => {
+          const ox = (Math.random() - 0.5) * 60;
+          const oy = (Math.random() - 0.5) * 60;
+
+          this.add
+            .particles(
+              this.bossSprite.x + ox,
+              this.bossSprite.y + oy,
+              "spark_particle",
+              {
+                speed: { min: 100, max: 400 },
+                scale: { start: 1.5, end: 0 },
+                blendMode: "ADD",
+                lifespan: 1000,
+                tint: [0xef4444, 0xfca5a5, 0xff6b6b, 0xfbbf24, 0xffffff],
+                quantity: 20,
+                emitting: false,
+              }
+            )
+            .explode(20);
+
+          this.cameras.main.shake(200, 0.01);
+        });
+      }
+
+      // Final big flash
+      this.time.delayedCall(600, () => {
+        this.cameras.main.flash(800, 255, 200, 200);
+      });
 
       // Fade out boss
       this.tweens.add({
@@ -1264,8 +1598,15 @@ export default class FinalBossScene extends Phaser.Scene {
         ease: "Cubic.easeOut",
       });
 
-      // Show victory screen after explosion
-      this.time.delayedCall(1500, () => {
+      // Hide aura
+      this.tweens.add({
+        targets: this.bossAura,
+        alpha: 0,
+        duration: 600,
+      });
+
+      // Show victory screen
+      this.time.delayedCall(1800, () => {
         this.showVictoryScreen(width, height);
       });
     });
@@ -1284,7 +1625,6 @@ export default class FinalBossScene extends Phaser.Scene {
       duration: 600,
     });
 
-    // Victory panel
     const panelWidth = Math.min(width - 40, 360);
     const panelHeight = 180;
     const panelX = width / 2 - panelWidth / 2;
@@ -1348,14 +1688,13 @@ export default class FinalBossScene extends Phaser.Scene {
       delay: 600,
     });
 
-    // "Continue" button
+    // Continue button
     this.createEndButton(
       width / 2,
       panelY + panelHeight - 30,
       "SAVE THE SOLAR SYSTEM",
       0x22c55e,
       () => {
-        // Emit event to App.tsx for the final victory scene
         EventBus.emit("boss-defeated");
       }
     );
@@ -1369,28 +1708,54 @@ export default class FinalBossScene extends Phaser.Scene {
 
     const { width, height } = this.scale;
 
+    // Stop ambient effects
+    if (this.voidParticles) this.voidParticles.stop();
+    this.cameras.main.setScroll(0, 0);
+    this.warningOverlay.setAlpha(0);
+
     if (fromDamage) {
       // Player ship destruction
-      this.cameras.main.shake(500, 0.015);
+      this.cameras.main.shake(600, 0.02);
       this.cameras.main.flash(400, 60, 0, 0);
+
+      // Explosion at player
+      this.add
+        .particles(this.playerShip.x, this.playerShip.y, "beam_particle", {
+          speed: { min: 60, max: 200 },
+          scale: { start: 0.8, end: 0 },
+          blendMode: "ADD",
+          lifespan: 600,
+          tint: [0x3b82f6, 0x22d3ee, 0xffffff],
+          quantity: 12,
+          emitting: false,
+        })
+        .explode(12);
 
       this.tweens.add({
         targets: this.playerShip,
         alpha: 0,
-        scaleX: 0.5,
-        scaleY: 0.5,
+        scaleX: 0.3,
+        scaleY: 0.3,
         angle: 45,
         duration: 600,
       });
+
+      // Boss victory roar
+      this.tweens.add({
+        targets: this.bossSprite,
+        scaleX: 2.2,
+        scaleY: 2.2,
+        duration: 800,
+        ease: "Bounce.easeOut",
+      });
     }
 
-    this.time.delayedCall(1200, () => {
+    this.time.delayedCall(1500, () => {
       this.showGameOverScreen(width, height);
     });
   }
 
   private showGameOverScreen(width: number, height: number): void {
-    // Dark overlay
     const overlay = this.add
       .rectangle(0, 0, width, height, 0x000000, 0)
       .setOrigin(0)
@@ -1402,7 +1767,6 @@ export default class FinalBossScene extends Phaser.Scene {
       duration: 600,
     });
 
-    // Game over panel
     const panelWidth = Math.min(width - 40, 360);
     const panelHeight = 200;
     const panelX = width / 2 - panelWidth / 2;
@@ -1421,7 +1785,6 @@ export default class FinalBossScene extends Phaser.Scene {
       delay: 200,
     });
 
-    // Title
     const title = this.add
       .text(width / 2, panelY + 24, "SHIELD BROKEN!", {
         fontFamily: "'Press Start 2P', monospace",
@@ -1440,11 +1803,10 @@ export default class FinalBossScene extends Phaser.Scene {
       delay: 400,
     });
 
-    // Message
     const message = this.add
       .text(
         width / 2,
-        panelY + 55,
+        panelY + 60,
         "The Void Devourer overwhelmed\nyour defenses. But the Solar\nSystem still needs you!",
         {
           fontFamily: "'Press Start 2P', monospace",
@@ -1465,10 +1827,9 @@ export default class FinalBossScene extends Phaser.Scene {
       delay: 500,
     });
 
-    // Stats
     const statsText = `Hit ${this.correctAnswers} of ${CORRECT_TO_WIN} needed`;
     const stats = this.add
-      .text(width / 2, panelY + 105, statsText, {
+      .text(width / 2, panelY + 110, statsText, {
         fontFamily: "'Press Start 2P', monospace",
         fontSize: "7px",
         color: "#fbbf24",
