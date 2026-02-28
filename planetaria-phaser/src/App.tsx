@@ -61,13 +61,23 @@ function App() {
       setShowPlanetCinematic(true);
     };
     const handleMercuryCompleteEvent = () => {
-      unlockLevel(2); // Unlock Venus
+      unlockLevel(2);
       setCurrentPlanet("venus");
       setShowPlanetCinematic(true);
     };
     const handleVenusCompleteEvent = () => {
-      unlockLevel(3); // Unlock Earth
+      unlockLevel(3);
       setShowEarthCinematic(true);
+    };
+
+    // Boss events
+    const handleBossDefeated = () => {
+      // TODO: Show final victory scene / credits
+      // For now, return to menu
+      setAppState("menu");
+    };
+    const handleBossReturnToMenu = () => {
+      setAppState("levels");
     };
 
     EventBus.on("enter-mars-scene", enterMars);
@@ -90,6 +100,8 @@ function App() {
     EventBus.on("start-planet-cinematic", startPlanetCinematic);
     EventBus.on("mercury-complete", handleMercuryCompleteEvent);
     EventBus.on("venus-complete", handleVenusCompleteEvent);
+    EventBus.on("boss-defeated", handleBossDefeated);
+    EventBus.on("boss-return-to-menu", handleBossReturnToMenu);
 
     return () => {
       EventBus.off("enter-mars-scene", enterMars);
@@ -112,6 +124,8 @@ function App() {
       EventBus.off("start-planet-cinematic", startPlanetCinematic);
       EventBus.off("mercury-complete", handleMercuryCompleteEvent);
       EventBus.off("venus-complete", handleVenusCompleteEvent);
+      EventBus.off("boss-defeated", handleBossDefeated);
+      EventBus.off("boss-return-to-menu", handleBossReturnToMenu);
     };
   }, []);
 
@@ -166,11 +180,15 @@ function App() {
     } else if (levelId === 8) {
       setCurrentPlanet("neptune");
       setShowPlanetCinematic(true);
+    } else if (levelId === 9) {
+      // Boss level — show boss intro cinematic
+      setCurrentPlanet("boss");
+      setShowPlanetCinematic(true);
     }
   };
 
   const handleVenusComplete = () => {
-    unlockLevel(3); // Unlock Earth
+    unlockLevel(3);
     EventBus.emit("venus-core-reactivated");
     setTimeout(() => {
       setShowVenusGame(false);
@@ -184,7 +202,7 @@ function App() {
   };
 
   const handleEarthComplete = () => {
-    unlockLevel(4); // Unlock Mars
+    unlockLevel(4);
     setTimeout(() => {
       setShowEarthGame(false);
       setShowEarthCongratulation(true);
@@ -210,17 +228,19 @@ function App() {
     } else if (currentPlanet === "jupiter") {
       setShowJupiterGame(true);
     } else if (currentPlanet === "saturn") {
-      // Go directly to the React SaturnGame — no Phaser intro needed
       setShowSaturnGame(true);
     } else if (currentPlanet === "uranus") {
       setShowUranusGame(true);
     } else if (currentPlanet === "neptune") {
       setShowNeptuneGame(true);
+    } else if (currentPlanet === "boss") {
+      // After boss intro cinematic, launch the Phaser FinalBossScene
+      EventBus.emit("change-phaser-scene", "FinalBossScene");
     }
   };
 
   const handleMarsPuzzleComplete = () => {
-    unlockLevel(5); // Unlock Jupiter
+    unlockLevel(5);
     EventBus.emit("mars-core-reactivated");
     setTimeout(() => {
       setShowMarsPuzzle(false);
@@ -230,7 +250,7 @@ function App() {
   };
 
   const handleJupiterComplete = () => {
-    unlockLevel(6); // Unlock Saturn
+    unlockLevel(6);
     EventBus.emit("jupiter-core-reactivated");
     setTimeout(() => {
       setShowJupiterGame(false);
@@ -250,7 +270,7 @@ function App() {
   }, []);
 
   const handleUranusComplete = () => {
-    unlockLevel(8); // Unlock Neptune
+    unlockLevel(8);
     setTimeout(() => {
       setShowUranusGame(false);
       setCurrentPlanet("neptune");
@@ -262,7 +282,9 @@ function App() {
     unlockLevel(9); // Unlock Boss
     setTimeout(() => {
       setShowNeptuneGame(false);
-      setAppState("menu"); // Return to menu for now
+      // Transition to boss intro cinematic
+      setCurrentPlanet("boss");
+      setShowPlanetCinematic(true);
     }, 2000);
   };
 

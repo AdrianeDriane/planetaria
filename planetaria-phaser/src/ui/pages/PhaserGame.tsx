@@ -3,7 +3,7 @@ import Phaser from "phaser";
 import GameScene from "../../game/scenes/GameScene";
 import EarthScene from "../../game/scenes/EarthScene";
 import MarsScene from "../../game/scenes/MarsScene";
-import SaturnIntroScene from "../../game/scenes/SaturnIntroScene";
+import FinalBossScene from "../../game/scenes/FinalBossScene";
 import { DISPLAY, PHYSICS } from "../../game/config";
 import VirtualControls from "../components/VirtualControls";
 import { EventBus } from "../../game/EventBus";
@@ -29,13 +29,15 @@ const PhaserGame: React.FC<PhaserGameProps> = ({ initialLevelId = 1 }) => {
       case 4:
         return "MarsScene";
       case 5:
-        return "GameScene";
+        return "GameScene"; // Jupiter is React-only
       case 6:
-        return "GameScene";
+        return "GameScene"; // Saturn is React-only
       case 7:
-        return "GameScene";
+        return "GameScene"; // Uranus is React-only
       case 8:
-        return "GameScene";
+        return "GameScene"; // Neptune is React-only
+      case 9:
+        return "FinalBossScene";
       default:
         return "GameScene";
     }
@@ -70,8 +72,8 @@ const PhaserGame: React.FC<PhaserGameProps> = ({ initialLevelId = 1 }) => {
   useEffect(() => {
     if (!containerRef.current || gameRef.current) return;
 
-    // Define all available scenes — including SaturnIntroScene
-    const allScenes = [GameScene, EarthScene, MarsScene];
+    // Define all available scenes
+    const allScenes = [GameScene, EarthScene, MarsScene, FinalBossScene];
 
     // Phaser starts the FIRST scene in the array.
     // We reorder to put the requested scene at index 0.
@@ -82,6 +84,7 @@ const PhaserGame: React.FC<PhaserGameProps> = ({ initialLevelId = 1 }) => {
       GameScene: GameScene,
       EarthScene: EarthScene,
       MarsScene: MarsScene,
+      FinalBossScene: FinalBossScene,
     };
 
     const finalScenes = [...allScenes];
@@ -157,18 +160,6 @@ const PhaserGame: React.FC<PhaserGameProps> = ({ initialLevelId = 1 }) => {
   return (
     <div className="relative z-50 h-dvh w-screen bg-gray-950">
       <div ref={containerRef} className="h-full w-full" />
-
-      {/* Virtual Controls for Mobile - only shown after intro
-      {isGameActive && (
-        <VirtualControls
-          onLeftDown={handleLeftDown}
-          onLeftUp={handleLeftUp}
-          onRightDown={handleRightDown}
-          onRightUp={handleRightUp}
-          onJumpDown={handleJumpDown}
-          onJumpUp={handleJumpUp}
-        />
-      )} */}
     </div>
   );
 };
