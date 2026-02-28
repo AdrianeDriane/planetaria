@@ -7,6 +7,7 @@ import FinalBossScene from "../../game/scenes/FinalBossScene";
 import { DISPLAY, PHYSICS } from "../../game/config";
 import VirtualControls from "../components/VirtualControls";
 import { EventBus } from "../../game/EventBus";
+import FinalOutroScene from "../../game/scenes/FinalOutroScene";
 
 interface PhaserGameProps {
   initialLevelId?: number;
@@ -73,7 +74,13 @@ const PhaserGame: React.FC<PhaserGameProps> = ({ initialLevelId = 1 }) => {
     if (!containerRef.current || gameRef.current) return;
 
     // Define all available scenes
-    const allScenes = [GameScene, EarthScene, MarsScene, FinalBossScene];
+    const allScenes = [
+      GameScene,
+      EarthScene,
+      MarsScene,
+      FinalBossScene,
+      FinalOutroScene,
+    ];
 
     // Phaser starts the FIRST scene in the array.
     // We reorder to put the requested scene at index 0.

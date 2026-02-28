@@ -8,6 +8,7 @@ import jupiterSprite from "/assets/ui/jupiter.png";
 import saturnSprite from "/assets/ui/saturn.png";
 import uranusSprite from "/assets/ui/uranus.png";
 import neptuneSprite from "/assets/ui/neptune.png";
+import bossSprite from "/assets/ui/kirby.png";
 
 // ─── Types ───
 
@@ -29,7 +30,7 @@ interface LevelData {
 }
 
 interface LevelProgress {
-  [levelId: number]: "locked" | "unlocked";
+  [key: string]: string | boolean;
 }
 
 // ─── Constants ───
@@ -172,7 +173,7 @@ const LEVELS: LevelData[] = [
       glow: "rgba(239, 68, 68, 0.6)",
       ring: "#f87171",
     },
-    spriteSrc: undefined,
+    spriteSrc: bossSprite,
     spriteSize: 72,
   },
 ];
@@ -264,13 +265,15 @@ const PixelBackArrow: React.FC = () => {
 const SpritePlaceholder: React.FC<{
   level: LevelData;
   isUnlocked: boolean;
+  isBossDefeated?: boolean;
   scale?: number;
-}> = ({ level, isUnlocked, scale = 1 }) => {
+}> = ({ level, isUnlocked, isBossDefeated = false, scale = 1 }) => {
   const [spriteLoaded, setSpriteLoaded] = useState(false);
   const [spriteError, setSpriteError] = useState(false);
 
   const size = Math.round(level.spriteSize * scale);
   const displayChar = level.isBoss ? "?" : level.name[0];
+  const showDefeated = level.isBoss && isBossDefeated;
 
   return (
     <div
@@ -281,7 +284,7 @@ const SpritePlaceholder: React.FC<{
         imageRendering: "pixelated",
       }}
     >
-      {!spriteError && (
+      {level.spriteSrc && !spriteError && (
         <img
           src={level.spriteSrc}
           alt={level.name}
@@ -289,7 +292,11 @@ const SpritePlaceholder: React.FC<{
           style={{
             imageRendering: "pixelated",
             opacity: spriteLoaded ? 1 : 0,
-            filter: isUnlocked ? "brightness(1.2)" : "brightness(0.2)",
+            filter: isUnlocked
+              ? showDefeated
+                ? "brightness(0.5) grayscale(0.6)"
+                : "brightness(1.2)"
+              : "brightness(0.2)",
           }}
           onLoad={() => setSpriteLoaded(true)}
           onError={() => setSpriteError(true)}
@@ -297,7 +304,7 @@ const SpritePlaceholder: React.FC<{
         />
       )}
 
-      {(!spriteLoaded || spriteError) && (
+      {(!level.spriteSrc || !spriteLoaded || spriteError) && (
         <div
           className="flex items-center justify-center rounded-full border-2 border-dashed"
           style={{
@@ -322,6 +329,42 @@ const SpritePlaceholder: React.FC<{
           </span>
         </div>
       )}
+
+      {/* Defeated X overlay on boss sprite */}
+      {showDefeated && spriteLoaded && !spriteError && (
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ pointerEvents: "none" }}
+        >
+          <svg
+            viewBox="0 0 100 100"
+            style={{
+              width: "70%",
+              height: "70%",
+              filter: "drop-shadow(0 0 4px rgba(74, 222, 128, 0.6))",
+            }}
+          >
+            <line
+              x1="15"
+              y1="15"
+              x2="85"
+              y2="85"
+              stroke="#4ade80"
+              strokeWidth="8"
+              strokeLinecap="round"
+            />
+            <line
+              x1="85"
+              y1="15"
+              x2="15"
+              y2="85"
+              stroke="#4ade80"
+              strokeWidth="8"
+              strokeLinecap="round"
+            />
+          </svg>
+        </div>
+      )}
     </div>
   );
 };
@@ -332,6 +375,7 @@ interface PlanetNodeProps {
   level: LevelData;
   isUnlocked: boolean;
   isSelected: boolean;
+  isBossDefeated?: boolean;
   onSelect: (id: number) => void;
   onLaunch: (id: number) => void;
   scale?: number;
@@ -341,13 +385,15 @@ const PlanetNode: React.FC<PlanetNodeProps> = ({
   level,
   isUnlocked,
   isSelected,
+  isBossDefeated = false,
   onSelect,
   onLaunch,
   scale = 1,
 }) => {
-  // Stagger the float animation per planet so they don't all bob in sync
   const floatDelay = (level.id - 1) * 0.7;
-  const floatDuration = 3 + (level.id % 3) * 0.5; // vary between 3s–4s
+  const floatDuration = 3 + (level.id % 3) * 0.5;
+
+  const showDefeated = level.isBoss && isBossDefeated;
 
   return (
     <div
@@ -367,9 +413,18 @@ const PlanetNode: React.FC<PlanetNodeProps> = ({
         style={{
           filter: isUnlocked
             ? isSelected
-              ? `drop-shadow(0 0 14px ${level.colors.glow}) drop-shadow(0 0 28px ${level.colors.glow})`
-              : `drop-shadow(0 0 6px ${level.colors.glow})`
+              ? showDefeated
+                ? "drop-shadow(0 0 14px rgba(74, 222, 128, 0.5)) drop-shadow(0 0 28px rgba(74, 222, 128, 0.3))"
+                : `drop-shadow(0 0 14px ${level.colors.glow}) drop-shadow(0 0 28px ${level.colors.glow})`
+              : showDefeated
+                ? "drop-shadow(0 0 6px rgba(74, 222, 128, 0.3))"
+                : `drop-shadow(0 0 6px ${level.colors.glow})`
             : `drop-shadow(0 0 4px ${level.colors.glow})`,
+          // No boss-pulse animation if defeated
+          animation:
+            level.isBoss && isUnlocked && !showDefeated
+              ? "boss-pulse 2s ease-in-out infinite"
+              : undefined,
         }}
         onClick={(e) => {
           e.stopPropagation();
@@ -385,6 +440,7 @@ const PlanetNode: React.FC<PlanetNodeProps> = ({
         <SpritePlaceholder
           level={level}
           isUnlocked={isUnlocked}
+          isBossDefeated={isBossDefeated}
           scale={scale}
         />
 
@@ -392,7 +448,7 @@ const PlanetNode: React.FC<PlanetNodeProps> = ({
           <div
             className="pointer-events-none absolute inset-0 animate-spin rounded-full border-2"
             style={{
-              borderColor: level.colors.body,
+              borderColor: showDefeated ? "#4ade80" : level.colors.body,
               borderStyle: "dashed",
               animationDuration: "8s",
               margin: -4,
@@ -419,16 +475,20 @@ const PlanetNode: React.FC<PlanetNodeProps> = ({
         <p
           className={`text-center font-['Press_Start_2P'] tracking-wider ${
             level.isBoss
-              ? "text-[8px] text-red-400 md:text-[10px]"
+              ? showDefeated
+                ? "text-[8px] text-green-400 md:text-[10px]"
+                : "text-[8px] text-red-400 md:text-[10px]"
               : "text-[6px] text-gray-300 md:text-[8px]"
           }`}
           style={{
             textShadow: isUnlocked
-              ? `0 0 6px ${level.colors.glow}`
+              ? showDefeated
+                ? "0 0 6px rgba(74, 222, 128, 0.5)"
+                : `0 0 6px ${level.colors.glow}`
               : `0 0 4px ${level.colors.glow}`,
           }}
         >
-          {level.name}
+          {showDefeated ? "DEFEATED" : level.name}
         </p>
       </div>
 
@@ -441,7 +501,7 @@ const PlanetNode: React.FC<PlanetNodeProps> = ({
           right: -6,
         }}
       >
-        {level.isBoss ? "★" : level.id}
+        {level.isBoss ? (showDefeated ? "✓" : "★") : level.id}
       </div>
     </div>
   );
@@ -539,9 +599,16 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
   const [fadeIn, setFadeIn] = useState(false);
 
+  const isBossDefeated = progress["bossDefeated"] === true;
+
   useEffect(() => {
     const timer = setTimeout(() => setFadeIn(true), 50);
     return () => clearTimeout(timer);
+  }, []);
+
+  // Re-load progress on mount (catches changes from outro scene)
+  useEffect(() => {
+    setProgress(loadProgress());
   }, []);
 
   useEffect(() => {
@@ -593,8 +660,8 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({
 
   const spriteScale = useViewportScale();
 
-  const unlockedCount = Object.values(progress).filter(
-    (s) => s === "unlocked"
+  const unlockedCount = Object.entries(progress).filter(
+    ([key, val]) => !isNaN(Number(key)) && val === "unlocked"
   ).length;
 
   const selectedData = selectedLevel
@@ -659,7 +726,9 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({
           PLANET MAP
         </h1>
         <p className="mt-1 font-['Press_Start_2P'] text-[6px] text-gray-500 md:mt-2 md:text-[7px]">
-          SELECT A PLANET • {unlockedCount}/9 WORLDS DISCOVERED
+          {isBossDefeated
+            ? "ALL WORLDS LIBERATED • HARMONY RESTORED ✦"
+            : `SELECT A PLANET • ${unlockedCount}/9 WORLDS DISCOVERED`}
         </p>
       </div>
 
@@ -693,6 +762,7 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({
             level={level}
             isUnlocked={progress[level.id] === "unlocked"}
             isSelected={selectedLevel === level.id}
+            isBossDefeated={isBossDefeated}
             onSelect={handlePlanetSelect}
             onLaunch={handleLaunch}
             scale={spriteScale}
@@ -706,14 +776,24 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({
             <p
               className="font-['Press_Start_2P'] text-[10px] md:text-xs"
               style={{
-                color: selectedData.colors.body,
-                textShadow: `0 0 8px ${selectedData.colors.glow}`,
+                color:
+                  selectedData.isBoss && isBossDefeated
+                    ? "#4ade80"
+                    : selectedData.colors.body,
+                textShadow:
+                  selectedData.isBoss && isBossDefeated
+                    ? "0 0 8px rgba(74, 222, 128, 0.5)"
+                    : `0 0 8px ${selectedData.colors.glow}`,
               }}
             >
-              {selectedData.name}
+              {selectedData.isBoss && isBossDefeated
+                ? "VOID DEVOURER"
+                : selectedData.name}
             </p>
             <p className="font-['Press_Start_2P'] text-[6px] text-gray-400 md:text-[7px]">
-              {selectedData.subtitle}
+              {selectedData.isBoss && isBossDefeated
+                ? "DEFEATED • THE VOID IS VANQUISHED"
+                : selectedData.subtitle}
             </p>
             <button
               onClick={(e) => {
@@ -722,13 +802,26 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({
               }}
               className="mt-1 cursor-pointer border-2 px-6 pt-1 pb-2 font-['Press_Start_2P'] text-[8px] tracking-wider transition-all duration-150 active:scale-95 md:text-[9px]"
               style={{
-                borderColor: selectedData.colors.body,
-                color: selectedData.colors.body,
-                backgroundColor: selectedData.colors.accent + "20",
-                boxShadow: `0 0 12px ${selectedData.colors.glow}`,
+                borderColor:
+                  selectedData.isBoss && isBossDefeated
+                    ? "#4ade80"
+                    : selectedData.colors.body,
+                color:
+                  selectedData.isBoss && isBossDefeated
+                    ? "#4ade80"
+                    : selectedData.colors.body,
+                backgroundColor:
+                  selectedData.isBoss && isBossDefeated
+                    ? "rgba(74, 222, 128, 0.12)"
+                    : selectedData.colors.accent + "20",
+                boxShadow:
+                  selectedData.isBoss && isBossDefeated
+                    ? "0 0 12px rgba(74, 222, 128, 0.4)"
+                    : `0 0 12px ${selectedData.colors.glow}`,
               }}
             >
-              <span className="text-[15px]">▶︎</span> LAUNCH
+              <span className="text-[15px]">▶︎</span>{" "}
+              {selectedData.isBoss && isBossDefeated ? "REPLAY" : "LAUNCH"}
             </button>
           </div>
         ) : selectedData && !isSelectedUnlocked ? (

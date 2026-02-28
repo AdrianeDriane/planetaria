@@ -1615,7 +1615,22 @@ export default class FinalBossScene extends Phaser.Scene {
       "SAVE THE SOLAR SYSTEM",
       0x22c55e,
       () => {
-        EventBus.emit("boss-defeated");
+        // Mark boss as defeated immediately
+        try {
+          const STORAGE_KEY = "planetaria_progress";
+          const stored = localStorage.getItem(STORAGE_KEY);
+          const progress = stored ? JSON.parse(stored) : {};
+          progress["bossDefeated"] = true;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+        } catch (e) {
+          console.warn("Failed to save boss defeated:", e);
+        }
+
+        // Fade out and transition to outro scene
+        this.cameras.main.fadeOut(600, 0, 0, 0);
+        this.cameras.main.once("camerafadeoutcomplete", () => {
+          this.scene.start("FinalOutroScene");
+        });
       }
     );
   }

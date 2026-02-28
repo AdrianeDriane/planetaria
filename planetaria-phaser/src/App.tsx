@@ -72,11 +72,15 @@ function App() {
 
     // Boss events
     const handleBossDefeated = () => {
-      // TODO: Show final victory scene / credits
-      // For now, return to menu
-      setAppState("menu");
+      // Progress is saved inside FinalBossScene/FinalOutroScene directly
+      // No app state change here — Phaser handles scene transition internally
     };
     const handleBossReturnToMenu = () => {
+      setAppState("levels");
+    };
+
+    // Outro complete — user clicked "RETURN TO PLANET MAP" in FinalOutroScene
+    const handleOutroComplete = () => {
       setAppState("levels");
     };
 
@@ -102,6 +106,7 @@ function App() {
     EventBus.on("venus-complete", handleVenusCompleteEvent);
     EventBus.on("boss-defeated", handleBossDefeated);
     EventBus.on("boss-return-to-menu", handleBossReturnToMenu);
+    EventBus.on("outro-complete", handleOutroComplete);
 
     return () => {
       EventBus.off("enter-mars-scene", enterMars);
@@ -126,6 +131,7 @@ function App() {
       EventBus.off("venus-complete", handleVenusCompleteEvent);
       EventBus.off("boss-defeated", handleBossDefeated);
       EventBus.off("boss-return-to-menu", handleBossReturnToMenu);
+      EventBus.off("outro-complete", handleOutroComplete);
     };
   }, []);
 
@@ -181,7 +187,6 @@ function App() {
       setCurrentPlanet("neptune");
       setShowPlanetCinematic(true);
     } else if (levelId === 9) {
-      // Boss level — show boss intro cinematic
       setCurrentPlanet("boss");
       setShowPlanetCinematic(true);
     }
@@ -234,7 +239,6 @@ function App() {
     } else if (currentPlanet === "neptune") {
       setShowNeptuneGame(true);
     } else if (currentPlanet === "boss") {
-      // After boss intro cinematic, launch the Phaser FinalBossScene
       EventBus.emit("change-phaser-scene", "FinalBossScene");
     }
   };
@@ -279,16 +283,14 @@ function App() {
   };
 
   const handleNeptuneComplete = () => {
-    unlockLevel(9); // Unlock Boss
+    unlockLevel(9);
     setTimeout(() => {
       setShowNeptuneGame(false);
-      // Transition to boss intro cinematic
       setCurrentPlanet("boss");
       setShowPlanetCinematic(true);
     }, 2000);
   };
 
-  // Determine if any React overlay is active (hides PhaserGame)
   const isReactOverlayActive =
     showVenusGame ||
     showMarsPuzzle ||
