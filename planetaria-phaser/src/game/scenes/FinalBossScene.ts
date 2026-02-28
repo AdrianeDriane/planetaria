@@ -237,6 +237,7 @@ export default class FinalBossScene extends Phaser.Scene {
   private isBossAnimating: boolean = false;
   // Store the player's resting X so we can always return to it
   private playerRestX: number = 0;
+  private bossBaseScale: number = 0.2;
 
   // Sprites
   private playerShip!: Phaser.GameObjects.Sprite;
@@ -280,6 +281,23 @@ export default class FinalBossScene extends Phaser.Scene {
     // ║  this.load.image("boss_enemy", "assets/ui/boss.png");        ║
     // ║  this.load.image("life_icon", "assets/ui/life_planet.png");  ║
     // ╚═══════════════════════════════════════════════════════════════╝
+    this.load.image("boss_player", "assets/ui/riding_ss_astra.png");
+    this.load.image("boss_enemy", "assets/ui/kirby.png");
+
+    const planetKeys = [
+      "mercury",
+      "venus",
+      "earth",
+      "mars",
+      "jupiter",
+      "saturn",
+      "uranus",
+      "neptune",
+    ];
+
+    planetKeys.forEach((key) => {
+      this.load.image(key, `assets/ui/${key}.png`);
+    });
   }
 
   create(): void {
@@ -509,8 +527,8 @@ export default class FinalBossScene extends Phaser.Scene {
     this.bossSprite.y = this.scale.height * 0.38 + bobY;
     this.bossSprite.x = this.bossInitialX + bobX;
 
-    const pulse = 1.7 + Math.sin(time * 2) * 0.1;
-    this.bossSprite.setScale(pulse);
+    const pulse = 1 + Math.sin(time * 2) * 0.05;
+    this.bossSprite.setScale(this.bossBaseScale * pulse);
 
     if (this.bossAura) {
       this.bossAura.setPosition(this.bossSprite.x, this.bossSprite.y);
@@ -524,52 +542,52 @@ export default class FinalBossScene extends Phaser.Scene {
   // ─── Placeholder Texture Generation ───
 
   private createPlaceholderTextures(): void {
-    if (!this.textures.exists("boss_player")) {
-      const playerGfx = this.make.graphics({ x: 0, y: 0 });
-      playerGfx.fillStyle(0x3b82f6);
-      playerGfx.fillTriangle(60, 30, 0, 0, 0, 60);
-      playerGfx.fillStyle(0x22d3ee);
-      playerGfx.fillRect(0, 22, 8, 16);
-      playerGfx.fillStyle(0xbae6fd);
-      playerGfx.fillTriangle(50, 30, 30, 22, 30, 38);
-      playerGfx.generateTexture("boss_player", 64, 64);
-      playerGfx.destroy();
-    }
+    // if (!this.textures.exists("boss_player")) {
+    //   const playerGfx = this.make.graphics({ x: 0, y: 0 });
+    //   playerGfx.fillStyle(0x3b82f6);
+    //   playerGfx.fillTriangle(60, 30, 0, 0, 0, 60);
+    //   playerGfx.fillStyle(0x22d3ee);
+    //   playerGfx.fillRect(0, 22, 8, 16);
+    //   playerGfx.fillStyle(0xbae6fd);
+    //   playerGfx.fillTriangle(50, 30, 30, 22, 30, 38);
+    //   playerGfx.generateTexture("boss_player", 64, 64);
+    //   playerGfx.destroy();
+    // }
 
-    if (!this.textures.exists("boss_enemy")) {
-      const bossGfx = this.make.graphics({ x: 0, y: 0 });
-      bossGfx.fillStyle(0x1a0000);
-      bossGfx.fillCircle(64, 64, 60);
-      bossGfx.lineStyle(4, 0xef4444);
-      bossGfx.strokeCircle(64, 64, 58);
-      bossGfx.fillStyle(0x450a0a);
-      bossGfx.fillCircle(64, 64, 40);
-      bossGfx.fillStyle(0xef4444);
-      bossGfx.fillCircle(64, 64, 14);
-      bossGfx.fillStyle(0xfca5a5);
-      bossGfx.fillCircle(60, 60, 5);
-      bossGfx.lineStyle(3, 0x7f1d1d);
-      for (let i = 0; i < 8; i++) {
-        const angle = (i / 8) * Math.PI * 2;
-        const x1 = 64 + Math.cos(angle) * 50;
-        const y1 = 64 + Math.sin(angle) * 50;
-        const x2 = 64 + Math.cos(angle) * 75;
-        const y2 = 64 + Math.sin(angle) * 75;
-        bossGfx.lineBetween(x1, y1, x2, y2);
-      }
-      bossGfx.generateTexture("boss_enemy", 128, 128);
-      bossGfx.destroy();
-    }
+    // if (!this.textures.exists("boss_enemy")) {
+    //   const bossGfx = this.make.graphics({ x: 0, y: 0 });
+    //   bossGfx.fillStyle(0x1a0000);
+    //   bossGfx.fillCircle(64, 64, 60);
+    //   bossGfx.lineStyle(4, 0xef4444);
+    //   bossGfx.strokeCircle(64, 64, 58);
+    //   bossGfx.fillStyle(0x450a0a);
+    //   bossGfx.fillCircle(64, 64, 40);
+    //   bossGfx.fillStyle(0xef4444);
+    //   bossGfx.fillCircle(64, 64, 14);
+    //   bossGfx.fillStyle(0xfca5a5);
+    //   bossGfx.fillCircle(60, 60, 5);
+    //   bossGfx.lineStyle(3, 0x7f1d1d);
+    //   for (let i = 0; i < 8; i++) {
+    //     const angle = (i / 8) * Math.PI * 2;
+    //     const x1 = 64 + Math.cos(angle) * 50;
+    //     const y1 = 64 + Math.sin(angle) * 50;
+    //     const x2 = 64 + Math.cos(angle) * 75;
+    //     const y2 = 64 + Math.sin(angle) * 75;
+    //     bossGfx.lineBetween(x1, y1, x2, y2);
+    //   }
+    //   bossGfx.generateTexture("boss_enemy", 128, 128);
+    //   bossGfx.destroy();
+    // }
 
-    if (!this.textures.exists("life_icon")) {
-      const lifeGfx = this.make.graphics({ x: 0, y: 0 });
-      lifeGfx.fillStyle(0x3b82f6);
-      lifeGfx.fillCircle(10, 10, 9);
-      lifeGfx.lineStyle(2, 0x60a5fa);
-      lifeGfx.strokeCircle(10, 10, 9);
-      lifeGfx.generateTexture("life_icon", 20, 20);
-      lifeGfx.destroy();
-    }
+    // if (!this.textures.exists("life_icon")) {
+    //   const lifeGfx = this.make.graphics({ x: 0, y: 0 });
+    //   lifeGfx.fillStyle(0x3b82f6);
+    //   lifeGfx.fillCircle(10, 10, 9);
+    //   lifeGfx.lineStyle(2, 0x60a5fa);
+    //   lifeGfx.strokeCircle(10, 10, 9);
+    //   lifeGfx.generateTexture("life_icon", 20, 20);
+    //   lifeGfx.destroy();
+    // }
 
     if (!this.textures.exists("beam_particle")) {
       const beamGfx = this.make.graphics({ x: 0, y: 0 });
@@ -595,7 +613,7 @@ export default class FinalBossScene extends Phaser.Scene {
 
     this.bossSprite = this.add
       .sprite(width + 100, height * 0.38, "boss_enemy")
-      .setScale(1.8)
+      .setScale(this.bossBaseScale)
       .setDepth(5);
 
     this.bossAura = this.add
@@ -609,7 +627,7 @@ export default class FinalBossScene extends Phaser.Scene {
   private createPlayer(width: number, height: number): void {
     this.playerShip = this.add
       .sprite(-80, height * 0.38, "boss_player")
-      .setScale(1.2)
+      .setScale(0.25)
       .setDepth(5);
 
     this.add.particles(0, 0, "beam_particle", {
@@ -725,11 +743,10 @@ export default class FinalBossScene extends Phaser.Scene {
     for (let i = 0; i < MAX_LIVES; i++) {
       const yPos = startY - i * 26;
 
-      const icon = this.add
-        .sprite(x, yPos, "life_icon")
-        .setScale(1)
-        .setDepth(20);
+      const planetKey = planetNames[i].toLowerCase();
 
+      const icon = this.add.sprite(x, yPos, planetKey).setDepth(20);
+      icon.setDisplaySize(22, 22 * (icon.height / icon.width));
       this.add
         .text(x + 16, yPos, planetNames[i].substring(0, 3).toUpperCase(), {
           fontFamily: "'Press Start 2P', monospace",
@@ -1143,31 +1160,35 @@ export default class FinalBossScene extends Phaser.Scene {
     const iconIndex = this.lives;
     if (iconIndex >= 0 && iconIndex < this.livesIcons.length) {
       const lostIcon = this.livesIcons[iconIndex];
+
       if (lostIcon && lostIcon.active) {
+        // Subtle shrink + fade
         this.tweens.add({
           targets: lostIcon,
           alpha: 0,
-          scaleX: 2.5,
-          scaleY: 2.5,
-          duration: 500,
-          ease: "Back.easeIn",
+          scaleX: 0.6,
+          scaleY: 0.6,
+          duration: 250,
+          ease: "Cubic.easeOut",
           onComplete: () => {
             lostIcon.setVisible(false);
           },
         });
 
+        // Small spark pop (optional, subtle)
         const sparkEmitter = this.add
           .particles(lostIcon.x, lostIcon.y, "spark_particle", {
-            speed: { min: 40, max: 120 },
-            scale: { start: 0.5, end: 0 },
+            speed: { min: 20, max: 80 },
+            scale: { start: 0.3, end: 0 },
             blendMode: "ADD",
-            lifespan: 500,
-            tint: [0xef4444, 0xfca5a5],
-            quantity: 6,
+            lifespan: 300,
+            tint: [0xef4444],
+            quantity: 4,
             emitting: false,
           })
           .setDepth(21);
-        sparkEmitter.explode(6);
+
+        sparkEmitter.explode(4);
       }
     }
 

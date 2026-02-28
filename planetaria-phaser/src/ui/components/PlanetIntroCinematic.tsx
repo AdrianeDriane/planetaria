@@ -158,7 +158,7 @@ const PLANET_CONFIGS: Record<string, PlanetData> = {
     title: "THE VOID DEVOURER",
     subtitle: "Final Stand at the Edge of the Solar System",
     accentColor: "#ef4444",
-    asset: "assets/ui/riding_ss_astra.png", // placeholder — boss has no planet image
+    asset: "assets/ui/kirby.png", // placeholder — boss has no planet image
     twistClass: "gravity-pull",
     hudInfo: ["THREAT: MAXIMUM", "CORES: 8/8 ACTIVE", "STATUS: CONVERGENCE"],
     beats: [
