@@ -3,20 +3,127 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <link rel="manifest" href="/manifest.json" />
     <link rel="stylesheet" href="/style.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
       rel="stylesheet"
     />
-    <title>Phaser React Template</title>
+    <title>Space Odyssey</title>
+    <style>
+      /* Ensure the game fills the dynamic viewport */
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        width: 100%;
+        height: 100dvh;
+        height: 100vh; /* fallback for older browsers */
+      }
+
+      #root {
+        width: 100%;
+        height: 100dvh;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+      }
+
+      /* Fullscreen button for mobile */
+      #fullscreen-btn {
+        display: none;
+        position: fixed;
+        bottom: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px 20px;
+        background: rgba(0, 0, 0, 0.75);
+        color: #fff;
+        border: 2px solid #fff;
+        border-radius: 8px;
+        font-family: "Press Start 2P", cursive;
+        font-size: 10px;
+        cursor: pointer;
+        z-index: 9999;
+        backdrop-filter: blur(4px);
+      }
+    </style>
   </head>
 
   <body>
     <div id="root"></div>
+    <button id="fullscreen-btn">⛶ FULLSCREEN</button>
     <script type="module" src="/src/main.tsx"></script>
+
+    <script>
+      (function () {
+        // Only show fullscreen button on mobile/touch devices
+        const isMobile =
+          /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(
+            navigator.userAgent
+          ) ||
+          ("ontouchstart" in window && window.innerWidth < 1024);
+
+        const btn = document.getElementById("fullscreen-btn");
+
+        if (isMobile) {
+          btn.style.display = "block";
+
+          btn.addEventListener("click", function () {
+            const el = document.documentElement;
+            const requestFs =
+              el.requestFullscreen ||
+              el.webkitRequestFullscreen ||
+              el.msRequestFullscreen;
+
+            if (requestFs) {
+              requestFs
+                .call(el)
+                .then(function () {
+                  btn.style.display = "none";
+                })
+                .catch(function () {
+                  // Some browsers don't return a promise
+                  btn.style.display = "none";
+                });
+            }
+
+            // Also try to lock orientation to landscape if your game needs it
+            // screen.orientation?.lock?.('landscape').catch(() => {});
+          });
+
+          // Show button again if user exits fullscreen
+          document.addEventListener("fullscreenchange", function () {
+            if (!document.fullscreenElement) {
+              btn.style.display = "block";
+            }
+          });
+          document.addEventListener("webkitfullscreenchange", function () {
+            if (!document.webkitFullscreenElement) {
+              btn.style.display = "block";
+            }
+          });
+        }
+
+        // Classic scroll trick to auto-hide address bar
+        window.addEventListener("load", function () {
+          setTimeout(function () {
+            window.scrollTo(0, 1);
+          }, 100);
+        });
+      })();
+    </script>
   </body>
 </html>
