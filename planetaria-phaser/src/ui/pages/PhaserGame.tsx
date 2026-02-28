@@ -3,6 +3,7 @@ import Phaser from "phaser";
 import GameScene from "../../game/scenes/GameScene";
 import EarthScene from "../../game/scenes/EarthScene";
 import MarsScene from "../../game/scenes/MarsScene";
+import SaturnIntroScene from "../../game/scenes/SaturnIntroScene";
 import { DISPLAY, PHYSICS } from "../../game/config";
 import VirtualControls from "../components/VirtualControls";
 import { EventBus } from "../../game/EventBus";
@@ -69,12 +70,8 @@ const PhaserGame: React.FC<PhaserGameProps> = ({ initialLevelId = 1 }) => {
   useEffect(() => {
     if (!containerRef.current || gameRef.current) return;
 
-    // Define all available scenes
-    const allScenes = [
-      GameScene,
-      EarthScene,
-      MarsScene,
-    ];
+    // Define all available scenes — including SaturnIntroScene
+    const allScenes = [GameScene, EarthScene, MarsScene];
 
     // Phaser starts the FIRST scene in the array.
     // We reorder to put the requested scene at index 0.
@@ -161,7 +158,7 @@ const PhaserGame: React.FC<PhaserGameProps> = ({ initialLevelId = 1 }) => {
     <div className="relative z-50 h-dvh w-screen bg-gray-950">
       <div ref={containerRef} className="h-full w-full" />
 
-      {/* Virtual Controls for Mobile - only shown after intro */}
+      {/* Virtual Controls for Mobile - only shown after intro
       {isGameActive && (
         <VirtualControls
           onLeftDown={handleLeftDown}
@@ -171,7 +168,7 @@ const PhaserGame: React.FC<PhaserGameProps> = ({ initialLevelId = 1 }) => {
           onJumpDown={handleJumpDown}
           onJumpUp={handleJumpUp}
         />
-      )}
+      )} */}
     </div>
   );
 };

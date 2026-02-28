@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import MainMenu from "./ui/pages/MainMenu";
 import LevelSelection from "./ui/pages/LevelSelection";
 import PhaserGame from "./ui/pages/PhaserGame";
@@ -8,6 +8,7 @@ import UranusGame from "./ui/pages/UranusGame";
 import NeptuneGame from "./ui/pages/NeptuneGame";
 import JupiterGame from "./ui/pages/JupiterGame";
 import EarthGame from "./ui/pages/EarthGame";
+import SaturnGame from "./ui/pages/SaturnGame";
 import { EarthIntroCinematic } from "./ui/components/EarthIntroCinematic";
 import { MarsIntroCinematic } from "./ui/components/MarsIntroCinematic";
 import { EarthCongratulationCinematic } from "./ui/components/EarthCongratulationCinematic";
@@ -27,6 +28,7 @@ function App() {
   const [showNeptuneGame, setShowNeptuneGame] = useState(false);
   const [showJupiterGame, setShowJupiterGame] = useState(false);
   const [showEarthGame, setShowEarthGame] = useState(false);
+  const [showSaturnGame, setShowSaturnGame] = useState(false);
   const [showEarthCinematic, setShowEarthCinematic] = useState(false);
   const [showMarsCinematic, setShowMarsCinematic] = useState(false);
   const [showEarthCongratulation, setShowEarthCongratulation] = useState(false);
@@ -46,6 +48,8 @@ function App() {
     const leaveJupiter = () => setShowJupiterGame(false);
     const enterEarth = () => setShowEarthGame(true);
     const leaveEarth = () => setShowEarthGame(false);
+    const enterSaturn = () => setShowSaturnGame(true);
+    const leaveSaturn = () => setShowSaturnGame(false);
     const startEarthCinematic = () => setShowEarthCinematic(true);
     const startMarsCinematic = () => setShowMarsCinematic(true);
     const startEarthCongratulation = () => {
@@ -78,6 +82,8 @@ function App() {
     EventBus.on("leave-jupiter-game", leaveJupiter);
     EventBus.on("enter-earth-game", enterEarth);
     EventBus.on("leave-earth-game", leaveEarth);
+    EventBus.on("enter-saturn-game", enterSaturn);
+    EventBus.on("leave-saturn-game", leaveSaturn);
     EventBus.on("start-earth-cinematic", startEarthCinematic);
     EventBus.on("start-mars-cinematic", startMarsCinematic);
     EventBus.on("start-earth-congratulation", startEarthCongratulation);
@@ -98,6 +104,8 @@ function App() {
       EventBus.off("leave-jupiter-game", leaveJupiter);
       EventBus.off("enter-earth-game", enterEarth);
       EventBus.off("leave-earth-game", leaveEarth);
+      EventBus.off("enter-saturn-game", enterSaturn);
+      EventBus.off("leave-saturn-game", leaveSaturn);
       EventBus.off("start-earth-cinematic", startEarthCinematic);
       EventBus.off("start-mars-cinematic", startMarsCinematic);
       EventBus.off("start-earth-congratulation", startEarthCongratulation);
@@ -121,13 +129,15 @@ function App() {
   const handleLevelSelect = (levelId: number) => {
     setSelectedLevelId(levelId);
     setAppState("playing");
-    
+
     // Reset all game/cinematic states
     setShowVenusGame(false);
     setShowEarthGame(false);
     setShowMarsPuzzle(false);
     setShowUranusGame(false);
     setShowNeptuneGame(false);
+    setShowJupiterGame(false);
+    setShowSaturnGame(false);
     setShowEarthCinematic(false);
     setShowMarsCinematic(false);
     setShowEarthCongratulation(false);
@@ -198,11 +208,10 @@ function App() {
     } else if (currentPlanet === "venus") {
       setShowVenusGame(true);
     } else if (currentPlanet === "jupiter") {
-      // Since Jupiter game is not implemented, go to Saturn
       setShowJupiterGame(true);
     } else if (currentPlanet === "saturn") {
-      // Since Saturn game is not implemented, go to Uranus
-      handleSaturnComplete();
+      // Go directly to the React SaturnGame — no Phaser intro needed
+      setShowSaturnGame(true);
     } else if (currentPlanet === "uranus") {
       setShowUranusGame(true);
     } else if (currentPlanet === "neptune") {
@@ -224,20 +233,21 @@ function App() {
     unlockLevel(6); // Unlock Saturn
     EventBus.emit("jupiter-core-reactivated");
     setTimeout(() => {
-        setShowJupiterGame(false);
-        EventBus.emit("change-phaser-scene", "SaturnIntroScene");
+      setShowJupiterGame(false);
       setCurrentPlanet("saturn");
       setShowPlanetCinematic(true);
     }, 2000);
   };
 
-  const handleSaturnComplete = () => {
-    unlockLevel(7); // Unlock Uranus
+  const handleSaturnComplete = useCallback(() => {
+    unlockLevel(7);
+    EventBus.emit("saturn-core-reactivated");
     setTimeout(() => {
+      setShowSaturnGame(false);
       setCurrentPlanet("uranus");
       setShowPlanetCinematic(true);
     }, 2000);
-  };
+  }, []);
 
   const handleUranusComplete = () => {
     unlockLevel(8); // Unlock Neptune
@@ -256,6 +266,20 @@ function App() {
     }, 2000);
   };
 
+  // Determine if any React overlay is active (hides PhaserGame)
+  const isReactOverlayActive =
+    showVenusGame ||
+    showMarsPuzzle ||
+    showUranusGame ||
+    showNeptuneGame ||
+    showJupiterGame ||
+    showSaturnGame ||
+    showEarthCinematic ||
+    showEarthGame ||
+    showMarsCinematic ||
+    showEarthCongratulation ||
+    showPlanetCinematic;
+
   return (
     <div className="relative h-dvh w-screen overflow-hidden bg-gray-950">
       {appState === "menu" && <MainMenu onPlay={() => setAppState("levels")} />}
@@ -267,22 +291,7 @@ function App() {
       )}
       {appState === "playing" && (
         <>
-          <div
-            className={
-              showVenusGame ||
-              showMarsPuzzle ||
-              showUranusGame ||
-              showNeptuneGame ||
-              showJupiterGame ||
-              showEarthCinematic ||
-              showEarthGame ||
-              showMarsCinematic ||
-              showEarthCongratulation ||
-              showPlanetCinematic
-                ? "hidden"
-                : "contents"
-            }
-          >
+          <div className={isReactOverlayActive ? "hidden" : "contents"}>
             <PhaserGame initialLevelId={selectedLevelId} />
           </div>
           {showPlanetCinematic && (
@@ -302,7 +311,6 @@ function App() {
               canSkip={(() => {
                 const stored = localStorage.getItem(STORAGE_KEY);
                 const progress = stored ? JSON.parse(stored) : {};
-                // If Mars (Level 4) is unlocked, it means Earth (Level 3) was already completed.
                 return !!progress[4];
               })()}
             />
@@ -313,7 +321,6 @@ function App() {
               canSkip={(() => {
                 const stored = localStorage.getItem(STORAGE_KEY);
                 const progress = stored ? JSON.parse(stored) : {};
-                // If Jupiter (Level 5) is unlocked, it means Mars (Level 4) was already completed.
                 return !!progress[5];
               })()}
             />
@@ -347,6 +354,12 @@ function App() {
           )}
           {showJupiterGame && (
             <JupiterGame onComplete={handleJupiterComplete} />
+          )}
+          {showSaturnGame && (
+            <SaturnGame
+              onComplete={handleSaturnComplete}
+              onBack={() => setShowSaturnGame(false)}
+            />
           )}
         </>
       )}
