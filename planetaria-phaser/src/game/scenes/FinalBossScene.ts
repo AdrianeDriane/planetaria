@@ -3,9 +3,7 @@ import { EventBus } from "../EventBus";
 
 // ─── Configuration ───
 
-/** Number of correct answers needed to defeat the boss */
 const CORRECT_TO_WIN = 12;
-/** Total number of lives (one per planet) */
 const MAX_LIVES = 8;
 
 // ─── Quiz Data ───
@@ -17,17 +15,11 @@ interface QuizQuestion {
   planet: string;
 }
 
-/**
- * 20 questions across all 8 planets.
- * Ordered from easier to slightly harder (6th-grade appropriate).
- * Correct answers are distributed across A (0), B (1), C (2), D (3).
- */
 const QUESTIONS: QuizQuestion[] = [
-  // ── Mercury (2) ──
   {
     question: "Mercury is the _____ planet from the Sun.",
     options: ["Farthest", "Third", "Closest", "Fifth"],
-    correctIndex: 2, // C
+    correctIndex: 2,
     planet: "Mercury",
   },
   {
@@ -38,16 +30,14 @@ const QUESTIONS: QuizQuestion[] = [
       "It has too much water",
       "It spins too fast",
     ],
-    correctIndex: 0, // A
+    correctIndex: 0,
     planet: "Mercury",
   },
-
-  // ── Venus (2) ──
   {
     question:
       "Venus is often called Earth's _____ because of its similar size.",
     options: ["Shadow", "Copy", "Brother", "Twin"],
-    correctIndex: 3, // D
+    correctIndex: 3,
     planet: "Venus",
   },
   {
@@ -58,21 +48,19 @@ const QUESTIONS: QuizQuestion[] = [
       "Its thick atmosphere traps heat",
       "It has no water at all",
     ],
-    correctIndex: 2, // C
+    correctIndex: 2,
     planet: "Venus",
   },
-
-  // ── Earth (3) ──
   {
     question: "What percentage of Earth's surface is covered by water?",
     options: ["About 71%", "About 50%", "About 90%", "About 30%"],
-    correctIndex: 0, // A
+    correctIndex: 0,
     planet: "Earth",
   },
   {
     question: "Earth's atmosphere is mostly made of which gas?",
     options: ["Oxygen", "Carbon dioxide", "Hydrogen", "Nitrogen"],
-    correctIndex: 3, // D
+    correctIndex: 3,
     planet: "Earth",
   },
   {
@@ -83,21 +71,19 @@ const QUESTIONS: QuizQuestion[] = [
       "The clouds",
       "The mountains",
     ],
-    correctIndex: 1, // B
+    correctIndex: 1,
     planet: "Earth",
   },
-
-  // ── Mars (3) ──
   {
     question: "Mars is known as the _____ Planet.",
     options: ["Blue", "Green", "Red", "Gold"],
-    correctIndex: 2, // C
+    correctIndex: 2,
     planet: "Mars",
   },
   {
     question: "What is the tallest volcano in the solar system, found on Mars?",
     options: ["Mount Everest", "Valles Marineris", "Mauna Kea", "Olympus Mons"],
-    correctIndex: 3, // D
+    correctIndex: 3,
     planet: "Mars",
   },
   {
@@ -108,15 +94,13 @@ const QUESTIONS: QuizQuestion[] = [
       "Io and Ganymede",
       "Luna and Sol",
     ],
-    correctIndex: 0, // A
+    correctIndex: 0,
     planet: "Mars",
   },
-
-  // ── Jupiter (3) ──
   {
     question: "Jupiter is the _____ planet in our solar system.",
     options: ["Smallest", "Hottest", "Closest", "Largest"],
-    correctIndex: 3, // D
+    correctIndex: 3,
     planet: "Jupiter",
   },
   {
@@ -127,31 +111,27 @@ const QUESTIONS: QuizQuestion[] = [
       "A massive storm",
       "A red ocean",
     ],
-    correctIndex: 2, // C
+    correctIndex: 2,
     planet: "Jupiter",
   },
   {
     question: "How many Earth-sized planets could fit inside Jupiter?",
     options: ["About 1,300", "About 500", "About 50", "About 10,000"],
-    correctIndex: 0, // A
+    correctIndex: 0,
     planet: "Jupiter",
   },
-
-  // ── Saturn (2) ──
   {
     question: "Saturn's rings are mostly made of what material?",
     options: ["Gas clouds", "Ice particles", "Rock and metal", "Liquid lava"],
-    correctIndex: 1, // B
+    correctIndex: 1,
     planet: "Saturn",
   },
   {
     question: "Saturn is so light that it could theoretically _____ in water.",
     options: ["Freeze", "Dissolve", "Sink", "Float"],
-    correctIndex: 3, // D
+    correctIndex: 3,
     planet: "Saturn",
   },
-
-  // ── Uranus (2) ──
   {
     question: "What makes Uranus unique among all the planets?",
     options: [
@@ -160,7 +140,7 @@ const QUESTIONS: QuizQuestion[] = [
       "It rotates on its side",
       "It's the hottest planet",
     ],
-    correctIndex: 2, // C
+    correctIndex: 2,
     planet: "Uranus",
   },
   {
@@ -171,15 +151,13 @@ const QUESTIONS: QuizQuestion[] = [
       "Copper in the rocks",
       "Reflected light from Neptune",
     ],
-    correctIndex: 0, // A
+    correctIndex: 0,
     planet: "Uranus",
   },
-
-  // ── Neptune (3) ──
   {
     question: "Neptune has the strongest _____ in the solar system.",
     options: ["Gravity", "Tides", "Magnetic field", "Winds"],
-    correctIndex: 3, // D
+    correctIndex: 3,
     planet: "Neptune",
   },
   {
@@ -190,13 +168,13 @@ const QUESTIONS: QuizQuestion[] = [
       "84 Earth years",
       "365 Earth days",
     ],
-    correctIndex: 1, // B
+    correctIndex: 1,
     planet: "Neptune",
   },
   {
     question: "Neptune is classified as what type of planet?",
     options: ["Ice giant", "Rocky planet", "Gas giant", "Dwarf planet"],
-    correctIndex: 0, // A
+    correctIndex: 0,
     planet: "Neptune",
   },
 ];
@@ -220,7 +198,6 @@ const COLORS = {
   OPTION_HOVER: 0x334155,
 };
 
-// Planet colors for the energy beam effect
 const PLANET_BEAM_COLORS: Record<string, number> = {
   Mercury: 0xa8a29e,
   Venus: 0xfbbf24,
@@ -231,8 +208,6 @@ const PLANET_BEAM_COLORS: Record<string, number> = {
   Uranus: 0x7dd3fc,
   Neptune: 0x6366f1,
 };
-
-// ─── Star interface for animated background ───
 
 interface BGStar {
   x: number;
@@ -258,14 +233,16 @@ export default class FinalBossScene extends Phaser.Scene {
   private isAnswering: boolean = false;
   private isGameOver: boolean = false;
   private shuffledQuestions: QuizQuestion[] = [];
+  // Flag to pause boss idle animation during attack/hit tweens
+  private isBossAnimating: boolean = false;
+  // Store the player's resting X so we can always return to it
+  private playerRestX: number = 0;
 
   // Sprites
-  /** Player ship sprite — replace texture key with your asset */
   private playerShip!: Phaser.GameObjects.Sprite;
-  /** Boss sprite — replace texture key with your asset */
   private bossSprite!: Phaser.GameObjects.Sprite;
   private bossInitialX: number = 0;
-  private bossAura!: Phaser.GameObjects.Circle;
+  private bossAura!: Phaser.GameObjects.Arc;
 
   // UI elements
   private bossHealthBar!: Phaser.GameObjects.Graphics;
@@ -284,11 +261,9 @@ export default class FinalBossScene extends Phaser.Scene {
   private elapsed: number = 0;
 
   // Intensity effects
-  private screenShakeIntensity: number = 0;
   private warningOverlay!: Phaser.GameObjects.Rectangle;
   private voidParticles!: Phaser.GameObjects.Particles.ParticleEmitter;
 
-  // Star colors
   private static STAR_COLORS = [
     0xffffff, 0xc8c8ff, 0xffdcb4, 0xb4b4ff, 0xffb4b4, 0xb4ffdc, 0xdcc8ff,
   ];
@@ -297,30 +272,19 @@ export default class FinalBossScene extends Phaser.Scene {
     super("FinalBossScene");
   }
 
-  // ─── Preload ───
-
   preload(): void {
     // ╔═══════════════════════════════════════════════════════════════╗
     // ║  PLACEHOLDER SPRITES                                        ║
     // ║  Replace these with your actual sprite assets:               ║
-    // ║                                                              ║
-    // ║  Player ship:                                                ║
-    // ║    this.load.image("boss_player", "assets/ui/player.png");   ║
-    // ║                                                              ║
-    // ║  Boss (Void Devourer):                                       ║
-    // ║    this.load.image("boss_enemy", "assets/ui/boss.png");      ║
-    // ║                                                              ║
-    // ║  Planet life icon:                                            ║
-    // ║    this.load.image("life_icon", "assets/ui/life_planet.png");║
+    // ║  this.load.image("boss_player", "assets/ui/player.png");     ║
+    // ║  this.load.image("boss_enemy", "assets/ui/boss.png");        ║
+    // ║  this.load.image("life_icon", "assets/ui/life_planet.png");  ║
     // ╚═══════════════════════════════════════════════════════════════╝
   }
-
-  // ─── Create ───
 
   create(): void {
     const { width, height } = this.scale;
 
-    // Reset state
     this.lives = MAX_LIVES;
     this.bossHealth = CORRECT_TO_WIN;
     this.currentQuestionIndex = 0;
@@ -328,19 +292,16 @@ export default class FinalBossScene extends Phaser.Scene {
     this.correctAnswers = 0;
     this.isAnswering = false;
     this.isGameOver = false;
+    this.isBossAnimating = false;
     this.optionButtons = [];
     this.livesIcons = [];
     this.bgStars = [];
     this.elapsed = 0;
-    this.screenShakeIntensity = 0;
+    this.playerRestX = width * 0.15;
 
-    // Shuffle questions
     this.shuffledQuestions = Phaser.Utils.Array.Shuffle([...QUESTIONS]);
 
-    // Create placeholder textures if real ones aren't loaded
     this.createPlaceholderTextures();
-
-    // Build the scene
     this.createStarfield(width, height);
     this.createWarningOverlay(width, height);
     this.createVoidParticles(width, height);
@@ -350,18 +311,14 @@ export default class FinalBossScene extends Phaser.Scene {
     this.createLivesDisplay(width, height);
     this.createQuestionUI(width, height);
     this.createFeedbackText(width, height);
-
-    // Start the intro sequence
     this.startIntro(width, height);
   }
-
-  // ─── Update (called every frame) ───
 
   update(_time: number, delta: number): void {
     this.elapsed += delta;
     this.updateStarfield(delta);
-    this.updateAmbientShake(delta);
-    this.updateBossIdle(delta);
+    this.updateAmbientShake();
+    this.updateBossIdle();
   }
 
   // ─── Animated Starfield Background ───
@@ -375,14 +332,12 @@ export default class FinalBossScene extends Phaser.Scene {
 
     this.starGfx = this.add.graphics().setVisible(false);
 
-    // Seeded RNG for consistency
     let seed = 42;
     const rng = () => {
       seed = (seed * 16807) % 2147483647;
       return (seed - 1) / 2147483646;
     };
 
-    // Normal stars
     for (let i = 0; i < 300; i++) {
       this.bgStars.push({
         x: rng() * width,
@@ -400,7 +355,6 @@ export default class FinalBossScene extends Phaser.Scene {
       });
     }
 
-    // Brighter accent stars
     for (let i = 0; i < 25; i++) {
       this.bgStars.push({
         x: rng() * width,
@@ -424,7 +378,6 @@ export default class FinalBossScene extends Phaser.Scene {
     const dt = delta / 16.667;
     const time = this.elapsed / 1000;
 
-    // Star drift speeds increase as boss health drops (battle intensifies)
     const intensityMul = 1 + (1 - this.bossHealth / CORRECT_TO_WIN) * 2;
     const dx = -0.25 * intensityMul;
     const dy = -0.12 * intensityMul;
@@ -432,14 +385,18 @@ export default class FinalBossScene extends Phaser.Scene {
     this.starRT.clear();
     this.starGfx.clear();
 
-    // Deep space base
     this.starGfx.fillStyle(0x000008, 1);
     this.starGfx.fillRect(0, 0, width, height);
 
-    // Red nebula intensifies as fight progresses
     const nebulaAlpha = 0.03 + (1 - this.bossHealth / CORRECT_TO_WIN) * 0.06;
     const nebs = [
-      { x: width * 0.7, y: height * 0.3, r: 120, c: 0x501020, a: nebulaAlpha },
+      {
+        x: width * 0.7,
+        y: height * 0.3,
+        r: 120,
+        c: 0x501020,
+        a: nebulaAlpha,
+      },
       {
         x: width * 0.85,
         y: height * 0.5,
@@ -457,18 +414,15 @@ export default class FinalBossScene extends Phaser.Scene {
       this.starGfx.fillCircle(n.x, n.y, n.r * 0.6);
     }
 
-    // Move and draw stars with twinkle
     for (const s of this.bgStars) {
       s.x += dx * s.speed * dt;
       s.y += dy * s.speed * dt;
 
-      // Wrap around viewport
       if (s.x < -2) s.x += width + 4;
       if (s.x > width + 2) s.x -= width + 4;
       if (s.y < -2) s.y += height + 4;
       if (s.y > height + 2) s.y -= height + 4;
 
-      // Twinkle effect
       const twinkle =
         s.baseAlpha *
         (0.6 + 0.4 * Math.sin(time * s.twinkleSpeed + s.twinkleOffset));
@@ -492,7 +446,6 @@ export default class FinalBossScene extends Phaser.Scene {
   // ─── Ambient Intensity Effects ───
 
   private createWarningOverlay(width: number, height: number): void {
-    // Red warning flash overlay — used for wrong answers and intensity
     this.warningOverlay = this.add
       .rectangle(0, 0, width, height, 0xff0000, 0)
       .setOrigin(0)
@@ -501,7 +454,6 @@ export default class FinalBossScene extends Phaser.Scene {
   }
 
   private createVoidParticles(width: number, height: number): void {
-    // Ambient void particles drifting from the right (boss side)
     if (!this.textures.exists("void_dust")) {
       const gfx = this.make.graphics({ x: 0, y: 0 });
       gfx.fillStyle(0xef4444, 0.6);
@@ -526,10 +478,9 @@ export default class FinalBossScene extends Phaser.Scene {
       .setDepth(3);
   }
 
-  private updateAmbientShake(_delta: number): void {
-    // Constant subtle screen vibration that increases as boss weakens
+  private updateAmbientShake(): void {
     const healthPercent = this.bossHealth / CORRECT_TO_WIN;
-    const baseShake = (1 - healthPercent) * 0.3; // 0 to 0.3 pixels
+    const baseShake = (1 - healthPercent) * 0.3;
 
     if (baseShake > 0.05 && !this.isGameOver) {
       const ox = (Math.random() - 0.5) * baseShake * 2;
@@ -537,51 +488,42 @@ export default class FinalBossScene extends Phaser.Scene {
       this.cameras.main.setScroll(ox, oy);
     }
 
-    // Pulse the warning overlay slightly at low boss health
     if (healthPercent < 0.4 && !this.isGameOver) {
       const pulse = Math.sin(this.elapsed / 800) * 0.015 * (1 - healthPercent);
       this.warningOverlay.setAlpha(Math.max(0, pulse));
     }
 
-    // Increase void particle rate as battle intensifies
     if (this.voidParticles) {
       const freq = Math.max(40, 200 - (1 - healthPercent) * 160);
       this.voidParticles.frequency = freq;
     }
   }
 
-  private updateBossIdle(_delta: number): void {
-    // Boss continuous menacing bob and pulse
-    if (this.bossSprite && !this.isGameOver) {
-      const time = this.elapsed / 1000;
-      const bobY = Math.sin(time * 1.2) * 4;
-      const bobX = Math.sin(time * 0.7) * 2;
-      this.bossSprite.y = this.scale.height * 0.38 + bobY;
-      this.bossSprite.x = this.bossInitialX + bobX;
+  // Only update boss idle when NOT in an attack/hit animation
+  private updateBossIdle(): void {
+    if (!this.bossSprite || this.isGameOver || this.isBossAnimating) return;
 
-      // Pulsing scale
-      const pulse = 1.7 + Math.sin(time * 2) * 0.1;
-      this.bossSprite.setScale(pulse);
+    const time = this.elapsed / 1000;
+    const bobY = Math.sin(time * 1.2) * 4;
+    const bobX = Math.sin(time * 0.7) * 2;
+    this.bossSprite.y = this.scale.height * 0.38 + bobY;
+    this.bossSprite.x = this.bossInitialX + bobX;
 
-      // Aura follows boss
-      if (this.bossAura) {
-        this.bossAura.setPosition(this.bossSprite.x, this.bossSprite.y);
-        const auraAlpha = 0.06 + Math.sin(time * 1.5) * 0.04;
-        this.bossAura.setAlpha(auraAlpha);
-        const auraScale = 1.0 + Math.sin(time * 1.8) * 0.15;
-        this.bossAura.setScale(auraScale);
-      }
+    const pulse = 1.7 + Math.sin(time * 2) * 0.1;
+    this.bossSprite.setScale(pulse);
+
+    if (this.bossAura) {
+      this.bossAura.setPosition(this.bossSprite.x, this.bossSprite.y);
+      const auraAlpha = 0.06 + Math.sin(time * 1.5) * 0.04;
+      this.bossAura.setAlpha(auraAlpha);
+      const auraScale = 1.0 + Math.sin(time * 1.8) * 0.15;
+      this.bossAura.setScale(auraScale);
     }
   }
 
   // ─── Placeholder Texture Generation ───
 
   private createPlaceholderTextures(): void {
-    // ╔═══════════════════════════════════════════════════════════════╗
-    // ║  PLAYER SHIP PLACEHOLDER                                     ║
-    // ║  To replace: load your image in preload() with key           ║
-    // ║  "boss_player" and remove this block.                        ║
-    // ╚═══════════════════════════════════════════════════════════════╝
     if (!this.textures.exists("boss_player")) {
       const playerGfx = this.make.graphics({ x: 0, y: 0 });
       playerGfx.fillStyle(0x3b82f6);
@@ -594,11 +536,6 @@ export default class FinalBossScene extends Phaser.Scene {
       playerGfx.destroy();
     }
 
-    // ╔═══════════════════════════════════════════════════════════════╗
-    // ║  BOSS (VOID DEVOURER) PLACEHOLDER                           ║
-    // ║  To replace: load your image in preload() with key           ║
-    // ║  "boss_enemy" and remove this block.                         ║
-    // ╚═══════════════════════════════════════════════════════════════╝
     if (!this.textures.exists("boss_enemy")) {
       const bossGfx = this.make.graphics({ x: 0, y: 0 });
       bossGfx.fillStyle(0x1a0000);
@@ -624,11 +561,6 @@ export default class FinalBossScene extends Phaser.Scene {
       bossGfx.destroy();
     }
 
-    // ╔═══════════════════════════════════════════════════════════════╗
-    // ║  LIFE ICON PLACEHOLDER                                       ║
-    // ║  To replace: load your image in preload() with key           ║
-    // ║  "life_icon" and remove this block.                          ║
-    // ╚═══════════════════════════════════════════════════════════════╝
     if (!this.textures.exists("life_icon")) {
       const lifeGfx = this.make.graphics({ x: 0, y: 0 });
       lifeGfx.fillStyle(0x3b82f6);
@@ -639,7 +571,6 @@ export default class FinalBossScene extends Phaser.Scene {
       lifeGfx.destroy();
     }
 
-    // Beam particle texture
     if (!this.textures.exists("beam_particle")) {
       const beamGfx = this.make.graphics({ x: 0, y: 0 });
       beamGfx.fillStyle(0xffffff);
@@ -648,7 +579,6 @@ export default class FinalBossScene extends Phaser.Scene {
       beamGfx.destroy();
     }
 
-    // Spark particle texture (for boss attack)
     if (!this.textures.exists("spark_particle")) {
       const sparkGfx = this.make.graphics({ x: 0, y: 0 });
       sparkGfx.fillStyle(0xef4444);
@@ -663,17 +593,11 @@ export default class FinalBossScene extends Phaser.Scene {
   private createBoss(width: number, height: number): void {
     this.bossInitialX = width * 0.78;
 
-    // ╔═══════════════════════════════════════════════════════════════╗
-    // ║  BOSS SPRITE                                                 ║
-    // ║  Uses "boss_enemy" texture key.                              ║
-    // ║  Adjust setScale() for your actual sprite dimensions.        ║
-    // ╚═══════════════════════════════════════════════════════════════╝
     this.bossSprite = this.add
       .sprite(width + 100, height * 0.38, "boss_enemy")
       .setScale(1.8)
       .setDepth(5);
 
-    // Boss red glow aura
     this.bossAura = this.add
       .circle(this.bossSprite.x, this.bossSprite.y, 90, COLORS.BOSS_RED, 0.08)
       .setDepth(4)
@@ -683,17 +607,11 @@ export default class FinalBossScene extends Phaser.Scene {
   // ─── Player ───
 
   private createPlayer(width: number, height: number): void {
-    // ╔═══════════════════════════════════════════════════════════════╗
-    // ║  PLAYER SPRITE                                               ║
-    // ║  Uses "boss_player" texture key.                             ║
-    // ║  Adjust setScale() for your actual sprite dimensions.        ║
-    // ╚═══════════════════════════════════════════════════════════════╝
     this.playerShip = this.add
       .sprite(-80, height * 0.38, "boss_player")
       .setScale(1.2)
       .setDepth(5);
 
-    // Engine particle trail
     this.add.particles(0, 0, "beam_particle", {
       speed: { min: 30, max: 80 },
       scale: { start: 0.3, end: 0 },
@@ -714,7 +632,6 @@ export default class FinalBossScene extends Phaser.Scene {
     const barWidth = width * 0.4;
     const barHeight = 16;
 
-    // Label
     this.add
       .text(width / 2, barY - 2, "VOID DEVOURER", {
         fontFamily: "'Press Start 2P', monospace",
@@ -725,18 +642,15 @@ export default class FinalBossScene extends Phaser.Scene {
       .setOrigin(0.5, 1)
       .setDepth(20);
 
-    // Background
     this.bossHealthBg = this.add.graphics().setDepth(20);
     this.bossHealthBg.fillStyle(0x1e293b, 0.9);
     this.bossHealthBg.fillRoundedRect(barX, barY, barWidth, barHeight, 4);
     this.bossHealthBg.lineStyle(2, 0x475569);
     this.bossHealthBg.strokeRoundedRect(barX, barY, barWidth, barHeight, 4);
 
-    // Health fill
     this.bossHealthBar = this.add.graphics().setDepth(21);
     this.drawBossHealth(barX, barY, barWidth, barHeight);
 
-    // Health text
     this.bossHealthText = this.add
       .text(
         width / 2,
@@ -788,7 +702,6 @@ export default class FinalBossScene extends Phaser.Scene {
     const x = 22;
     const startY = height - 30;
 
-    // Label
     this.add
       .text(x, startY - MAX_LIVES * 26 - 12, "SHIELD", {
         fontFamily: "'Press Start 2P', monospace",
@@ -798,13 +711,6 @@ export default class FinalBossScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(20);
 
-    // ╔═══════════════════════════════════════════════════════════════╗
-    // ║  LIFE ICONS — arranged vertically, bottom-left               ║
-    // ║  Uses "life_icon" texture key.                               ║
-    // ║  Each icon represents one planet/life.                       ║
-    // ║  To use custom planet sprites per life, change the texture   ║
-    // ║  key for each icon individually below.                       ║
-    // ╚═══════════════════════════════════════════════════════════════╝
     const planetNames = [
       "Mercury",
       "Venus",
@@ -817,7 +723,6 @@ export default class FinalBossScene extends Phaser.Scene {
     ];
 
     for (let i = 0; i < MAX_LIVES; i++) {
-      // Bottom icon = index 0 (Mercury), top icon = index 7 (Neptune)
       const yPos = startY - i * 26;
 
       const icon = this.add
@@ -825,7 +730,6 @@ export default class FinalBossScene extends Phaser.Scene {
         .setScale(1)
         .setDepth(20);
 
-      // Planet name label next to icon
       this.add
         .text(x + 16, yPos, planetNames[i].substring(0, 3).toUpperCase(), {
           fontFamily: "'Press Start 2P', monospace",
@@ -842,7 +746,6 @@ export default class FinalBossScene extends Phaser.Scene {
   // ─── Question UI ───
 
   private createQuestionUI(width: number, height: number): void {
-    // Question counter (top-left, offset from lives)
     this.questionCounter = this.add
       .text(60, 16, "", {
         fontFamily: "'Press Start 2P', monospace",
@@ -851,7 +754,6 @@ export default class FinalBossScene extends Phaser.Scene {
       })
       .setDepth(20);
 
-    // Question text — positioned in the middle area, above the options
     const questionY = height * 0.52;
 
     this.questionText = this.add
@@ -883,7 +785,6 @@ export default class FinalBossScene extends Phaser.Scene {
   // ─── Intro Sequence ───
 
   private startIntro(width: number, height: number): void {
-    // Title text
     const titleText = this.add
       .text(width / 2, height * 0.15, "FINAL STAND", {
         fontFamily: "'Press Start 2P', monospace",
@@ -904,15 +805,15 @@ export default class FinalBossScene extends Phaser.Scene {
       onComplete: () => titleText.destroy(),
     });
 
-    // Fly player in from the left
     this.tweens.add({
       targets: this.playerShip,
-      x: width * 0.15,
+      x: this.playerRestX,
       duration: 2000,
       ease: "Cubic.easeOut",
     });
 
-    // Bring boss in from the right with dramatic entrance
+    // Boss intro — pause idle during entrance tween
+    this.isBossAnimating = true;
     this.tweens.add({
       targets: this.bossSprite,
       x: this.bossInitialX,
@@ -920,13 +821,12 @@ export default class FinalBossScene extends Phaser.Scene {
       ease: "Back.easeOut",
       delay: 800,
       onComplete: () => {
-        // Boss entrance shake
+        this.isBossAnimating = false;
         this.cameras.main.shake(600, 0.008);
         this.cameras.main.flash(300, 40, 0, 0);
       },
     });
 
-    // Start the battle after intro
     this.time.delayedCall(4000, () => {
       this.showQuestion();
     });
@@ -939,7 +839,6 @@ export default class FinalBossScene extends Phaser.Scene {
 
     const { width, height } = this.scale;
 
-    // Check if we've run out of questions
     if (this.currentQuestionIndex >= this.shuffledQuestions.length) {
       this.triggerGameOver(false);
       return;
@@ -947,12 +846,10 @@ export default class FinalBossScene extends Phaser.Scene {
 
     const q = this.shuffledQuestions[this.currentQuestionIndex];
 
-    // Update counter
     this.questionCounter.setText(
       `Q${this.questionsAnswered + 1}  |  ${this.correctAnswers}/${CORRECT_TO_WIN} hits`
     );
 
-    // Show question text with typewriter-like pop
     this.questionText.setText(q.question);
     this.questionText.setAlpha(0);
     this.questionText.setScale(0.9);
@@ -965,13 +862,14 @@ export default class FinalBossScene extends Phaser.Scene {
       ease: "Back.easeOut",
     });
 
-    // Clear old option buttons
-    this.optionButtons.forEach((btn) => btn.destroy());
+    // Clear old option buttons safely
+    this.optionButtons.forEach((btn) => {
+      if (btn && btn.active) btn.destroy();
+    });
     this.optionButtons = [];
 
-    // Create option buttons — 2x2 grid layout to avoid overflow
+    // 2x2 grid layout
     const gridCols = 2;
-    const gridRows = 2;
     const optionWidth = Math.min((width - 80) / 2, 200);
     const optionHeight = 36;
     const gapX = 10;
@@ -988,7 +886,6 @@ export default class FinalBossScene extends Phaser.Scene {
 
       const container = this.add.container(x, y).setDepth(20);
 
-      // Button background
       const bg = this.add
         .graphics()
         .fillStyle(COLORS.OPTION_BG, 0.95)
@@ -1008,7 +905,6 @@ export default class FinalBossScene extends Phaser.Scene {
           6
         );
 
-      // Option label
       const label = String.fromCharCode(65 + i);
       const text = this.add
         .text(0, 0, `${label}. ${optionText}`, {
@@ -1022,7 +918,6 @@ export default class FinalBossScene extends Phaser.Scene {
 
       container.add([bg, text]);
 
-      // Hit zone
       const hitZone = this.add
         .rectangle(0, 0, optionWidth, optionHeight)
         .setOrigin(0.5)
@@ -1031,7 +926,6 @@ export default class FinalBossScene extends Phaser.Scene {
 
       container.add(hitZone);
 
-      // Hover effects
       hitZone.on("pointerover", () => {
         if (!this.isAnswering) {
           bg.clear()
@@ -1078,13 +972,11 @@ export default class FinalBossScene extends Phaser.Scene {
         }
       });
 
-      // Click handler
       hitZone.on("pointerdown", () => {
         if (this.isAnswering || this.isGameOver) return;
         this.handleAnswer(i, q, bg, optionWidth, optionHeight);
       });
 
-      // Staggered entry animation
       container.setAlpha(0);
       container.setScale(0.8);
       this.tweens.add({
@@ -1118,7 +1010,6 @@ export default class FinalBossScene extends Phaser.Scene {
 
     const isCorrect = selectedIndex === question.correctIndex;
 
-    // Visual feedback on the selected button
     const color = isCorrect ? COLORS.CORRECT_GREEN : COLORS.WRONG_RED;
     const borderColor = isCorrect ? 0x4ade80 : 0xf87171;
 
@@ -1141,10 +1032,40 @@ export default class FinalBossScene extends Phaser.Scene {
         6
       );
 
+    // Also highlight the correct answer if wrong
+    if (!isCorrect) {
+      const correctBtn = this.optionButtons[question.correctIndex];
+      if (correctBtn && correctBtn.active) {
+        const correctBg = correctBtn.getAt(0) as Phaser.GameObjects.Graphics;
+        if (correctBg) {
+          correctBg
+            .clear()
+            .fillStyle(COLORS.CORRECT_GREEN, 0.2)
+            .fillRoundedRect(
+              -optionWidth / 2,
+              -optionHeight / 2,
+              optionWidth,
+              optionHeight,
+              6
+            )
+            .lineStyle(2, 0x4ade80)
+            .strokeRoundedRect(
+              -optionWidth / 2,
+              -optionHeight / 2,
+              optionWidth,
+              optionHeight,
+              6
+            );
+        }
+      }
+    }
+
     // Disable all buttons
     this.optionButtons.forEach((btn) => {
-      const hitZone = btn.getAt(2) as Phaser.GameObjects.Rectangle;
-      if (hitZone) hitZone.disableInteractive();
+      if (btn && btn.active) {
+        const hitZone = btn.getAt(2) as Phaser.GameObjects.Rectangle;
+        if (hitZone && hitZone.input) hitZone.disableInteractive();
+      }
     });
 
     if (isCorrect) {
@@ -1162,19 +1083,16 @@ export default class FinalBossScene extends Phaser.Scene {
 
     const { width } = this.scale;
 
-    // Show feedback
     this.showFeedback("DIRECT HIT!", "#4ade80");
-
-    // Fire beam from player to boss
     this.fireBeam(question.planet);
 
-    // Update boss health bar
     const barX = width * 0.3;
     const barWidth = width * 0.4;
     this.drawBossHealth(barX, 20, barWidth, 16);
     this.bossHealthText.setText(`${this.bossHealth}/${CORRECT_TO_WIN}`);
 
-    // Boss hit reaction — violent shake
+    // Pause idle so tween works, then resume
+    this.isBossAnimating = true;
     this.tweens.add({
       targets: this.bossSprite,
       x: this.bossSprite.x + 20,
@@ -1184,13 +1102,12 @@ export default class FinalBossScene extends Phaser.Scene {
       repeat: 4,
       onComplete: () => {
         this.bossSprite.clearTint();
+        this.isBossAnimating = false;
       },
     });
 
-    // Camera shake
     this.cameras.main.shake(300, 0.008);
 
-    // Boss roar / red flash
     this.warningOverlay.setAlpha(0.1);
     this.tweens.add({
       targets: this.warningOverlay,
@@ -1198,7 +1115,6 @@ export default class FinalBossScene extends Phaser.Scene {
       duration: 500,
     });
 
-    // Check win condition
     if (this.bossHealth <= 0) {
       this.time.delayedCall(1200, () => {
         this.triggerVictory();
@@ -1206,7 +1122,7 @@ export default class FinalBossScene extends Phaser.Scene {
       return;
     }
 
-    // Next question
+    // Transition to next question
     this.time.delayedCall(1800, () => {
       this.clearQuestionUI();
       this.time.delayedCall(400, () => this.showQuestion());
@@ -1218,24 +1134,21 @@ export default class FinalBossScene extends Phaser.Scene {
   private onWrongAnswer(_question: QuizQuestion): void {
     this.lives--;
 
-    // Show feedback
     this.showFeedback("SHIELD HIT!", "#ef4444");
 
-    // Boss attack animation — lunges toward player with sparks
+    // Boss attack animation
     this.bossAttackAnimation();
 
-    // Remove a life icon (remove from top = Neptune first)
-    const iconIndex = this.lives; // after decrement, this is the index to remove
+    // Remove a life icon (remove from top = last index first)
+    const iconIndex = this.lives;
     if (iconIndex >= 0 && iconIndex < this.livesIcons.length) {
       const lostIcon = this.livesIcons[iconIndex];
-      if (lostIcon) {
-        // Dramatic destruction animation
+      if (lostIcon && lostIcon.active) {
         this.tweens.add({
           targets: lostIcon,
           alpha: 0,
           scaleX: 2.5,
           scaleY: 2.5,
-          tint: 0xff0000,
           duration: 500,
           ease: "Back.easeIn",
           onComplete: () => {
@@ -1243,8 +1156,7 @@ export default class FinalBossScene extends Phaser.Scene {
           },
         });
 
-        // Spark burst at the lost icon
-        this.add
+        const sparkEmitter = this.add
           .particles(lostIcon.x, lostIcon.y, "spark_particle", {
             speed: { min: 40, max: 120 },
             scale: { start: 0.5, end: 0 },
@@ -1254,15 +1166,15 @@ export default class FinalBossScene extends Phaser.Scene {
             quantity: 6,
             emitting: false,
           })
-          .explode(6)
           .setDepth(21);
+        sparkEmitter.explode(6);
       }
     }
 
     // Heavy camera shake
     this.cameras.main.shake(500, 0.015);
-    // Red flash
     this.cameras.main.flash(300, 80, 0, 0);
+
     // Warning overlay pulse
     this.warningOverlay.setAlpha(0.15);
     this.tweens.add({
@@ -1270,15 +1182,6 @@ export default class FinalBossScene extends Phaser.Scene {
       alpha: 0,
       duration: 800,
       ease: "Cubic.easeOut",
-    });
-
-    // Player ship recoil
-    this.tweens.add({
-      targets: this.playerShip,
-      x: this.playerShip.x - 12,
-      duration: 100,
-      yoyo: true,
-      repeat: 1,
     });
 
     // Check lose condition
@@ -1289,10 +1192,15 @@ export default class FinalBossScene extends Phaser.Scene {
       return;
     }
 
-    // Next question
+    // Transition to next question — this is the key fix:
+    // Use a single delayedCall chain that always fires
     this.time.delayedCall(2000, () => {
+      if (this.isGameOver) return;
       this.clearQuestionUI();
-      this.time.delayedCall(400, () => this.showQuestion());
+      this.time.delayedCall(400, () => {
+        if (this.isGameOver) return;
+        this.showQuestion();
+      });
     });
   }
 
@@ -1306,15 +1214,17 @@ export default class FinalBossScene extends Phaser.Scene {
     const endX = this.bossSprite.x;
     const endY = this.bossSprite.y;
 
-    // Player recoil from firing
+    // Player recoil — use absolute position to avoid drift
     this.tweens.add({
       targets: this.playerShip,
-      x: this.playerShip.x - 8,
+      x: this.playerRestX - 8,
       duration: 80,
       yoyo: true,
+      onComplete: () => {
+        this.playerShip.x = this.playerRestX;
+      },
     });
 
-    // Main beam line
     const beam = this.add.graphics().setDepth(15);
 
     const beamProgress = { t: 0 };
@@ -1327,18 +1237,14 @@ export default class FinalBossScene extends Phaser.Scene {
         const cx = Phaser.Math.Linear(startX, endX, beamProgress.t);
         const cy = Phaser.Math.Linear(startY, endY, beamProgress.t);
         beam.clear();
-        // Outer glow
         beam.lineStyle(12, beamColor, 0.15);
         beam.lineBetween(startX, startY, cx, cy);
-        // Core beam
         beam.lineStyle(4, beamColor, 0.9);
         beam.lineBetween(startX, startY, cx, cy);
-        // Inner bright core
         beam.lineStyle(2, 0xffffff, 0.6);
         beam.lineBetween(startX, startY, cx, cy);
       },
       onComplete: () => {
-        // Impact burst at boss position
         this.add
           .particles(endX, endY, "beam_particle", {
             speed: { min: 80, max: 250 },
@@ -1351,7 +1257,6 @@ export default class FinalBossScene extends Phaser.Scene {
           })
           .explode(16);
 
-        // Impact flash
         const flash = this.add
           .circle(endX, endY, 30, 0xffffff, 0.5)
           .setDepth(16)
@@ -1365,7 +1270,6 @@ export default class FinalBossScene extends Phaser.Scene {
           onComplete: () => flash.destroy(),
         });
 
-        // Fade beam
         this.tweens.add({
           targets: beam,
           alpha: 0,
@@ -1375,7 +1279,6 @@ export default class FinalBossScene extends Phaser.Scene {
       },
     });
 
-    // Planet name flash
     const planetLabel = this.add
       .text(startX + 40, startY - 20, `${planet} ENERGY!`, {
         fontFamily: "'Press Start 2P', monospace",
@@ -1399,35 +1302,36 @@ export default class FinalBossScene extends Phaser.Scene {
   // ─── Boss Attack Animation ───
 
   private bossAttackAnimation(): void {
-    // Boss lunges aggressively toward player
-    const originalX = this.bossSprite.x;
+    // Pause idle so tweens can work
+    this.isBossAnimating = true;
+
+    const lungeTarget = this.bossInitialX - 80;
+
     this.tweens.add({
       targets: this.bossSprite,
-      x: originalX - 80,
+      x: lungeTarget,
       duration: 150,
       ease: "Cubic.easeOut",
-      yoyo: true,
-      hold: 80,
-      onYoyo: () => {
-        // At the closest point, spawn spark barrage
-        const sparks = this.add.particles(
-          this.bossSprite.x - 30,
-          this.bossSprite.y,
-          "spark_particle",
-          {
-            speed: { min: 150, max: 350 },
-            angle: { min: 155, max: 205 },
-            scale: { start: 1, end: 0 },
-            blendMode: "ADD",
-            lifespan: 700,
-            tint: [0xef4444, 0xfca5a5, 0xff6b6b, 0xfbbf24],
-            quantity: 14,
-            emitting: false,
-          }
-        );
-        sparks.explode(14);
+      onComplete: () => {
+        // At closest point, spawn spark barrage
+        this.add
+          .particles(
+            this.bossSprite.x - 30,
+            this.bossSprite.y,
+            "spark_particle",
+            {
+              speed: { min: 150, max: 350 },
+              angle: { min: 155, max: 205 },
+              scale: { start: 1, end: 0 },
+              blendMode: "ADD",
+              lifespan: 700,
+              tint: [0xef4444, 0xfca5a5, 0xff6b6b, 0xfbbf24],
+              quantity: 14,
+              emitting: false,
+            }
+          )
+          .explode(14);
 
-        // Secondary smaller burst
         this.time.delayedCall(100, () => {
           this.add
             .particles(
@@ -1447,26 +1351,43 @@ export default class FinalBossScene extends Phaser.Scene {
             )
             .explode(8);
         });
+
+        // Return boss to position
+        this.tweens.add({
+          targets: this.bossSprite,
+          x: this.bossInitialX,
+          duration: 300,
+          ease: "Cubic.easeIn",
+          onComplete: () => {
+            this.isBossAnimating = false;
+          },
+        });
       },
     });
 
-    // Boss temporarily turns brighter/angrier
+    // Boss temporarily turns angrier
     this.bossSprite.setTint(0xff4444);
-    this.time.delayedCall(400, () => {
-      this.bossSprite.clearTint();
+    this.time.delayedCall(500, () => {
+      if (this.bossSprite && this.bossSprite.active) {
+        this.bossSprite.clearTint();
+      }
     });
 
-    // Impact on player
+    // Impact on player — use absolute position to avoid drift
     this.time.delayedCall(300, () => {
+      if (this.isGameOver) return;
+      this.playerShip.setTint(0xff0000);
       this.tweens.add({
         targets: this.playerShip,
-        tint: 0xff0000,
-        x: this.playerShip.x - 10,
+        x: this.playerRestX - 10,
         duration: 80,
         yoyo: true,
         repeat: 3,
         onComplete: () => {
-          this.playerShip.clearTint();
+          if (this.playerShip && this.playerShip.active) {
+            this.playerShip.clearTint();
+            this.playerShip.x = this.playerRestX;
+          }
         },
       });
     });
@@ -1497,14 +1418,18 @@ export default class FinalBossScene extends Phaser.Scene {
 
   private clearQuestionUI(): void {
     this.optionButtons.forEach((btn) => {
-      this.tweens.add({
-        targets: btn,
-        alpha: 0,
-        scaleX: 0.8,
-        scaleY: 0.8,
-        duration: 200,
-        onComplete: () => btn.destroy(),
-      });
+      if (btn && btn.active) {
+        this.tweens.add({
+          targets: btn,
+          alpha: 0,
+          scaleX: 0.8,
+          scaleY: 0.8,
+          duration: 200,
+          onComplete: () => {
+            if (btn && btn.active) btn.destroy();
+          },
+        });
+      }
     });
     this.optionButtons = [];
 
@@ -1519,19 +1444,17 @@ export default class FinalBossScene extends Phaser.Scene {
 
   private triggerVictory(): void {
     this.isGameOver = true;
+    this.isBossAnimating = true;
     this.clearQuestionUI();
 
     const { width, height } = this.scale;
 
-    // Stop ambient effects
     if (this.voidParticles) this.voidParticles.stop();
     this.cameras.main.setScroll(0, 0);
     this.warningOverlay.setAlpha(0);
 
-    // Boss death animation
     this.cameras.main.flash(600, 255, 100, 100);
 
-    // Boss shakes violently
     this.tweens.add({
       targets: this.bossSprite,
       x: this.bossSprite.x + 6,
@@ -1540,55 +1463,52 @@ export default class FinalBossScene extends Phaser.Scene {
       repeat: 20,
     });
 
-    // Boss flash tint rapidly
     let flashCount = 0;
     const flashTimer = this.time.addEvent({
       delay: 80,
       repeat: 12,
       callback: () => {
         flashCount++;
-        this.bossSprite.setTint(flashCount % 2 === 0 ? 0xffffff : 0xff0000);
+        if (this.bossSprite && this.bossSprite.active) {
+          this.bossSprite.setTint(flashCount % 2 === 0 ? 0xffffff : 0xff0000);
+        }
       },
     });
 
-    // Boss explodes after shaking
     this.time.delayedCall(1200, () => {
       flashTimer.destroy();
-      this.bossSprite.clearTint();
+      if (this.bossSprite && this.bossSprite.active) {
+        this.bossSprite.clearTint();
+      }
 
-      // Multiple explosion bursts
       for (let i = 0; i < 3; i++) {
         this.time.delayedCall(i * 200, () => {
           const ox = (Math.random() - 0.5) * 60;
           const oy = (Math.random() - 0.5) * 60;
 
-          this.add
-            .particles(
-              this.bossSprite.x + ox,
-              this.bossSprite.y + oy,
-              "spark_particle",
-              {
-                speed: { min: 100, max: 400 },
-                scale: { start: 1.5, end: 0 },
-                blendMode: "ADD",
-                lifespan: 1000,
-                tint: [0xef4444, 0xfca5a5, 0xff6b6b, 0xfbbf24, 0xffffff],
-                quantity: 20,
-                emitting: false,
-              }
-            )
-            .explode(20);
-
+          const burstEmitter = this.add.particles(
+            this.bossSprite.x + ox,
+            this.bossSprite.y + oy,
+            "spark_particle",
+            {
+              speed: { min: 100, max: 400 },
+              scale: { start: 1.5, end: 0 },
+              blendMode: "ADD",
+              lifespan: 1000,
+              tint: [0xef4444, 0xfca5a5, 0xff6b6b, 0xfbbf24, 0xffffff],
+              quantity: 20,
+              emitting: false,
+            }
+          );
+          burstEmitter.explode(20);
           this.cameras.main.shake(200, 0.01);
         });
       }
 
-      // Final big flash
       this.time.delayedCall(600, () => {
         this.cameras.main.flash(800, 255, 200, 200);
       });
 
-      // Fade out boss
       this.tweens.add({
         targets: this.bossSprite,
         alpha: 0,
@@ -1598,14 +1518,12 @@ export default class FinalBossScene extends Phaser.Scene {
         ease: "Cubic.easeOut",
       });
 
-      // Hide aura
       this.tweens.add({
         targets: this.bossAura,
         alpha: 0,
         duration: 600,
       });
 
-      // Show victory screen
       this.time.delayedCall(1800, () => {
         this.showVictoryScreen(width, height);
       });
@@ -1613,7 +1531,6 @@ export default class FinalBossScene extends Phaser.Scene {
   }
 
   private showVictoryScreen(width: number, height: number): void {
-    // Dark overlay
     const overlay = this.add
       .rectangle(0, 0, width, height, 0x000000, 0)
       .setOrigin(0)
@@ -1636,14 +1553,8 @@ export default class FinalBossScene extends Phaser.Scene {
     panel.lineStyle(2, 0x4ade80);
     panel.strokeRoundedRect(panelX, panelY, panelWidth, panelHeight, 8);
 
-    this.tweens.add({
-      targets: panel,
-      alpha: 1,
-      duration: 400,
-      delay: 200,
-    });
+    this.tweens.add({ targets: panel, alpha: 1, duration: 400, delay: 200 });
 
-    // Title
     const title = this.add
       .text(width / 2, panelY + 24, "THE VOID IS VANQUISHED!", {
         fontFamily: "'Press Start 2P', monospace",
@@ -1655,14 +1566,8 @@ export default class FinalBossScene extends Phaser.Scene {
       .setDepth(32)
       .setAlpha(0);
 
-    this.tweens.add({
-      targets: title,
-      alpha: 1,
-      duration: 400,
-      delay: 400,
-    });
+    this.tweens.add({ targets: title, alpha: 1, duration: 400, delay: 400 });
 
-    // Stats
     const statsText = [
       `Correct: ${this.correctAnswers}/${this.questionsAnswered}`,
       `Shield Remaining: ${this.lives}/${MAX_LIVES}`,
@@ -1681,14 +1586,8 @@ export default class FinalBossScene extends Phaser.Scene {
       .setDepth(32)
       .setAlpha(0);
 
-    this.tweens.add({
-      targets: stats,
-      alpha: 1,
-      duration: 400,
-      delay: 600,
-    });
+    this.tweens.add({ targets: stats, alpha: 1, duration: 400, delay: 600 });
 
-    // Continue button
     this.createEndButton(
       width / 2,
       panelY + panelHeight - 30,
@@ -1704,21 +1603,19 @@ export default class FinalBossScene extends Phaser.Scene {
 
   private triggerGameOver(fromDamage: boolean): void {
     this.isGameOver = true;
+    this.isBossAnimating = true;
     this.clearQuestionUI();
 
     const { width, height } = this.scale;
 
-    // Stop ambient effects
     if (this.voidParticles) this.voidParticles.stop();
     this.cameras.main.setScroll(0, 0);
     this.warningOverlay.setAlpha(0);
 
     if (fromDamage) {
-      // Player ship destruction
       this.cameras.main.shake(600, 0.02);
       this.cameras.main.flash(400, 60, 0, 0);
 
-      // Explosion at player
       this.add
         .particles(this.playerShip.x, this.playerShip.y, "beam_particle", {
           speed: { min: 60, max: 200 },
@@ -1740,7 +1637,6 @@ export default class FinalBossScene extends Phaser.Scene {
         duration: 600,
       });
 
-      // Boss victory roar
       this.tweens.add({
         targets: this.bossSprite,
         scaleX: 2.2,
@@ -1778,12 +1674,7 @@ export default class FinalBossScene extends Phaser.Scene {
     panel.lineStyle(2, 0xef4444);
     panel.strokeRoundedRect(panelX, panelY, panelWidth, panelHeight, 8);
 
-    this.tweens.add({
-      targets: panel,
-      alpha: 1,
-      duration: 400,
-      delay: 200,
-    });
+    this.tweens.add({ targets: panel, alpha: 1, duration: 400, delay: 200 });
 
     const title = this.add
       .text(width / 2, panelY + 24, "SHIELD BROKEN!", {
@@ -1796,12 +1687,7 @@ export default class FinalBossScene extends Phaser.Scene {
       .setDepth(32)
       .setAlpha(0);
 
-    this.tweens.add({
-      targets: title,
-      alpha: 1,
-      duration: 400,
-      delay: 400,
-    });
+    this.tweens.add({ targets: title, alpha: 1, duration: 400, delay: 400 });
 
     const message = this.add
       .text(
@@ -1820,12 +1706,7 @@ export default class FinalBossScene extends Phaser.Scene {
       .setDepth(32)
       .setAlpha(0);
 
-    this.tweens.add({
-      targets: message,
-      alpha: 1,
-      duration: 400,
-      delay: 500,
-    });
+    this.tweens.add({ targets: message, alpha: 1, duration: 400, delay: 500 });
 
     const statsText = `Hit ${this.correctAnswers} of ${CORRECT_TO_WIN} needed`;
     const stats = this.add
@@ -1839,14 +1720,8 @@ export default class FinalBossScene extends Phaser.Scene {
       .setDepth(32)
       .setAlpha(0);
 
-    this.tweens.add({
-      targets: stats,
-      alpha: 1,
-      duration: 400,
-      delay: 600,
-    });
+    this.tweens.add({ targets: stats, alpha: 1, duration: 400, delay: 600 });
 
-    // Retry button
     this.createEndButton(
       width / 2 - 80,
       panelY + panelHeight - 30,
@@ -1857,7 +1732,6 @@ export default class FinalBossScene extends Phaser.Scene {
       }
     );
 
-    // Back to map button
     this.createEndButton(
       width / 2 + 80,
       panelY + panelHeight - 30,
