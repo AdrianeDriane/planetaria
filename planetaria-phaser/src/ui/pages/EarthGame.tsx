@@ -44,7 +44,14 @@ const EarthGame: React.FC<EarthGameProps> = ({ onComplete, onBack }) => {
 
     gameRef.current = new Phaser.Game(config);
 
+    const handleComplete = () => {
+      if (onComplete) onComplete();
+    };
+
+    window.addEventListener("earth-complete", handleComplete);
+
     return () => {
+      window.removeEventListener("earth-complete", handleComplete);
       if (gameRef.current) {
         gameRef.current.destroy(true);
         gameRef.current = null;
@@ -55,24 +62,6 @@ const EarthGame: React.FC<EarthGameProps> = ({ onComplete, onBack }) => {
   return (
     <div className="h-screen w-screen bg-gray-950 relative">
       <div ref={containerRef} className="h-full w-full" />
-      
-      {/* Navigation buttons overlay */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex flex-col sm:flex-row gap-2 sm:gap-4">
-        {onBack && (
-          <PixelButton 
-            label="Back to Venus" 
-            onClick={onBack}
-            variant="secondary"
-          />
-        )}
-        {onComplete && (
-          <PixelButton 
-            label="Continue" 
-            onClick={onComplete}
-            variant="primary"
-          />
-        )}
-      </div>
     </div>
   );
 };

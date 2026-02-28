@@ -190,12 +190,12 @@ export default class EarthScene extends Phaser.Scene {
                 console.warn("Failed to save progress in EarthScene:", e);
             }
 
-            // Fade out and switch scene
+            // Fade out and notify React
             this.cameras.main.fadeOut(1000, 0, 0, 0);
             this.cameras.main.once(
                 Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
                 () => {
-                    this.scene.start("EarthCongratulationScene");
+                    window.dispatchEvent(new CustomEvent("earth-complete"));
                 },
             );
         });

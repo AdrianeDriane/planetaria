@@ -5,7 +5,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   overflow: hidden;
   background-color: black;
   font-family: 'Courier New', Courier, monospace;
@@ -21,7 +21,7 @@
   position: absolute;
   left: 0;
   width: 100%;
-  height: 15vh;
+  height: 12vh;
   background-color: black;
   z-index: 2000;
 }
@@ -54,13 +54,8 @@
   50% { opacity: 0.2; }
 }
 
-.crash-impact {
-  filter: grayscale(0.5) contrast(1.2);
-}
-
-.impact-flash {
-  animation: screen-shake 0.2s 3;
-}
+.crash-impact { filter: grayscale(0.5) contrast(1.2); }
+.impact-flash { animation: screen-shake 0.2s 3; }
 
 @keyframes screen-shake {
   0% { transform: translate(2px, 2px); }
@@ -102,9 +97,7 @@
   to { transform: translateX(100%); }
 }
 
-.frozen-tilt {
-  filter: hue-rotate(180deg) brightness(0.8);
-}
+.frozen-tilt { filter: hue-rotate(180deg) brightness(0.8); }
 
 .planet-flare {
   position: absolute;
@@ -121,28 +114,28 @@
 .planet-visual-stage {
   position: relative;
   width: 100%;
-  height: 100%;
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 10vh 0;
 }
 
 .planet-hero-sprite {
-  width: 35vh;
-  max-width: 350px;
+  width: 40vh;
+  max-width: 80vw;
+  height: auto;
   filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.2));
   opacity: 0;
   animation: planet-enter 5s ease-out forwards 0.5s;
 }
 
 @keyframes planet-enter {
-  from { opacity: 0; transform: translateX(100px) scale(0.8); }
+  from { opacity: 0; transform: translateX(50px) scale(0.9); }
   to { opacity: 1; transform: translateX(0) scale(1); }
 }
 
-.planet-hero-sprite.surging {
-  animation: cloud-pulse 2s infinite alternate;
-}
+.planet-hero-sprite.surging { animation: cloud-pulse 2s infinite alternate; }
 
 @keyframes cloud-pulse {
   from { transform: scale(1); filter: brightness(1); }
@@ -151,18 +144,13 @@
 
 .planet-ship-container {
   position: absolute;
-  left: 10vw;
+  left: 5vw;
   z-index: 100;
   transition: transform 3s ease-in-out, left 8s linear;
 }
 
-.planet-ship-container.tilted {
-  transform: rotate(20deg);
-}
-
-.planet-ship-container.shaking {
-  animation: ship-shake 0.1s infinite;
-}
+.planet-ship-container.tilted { transform: rotate(20deg); }
+.planet-ship-container.shaking { animation: ship-shake 0.1s infinite; }
 
 @keyframes ship-shake {
   0%, 100% { transform: translate(0, 0); }
@@ -172,24 +160,26 @@
 }
 
 .planet-ship-sprite {
-  width: 18vw;
-  max-width: 150px;
+  width: 15vw;
+  max-width: 120px;
+  min-width: 60px;
   filter: drop-shadow(0 0 15px rgba(0, 242, 255, 0.5));
 }
 
 /* Titles */
 .planet-chapter-title {
   position: absolute;
-  top: 15vh;
+  top: 14vh;
+  width: 100%;
   text-align: center;
   z-index: 300;
-  width: 100%;
+  pointer-events: none;
 }
 
 .planet-title-text {
-  font-size: clamp(1.8rem, 8vw, 5rem);
+  font-size: clamp(1.5rem, 10vw, 4.5rem);
   font-weight: 900;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.4em;
   color: white;
   margin: 0;
   text-transform: uppercase;
@@ -198,7 +188,7 @@
 }
 
 .planet-subtitle-text {
-  font-size: clamp(0.6rem, 2vw, 1.1rem);
+  font-size: clamp(0.6rem, 2.5vw, 1rem);
   letter-spacing: 0.6em;
   text-transform: uppercase;
   font-weight: bold;
@@ -217,108 +207,91 @@
 .planet-hud-data-left {
   position: absolute;
   top: 13vh;
-  left: 5vw;
-  font-size: clamp(8px, 1.2vw, 10px);
+  left: 4vw;
+  font-size: clamp(7px, 1.2vw, 10px);
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
+
+.hud-info-line { background: rgba(0,0,0,0.4); padding: 2px 4px; }
 
 .planet-hud-scanner {
   position: absolute;
-  top: 15vh;
-  left: 5vw;
-  right: 5vw;
-  height: 65vh;
-  border-bottom: 2px solid;
-  opacity: 0.1;
-  animation: scan-move 4s linear infinite;
+  top: 12vh;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  border-bottom: 1px solid;
+  opacity: 0.3;
+  animation: scan-move 6s linear infinite;
 }
 
 @keyframes scan-move {
-  from { transform: translateY(-100%); opacity: 0; }
-  50% { opacity: 0.3; }
-  to { transform: translateY(0); opacity: 0; }
+  from { top: 12vh; opacity: 0; }
+  10%, 90% { opacity: 0.3; }
+  to { top: 88vh; opacity: 0; }
 }
 
 /* Dialogue */
 .planet-dialogue-area {
   position: absolute;
-  bottom: 12vh;
+  bottom: 13vh;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   z-index: 1000;
+  padding: 0 5vw;
 }
 
 .planet-dialogue-box {
-  width: 90vw;
-  max-width: 900px;
-  padding: 2vh 5vw;
-  background: rgba(0, 0, 0, 0.85);
+  width: 100%;
+  max-width: 800px;
+  padding: 2.5vh 5vw;
+  background: rgba(0, 0, 0, 0.9);
   border-left: 4px solid;
   min-height: 10vh;
+  box-shadow: 0 0 30px rgba(0,0,0,0.8);
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
 .planet-dialogue-speaker {
-  font-size: clamp(8px, 1.2vw, 11px);
+  font-size: clamp(8px, 1vw, 11px);
   letter-spacing: 0.2em;
-  margin-bottom: 0.5vh;
+  margin-bottom: 1vh;
   font-weight: 900;
+  opacity: 0.8;
 }
 
 .planet-dialogue-text {
-  font-size: clamp(0.9rem, 3.5vw, 1.7rem);
-  line-height: 1.3;
+  font-size: clamp(0.85rem, 3.5vw, 1.6rem);
+  line-height: 1.4;
   color: #f0f9ff;
   font-weight: 400;
 }
 
 .planet-start-button {
   margin-top: 2vh;
-  background: transparent;
+  background: black;
   border: 1px solid;
-  padding: 8px 25px;
+  padding: 12px 30px;
   font-size: clamp(10px, 1.5vw, 13px);
   font-weight: bold;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.2em;
   cursor: pointer;
   animation: fade-in 1s forwards;
-}
-
-.planet-start-button:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-@media (max-width: 768px) {
-  .planet-chapter-title {
-    top: 13vh;
-  }
-  .planet-dialogue-area {
-    bottom: 14vh;
-  }
-  .planet-hero-sprite {
-    width: 30vh;
-  }
-  .planet-ship-sprite {
-    width: 25vw;
-  }
-}
-
-.planet-start-button:hover {
-  background: rgba(255, 255, 255, 0.1);
+  z-index: 2000;
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Twists overlays */
+/* Twist Overlays */
 .frost-overlay {
     position: absolute;
     inset: 0;
@@ -345,4 +318,32 @@
 @keyframes dust-move {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+}
+
+/* Mobile Portrait Specifics */
+@media (max-aspect-ratio: 1/1) {
+  .planet-hero-sprite {
+    width: 70vw;
+    margin-top: -5vh;
+  }
+  .planet-chapter-title {
+    top: 15vh;
+  }
+  .planet-dialogue-area {
+    bottom: 14vh;
+  }
+  .planet-ship-container {
+    left: 10vw;
+    top: 45%;
+  }
+}
+
+/* Landscape Mobile Fix */
+@media (max-height: 500px) {
+  .cinematic-letterbox { height: 8vh; }
+  .planet-chapter-title { top: 10vh; }
+  .planet-title-text { font-size: 1.5rem; }
+  .planet-dialogue-area { bottom: 10vh; }
+  .planet-dialogue-box { min-height: 15vh; padding: 10px 20px; }
+  .planet-hero-sprite { width: 30vh; }
 }

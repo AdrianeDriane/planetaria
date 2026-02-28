@@ -22,7 +22,7 @@
   position: absolute;
   left: 0;
   width: 100%;
-  height: 15vh;
+  height: 12vh;
   background-color: black;
   z-index: 2000;
 }
@@ -75,13 +75,13 @@
 }
 
 .mars-ship-container.mars-approaching {
-  left: 30vw;
+  left: 25vw;
 }
 
 .mars-ship-sprite {
-  width: 22vw;
-  max-width: 160px;
-  min-width: 90px;
+  width: 18vw;
+  max-width: 140px;
+  min-width: 70px;
   filter: drop-shadow(0 0 20px rgba(255, 69, 0, 0.4));
 }
 
@@ -96,9 +96,8 @@
 }
 
 .mars-sprite {
-  width: 40vw;
-  max-width: 350px;
-  min-width: 200px;
+  width: 40vh;
+  max-width: 80vw;
   height: auto;
   opacity: 0;
   filter: drop-shadow(0 0 30px rgba(255, 69, 0, 0.3));
@@ -131,7 +130,7 @@
 /* Titles */
 .mars-chapter-title {
   position: absolute;
-  top: 15vh;
+  top: 14vh;
   text-align: center;
   z-index: 300;
   pointer-events: none;
@@ -141,7 +140,7 @@
 .mars-cinematic-title-text {
   font-size: clamp(1.8rem, 10vw, 5rem);
   font-weight: 900;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.4em;
   color: #fff;
   margin: 0;
   text-transform: uppercase;
@@ -194,18 +193,19 @@
 /* Dialogue Area */
 .mars-dialogue-area {
   position: absolute;
-  bottom: 12vh;
+  bottom: 13vh;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   z-index: 1000;
+  padding: 0 5vw;
 }
 
 .mars-dialogue-box {
-  width: 90vw;
-  max-width: 950px;
-  padding: 2vh 5vw;
+  width: 100%;
+  max-width: 850px;
+  padding: 2.5vh 5vw;
   background: rgba(15, 0, 0, 0.9);
   border-left: 4px solid #ff4500;
   min-height: 10vh;
@@ -231,37 +231,11 @@
   font-weight: 600;
 }
 
-@media (max-width: 768px) {
-  .mars-chapter-title {
-    top: 13vh;
-  }
-  .mars-dialogue-area {
-    bottom: 14vh;
-  }
-  .mars-ship-container {
-    left: 2vw;
-    top: 40%;
-  }
-  .mars-planet-container {
-    right: 5vw;
-    top: 40%;
-  }
-  .mars-sprite {
-    width: 35vw;
-  }
-}
-
-.scrambled-font {
-  font-family: 'Courier New', monospace;
-  text-shadow: 2px 0 #ff0000, -2px 0 #00ffff;
-}
-
 .mars-skip-hint {
   margin-top: 1.5vh;
-  font-size: clamp(10px, 1.5vw, 12px);
-  color: rgba(255, 69, 0, 0.5);
-  letter-spacing: 0.3em;
-  font-weight: bold;
+  font-size: clamp(8px, 1.2vw, 10px);
+  color: rgba(255, 69, 0, 0.4);
+  letter-spacing: 0.2em;
 }
 
 .mars-skip-hitbox {
@@ -273,10 +247,26 @@
   border: none;
 }
 
+/* Mobile Aspect Ratio Fix */
+@media (max-aspect-ratio: 1/1) {
+  .mars-sprite { width: 75vw; }
+  .mars-chapter-title { top: 15vh; }
+  .mars-dialogue-area { bottom: 14vh; }
+  .mars-ship-container { left: 10vw; top: 45%; }
+  .mars-planet-container { right: 5vw; top: 40%; }
+}
+
+/* Landscape Mobile Fix */
+@media (max-height: 500px) {
+  .cinematic-letterbox { height: 8vh; }
+  .mars-chapter-title { top: 10vh; }
+  .mars-dialogue-area { bottom: 10vh; }
+}
+
 /* Animations */
 @keyframes mars-ship-float {
   0%, 100% { transform: translateY(0) rotate(2deg); }
-  50% { transform: translateY(-4vh) rotate(-1deg); }
+  50% { transform: translateY(-3vh) rotate(-1deg); }
 }
 
 @keyframes mars-reveal {
@@ -305,14 +295,13 @@
 }
 
 @keyframes mars-scanner-move {
-  0% { top: 15vh; opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { top: 85vh; opacity: 0; }
+  0% { top: 12vh; opacity: 0; }
+  10%, 90% { opacity: 1; }
+  100% { top: 88vh; opacity: 0; }
 }
 
 @keyframes mars-fade-in {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 

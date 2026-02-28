@@ -48,7 +48,10 @@ function App() {
     const leaveEarth = () => setShowEarthGame(false);
     const startEarthCinematic = () => setShowEarthCinematic(true);
     const startMarsCinematic = () => setShowMarsCinematic(true);
-    const startEarthCongratulation = () => setShowEarthCongratulation(true);
+    const startEarthCongratulation = () => {
+      setShowEarthGame(false);
+      setShowEarthCongratulation(true);
+    };
     const startPlanetCinematic = (planet: string) => {
       setCurrentPlanet(planet);
       setShowPlanetCinematic(true);

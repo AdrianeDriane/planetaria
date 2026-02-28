@@ -76,8 +76,9 @@
 }
 
 .earth-hero-sprite {
-  width: 45vh;
-  max-width: 450px;
+  width: 40vh;
+  max-width: 80vw;
+  height: auto;
   filter: drop-shadow(0 0 40px rgba(0, 255, 204, 0.4));
   animation: earth-majestic-rotate 120s linear infinite;
 }
@@ -117,6 +118,7 @@
 .congrat-ship-sprite {
   width: 15vw;
   max-width: 120px;
+  min-width: 60px;
   filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.5));
 }
 
@@ -135,7 +137,7 @@
 /* Titles */
 .hero-title-area {
   position: absolute;
-  top: 15vh;
+  top: 14vh;
   text-align: center;
   z-index: 500;
   pointer-events: none;
@@ -171,16 +173,17 @@
 /* Dialogue Box */
 .congrat-dialogue-area {
   position: absolute;
-  bottom: 12vh;
+  bottom: 13vh;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   z-index: 1000;
+  padding: 0 5vw;
 }
 
 .congrat-dialogue-box {
-  width: 90vw;
+  width: 100%;
   max-width: 850px;
   padding: 2vh 5vw;
   background: rgba(0, 10, 10, 0.85);
@@ -225,7 +228,7 @@
 /* Warp Button */
 .warp-button {
   margin-top: 3vh;
-  background: transparent;
+  background: black;
   border: 1px solid #00ffcc;
   padding: 12px 35px;
   color: #00ffcc;
@@ -238,6 +241,7 @@
   overflow: hidden;
   transition: all 0.3s;
   animation: fade-in 1s forwards;
+  z-index: 2000;
 }
 
 .warp-button:hover {
@@ -268,7 +272,7 @@
   bottom: 15vh;
   right: 5vw;
   text-align: right;
-  font-size: 10px;
+  font-size: clamp(7px, 1vw, 10px);
   color: rgba(0, 255, 204, 0.5);
   letter-spacing: 2px;
   z-index: 1000;
@@ -298,19 +302,17 @@
   to { opacity: 1; }
 }
 
-@media (max-width: 768px) {
-  .hero-title-area {
-    top: 13vh;
-  }
-  .congrat-dialogue-area {
-    bottom: 14vh;
-  }
-  .earth-hero-sprite {
-    width: 35vh;
-  }
-  .sector-status {
-    bottom: 15vh;
-    right: 5vw;
-    font-size: 8px;
-  }
+/* Mobile Overrides */
+@media (max-aspect-ratio: 1/1) {
+  .earth-hero-sprite { width: 75vw; }
+  .hero-title-area { top: 15vh; }
+  .congrat-dialogue-area { bottom: 14vh; }
+  .sector-status { bottom: 15vh; right: 5vw; font-size: 8px; }
+}
+
+@media (max-height: 500px) {
+  .cinematic-letterbox { height: 8vh; }
+  .hero-title-area { top: 10vh; }
+  .congrat-dialogue-area { bottom: 10vh; }
+  .congrat-dialogue-box { min-height: 15vh; padding: 10px 20px; }
 }

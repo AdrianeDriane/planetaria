@@ -2,21 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import Phaser from "phaser";
 import GameScene from "../../game/scenes/GameScene";
 import EarthScene from "../../game/scenes/EarthScene";
-import EarthCongratulationScene from "../../game/scenes/earth/EarthCongratulationScene";
 import MarsScene from "../../game/scenes/MarsScene";
 import { DISPLAY, PHYSICS } from "../../game/config";
-import PixelButton from "../components/PixelButton";
+import VirtualControls from "../components/VirtualControls";
 import { EventBus } from "../../game/EventBus";
 
 interface PhaserGameProps {
   initialLevelId?: number;
-  onNavigateToVenus?: () => void;
 }
 
-const PhaserGame: React.FC<PhaserGameProps> = ({
-  initialLevelId = 1,
-  onNavigateToVenus,
-}) => {
+const PhaserGame: React.FC<PhaserGameProps> = ({ initialLevelId = 1 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
   const [isGameActive, setIsGameActive] = useState(false);
@@ -78,7 +73,6 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
     const allScenes = [
       GameScene,
       EarthScene,
-      EarthCongratulationScene,
       MarsScene,
     ];
 
@@ -90,7 +84,6 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
     const sceneMap: Record<string, any> = {
       GameScene: GameScene,
       EarthScene: EarthScene,
-      EarthCongratulationScene: EarthCongratulationScene,
       MarsScene: MarsScene,
     };
 
@@ -168,15 +161,16 @@ const PhaserGame: React.FC<PhaserGameProps> = ({
     <div className="relative z-50 h-dvh w-screen bg-gray-950">
       <div ref={containerRef} className="h-full w-full" />
 
-      {/* Navigation button overlay */}
-      {onNavigateToVenus && (
-        <div className="pointer-events-auto absolute top-4 right-4 z-50 sm:top-6 sm:right-6">
-          <PixelButton
-            label="Go to Venus"
-            onClick={onNavigateToVenus}
-            variant="primary"
-          />
-        </div>
+      {/* Virtual Controls for Mobile - only shown after intro */}
+      {isGameActive && (
+        <VirtualControls
+          onLeftDown={handleLeftDown}
+          onLeftUp={handleLeftUp}
+          onRightDown={handleRightDown}
+          onRightUp={handleRightUp}
+          onJumpDown={handleJumpDown}
+          onJumpUp={handleJumpUp}
+        />
       )}
     </div>
   );
