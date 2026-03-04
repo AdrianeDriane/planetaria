@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import { startAlarmLoopSfx, stopAlarmLoopSfx, playCorrectSfx } from "../../audio/Sfx";
+import { setBgMusicVolume, DEFAULT_VOLUME, playBgMusic, setBgMusicLoop } from "../../audio/BgMusic";
 import PixelButton from "../components/PixelButton";
 
 interface DataPacket {
@@ -255,6 +257,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
 
   // Completion modal (shows when all 4 data packets are found)
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const victoryTriggeredRef = useRef(false);
 
   // Detect mobile screen size changes
   useEffect(() => {
@@ -681,6 +684,7 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
           // Handle packet contents
           if (targetPacket.type === "data") {
             // DATA PACKET - Success!
+            playCorrectSfx();
 
             // Show trivia modal with custom content
             const triviaData = {
@@ -955,6 +959,22 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
     setScanProgress(0);
   };
 
+  // Start/stop alarm loop while a trap is active and duck BG music slightly.
+  useEffect(() => {
+    if (activeTrap) {
+      startAlarmLoopSfx();
+      setBgMusicVolume(Math.max(0, DEFAULT_VOLUME - 0.15));
+    } else {
+      stopAlarmLoopSfx();
+      setBgMusicVolume(DEFAULT_VOLUME);
+    }
+
+    return () => {
+      stopAlarmLoopSfx();
+      setBgMusicVolume(DEFAULT_VOLUME);
+    };
+  }, [activeTrap]);
+
   // Only count DATA packets for completion (4 required, traps don't count)
   const allFound =
     dataPackets.filter((p) => p.type === "data" && p.opened).length === 4;
@@ -962,12 +982,15 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
   // Show completion modal when all 4 data packets are found
   useEffect(() => {
     if (allFound) {
+      if (!victoryTriggeredRef.current) {
+        victoryTriggeredRef.current = true;
+        setBgMusicLoop(false);
+        playBgMusic("/musicalscores/victory.mp3");
+      }
       // Close trivia modal if open, then show completion modal
       setShowTriviaModal(false);
       const timer = setTimeout(() => {
         setShowCompletionModal(true);
-        // Also trigger the parent onComplete after another delay if needed
-        // or just rely on the completion modal button which calls onComplete
       }, 500);
       return () => clearTimeout(timer);
     }

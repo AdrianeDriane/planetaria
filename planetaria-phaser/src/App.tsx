@@ -14,6 +14,16 @@ import { MarsIntroCinematic } from "./ui/components/MarsIntroCinematic";
 import { EarthCongratulationCinematic } from "./ui/components/EarthCongratulationCinematic";
 import { PlanetIntroCinematic } from "./ui/components/PlanetIntroCinematic";
 import { EventBus } from "./game/EventBus";
+import {
+  playBgMusic,
+  initBgMusic,
+  toggleMute,
+  isMuted as getIsMuted,
+  setMuted,
+  setBgMusicTrack,
+  DEFAULT_TRACK,
+} from "./audio/BgMusic";
+import { playClickSfx } from "./audio/Sfx";
 
 type AppState = "menu" | "levels" | "playing";
 
@@ -34,6 +44,63 @@ function App() {
   const [showEarthCongratulation, setShowEarthCongratulation] = useState(false);
   const [showPlanetCinematic, setShowPlanetCinematic] = useState(false);
   const [currentPlanet, setCurrentPlanet] = useState<string>("");
+  const [audioMuted, setAudioMuted] = useState(getIsMuted());
+  const [showSoundGate, setShowSoundGate] = useState(true);
+
+  const VENUS_GAMEPLAY_TRACK = "/musicalscores/venusbg.mp3";
+
+  const PLANET_TRACKS: Record<string, string> = {
+    default: DEFAULT_TRACK,
+    mercury: DEFAULT_TRACK,
+    venus: DEFAULT_TRACK,
+    earth: DEFAULT_TRACK,
+    mars: DEFAULT_TRACK,
+    jupiter: DEFAULT_TRACK,
+    saturn: DEFAULT_TRACK,
+    uranus: DEFAULT_TRACK,
+    neptune: DEFAULT_TRACK,
+  };
+
+  const setPlanet = (planet: string) => {
+    setCurrentPlanet(planet);
+    const track = PLANET_TRACKS[planet] || PLANET_TRACKS.default;
+    setBgMusicTrack(track);
+    playBgMusic(track);
+  };
+
+  // Global click/tap SFX
+  useEffect(() => {
+    const handlePointerDown = () => playClickSfx();
+    document.addEventListener("pointerdown", handlePointerDown, true);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown, true);
+    };
+  }, []);
+
+  // Start background music immediately on mount (muted autoplay),
+  // BgMusic.initBgMusic() will unmute it on the first user interaction.
+  useEffect(() => {
+    initBgMusic();
+  }, []);
+
+  // Swap to alternate track during Venus gameplay only
+  useEffect(() => {
+    if (showVenusGame) {
+      setBgMusicTrack(VENUS_GAMEPLAY_TRACK);
+      playBgMusic(VENUS_GAMEPLAY_TRACK);
+    } else if (currentPlanet) {
+      const track = PLANET_TRACKS[currentPlanet] || PLANET_TRACKS.default;
+      setBgMusicTrack(track);
+      playBgMusic(track);
+    }
+  }, [showVenusGame, currentPlanet]);
+
+  const handleEnableSound = () => {
+    setMuted(false);
+    setAudioMuted(false);
+    playBgMusic();
+    setShowSoundGate(false);
+  };
 
   useEffect(() => {
     const enterMars = () => setShowMarsPuzzle(true);
@@ -57,14 +124,14 @@ function App() {
       setShowEarthCongratulation(true);
     };
     const startPlanetCinematic = (planet: string) => {
-      setCurrentPlanet(planet);
+      setPlanet(planet);
       setShowPlanetCinematic(true);
     };
-    const handleMercuryCompleteEvent = () => {
-      unlockLevel(2);
-      setCurrentPlanet("venus");
+        const handleMercuryCompleteEvent = () => {
+      unlockLevel(2); // Unlock Venus
+      setPlanet("venus");
       setShowPlanetCinematic(true);
-    };
+        };
     const handleVenusCompleteEvent = () => {
       unlockLevel(3);
       setShowEarthCinematic(true);
@@ -165,26 +232,26 @@ function App() {
 
     // Trigger Intros Directly
     if (levelId === 1) {
-      setCurrentPlanet("mercury");
+      setPlanet("mercury");
       setShowPlanetCinematic(true);
     } else if (levelId === 2) {
-      setCurrentPlanet("venus");
+      setPlanet("venus");
       setShowPlanetCinematic(true);
     } else if (levelId === 3) {
       setShowEarthCinematic(true);
     } else if (levelId === 4) {
       setShowMarsCinematic(true);
     } else if (levelId === 5) {
-      setCurrentPlanet("jupiter");
+      setPlanet("jupiter");
       setShowPlanetCinematic(true);
     } else if (levelId === 6) {
-      setCurrentPlanet("saturn");
+      setPlanet("saturn");
       setShowPlanetCinematic(true);
     } else if (levelId === 7) {
-      setCurrentPlanet("uranus");
+      setPlanet("uranus");
       setShowPlanetCinematic(true);
     } else if (levelId === 8) {
-      setCurrentPlanet("neptune");
+      setPlanet("neptune");
       setShowPlanetCinematic(true);
     } else if (levelId === 9) {
       setCurrentPlanet("boss");
@@ -248,7 +315,7 @@ function App() {
     EventBus.emit("mars-core-reactivated");
     setTimeout(() => {
       setShowMarsPuzzle(false);
-      setCurrentPlanet("jupiter");
+      setPlanet("jupiter");
       setShowPlanetCinematic(true);
     }, 2000);
   };
@@ -258,7 +325,7 @@ function App() {
     EventBus.emit("jupiter-core-reactivated");
     setTimeout(() => {
       setShowJupiterGame(false);
-      setCurrentPlanet("saturn");
+      setPlanet("saturn");
       setShowPlanetCinematic(true);
     }, 2000);
   };
@@ -268,7 +335,7 @@ function App() {
     EventBus.emit("saturn-core-reactivated");
     setTimeout(() => {
       setShowSaturnGame(false);
-      setCurrentPlanet("uranus");
+      setPlanet("uranus");
       setShowPlanetCinematic(true);
     }, 2000);
   }, []);
@@ -277,7 +344,7 @@ function App() {
     unlockLevel(8);
     setTimeout(() => {
       setShowUranusGame(false);
-      setCurrentPlanet("neptune");
+      setPlanet("neptune");
       setShowPlanetCinematic(true);
     }, 2000);
   };
@@ -306,7 +373,34 @@ function App() {
 
   return (
     <div className="relative h-dvh w-screen overflow-hidden bg-gray-950">
-      {appState === "menu" && <MainMenu onPlay={() => setAppState("levels")} />}
+      {showSoundGate && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4 rounded-lg border border-white/20 bg-white/5 px-6 py-5 text-center shadow-lg">
+            <p className="font-['Press_Start_2P'] text-xs text-white tracking-wide">
+              ENABLE SOUND?
+            </p>
+            <button
+              onClick={handleEnableSound}
+              className="rounded-md border border-green-400 bg-green-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-600 active:translate-y-px"
+            >
+              Enable
+            </button>
+          </div>
+        </div>
+      )}
+      {appState === "menu" && (
+        <MainMenu
+          onPlay={() => {
+            playBgMusic();
+            setAppState("levels");
+          }}
+          isMuted={audioMuted}
+          onToggleMute={() => {
+            const nowMuted = toggleMute();
+            setAudioMuted(nowMuted);
+          }}
+        />
+      )}
       {appState === "levels" && (
         <LevelSelection
           onLevelSelect={handleLevelSelect}

@@ -4,6 +4,8 @@ import { GameStarfield } from "../world/GridBackground";
 import Terrain from "../world/Terrain";
 import Player from "../entities/Player";
 import { EventBus } from "../EventBus";
+import { playHitSfx } from "../../audio/Sfx";
+import { setBgMusicTrack, playBgMusic, setBgMusicLoop } from "../../audio/BgMusic";
 
 const SHIP_TEXTURE = "game_ss_astra";
 const SHIP_ASSET = "assets/ui/ss_astra.png";
@@ -102,6 +104,7 @@ export default class GameScene extends Phaser.Scene {
   private lastActionButtonState: boolean = false;
   private isMobile: boolean = false;
   private isPortraitBlocked: boolean = false;
+  private victoryMusicPlayed: boolean = false;
 
   // Track if final cog overlay is awaiting manual dismiss
   private awaitingCogDismiss: boolean = false;
@@ -130,6 +133,7 @@ export default class GameScene extends Phaser.Scene {
     this.lastActionButtonState = false;
     this.awaitingCogDismiss = false;
     this.isPortraitBlocked = false;
+    this.victoryMusicPlayed = false;
 
     // Detect mobile device
     this.isMobile = !this.sys.game.device.os.desktop;
@@ -262,6 +266,7 @@ export default class GameScene extends Phaser.Scene {
       "⚡",
       () => {
         this.actionButtonPressed = true;
+        playHitSfx();
       },
       () => {
         this.actionButtonPressed = false;
@@ -1030,6 +1035,7 @@ export default class GameScene extends Phaser.Scene {
 
   private isActionJustPressed(): boolean {
     const keyboardAction = Phaser.Input.Keyboard.JustDown(this.interactKey);
+    if (keyboardAction) playHitSfx();
     const mobileAction =
       this.actionButtonPressed && !this.lastActionButtonState;
     return keyboardAction || mobileAction;
@@ -1102,6 +1108,15 @@ export default class GameScene extends Phaser.Scene {
     this.time.delayedCall(500, () => {
       this.missionState = MissionState.REPAIR_COMPLETE;
       this.updateMissionText();
+
+      // Swap to victory music
+      if (!this.victoryMusicPlayed) {
+        const victoryTrack = "/musicalscores/victory.mp3";
+        setBgMusicLoop(false);
+        setBgMusicTrack(victoryTrack);
+        playBgMusic(victoryTrack);
+        this.victoryMusicPlayed = true;
+      }
 
       // Screen shake for dramatic effect
       this.cameras.main.shake(400, 0.015);

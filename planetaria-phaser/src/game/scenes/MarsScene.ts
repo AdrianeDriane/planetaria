@@ -1,6 +1,7 @@
 // src/game/scenes/MarsScene.ts
 import Phaser from "phaser";
 import { EventBus } from "../EventBus";
+import { playHitSfx } from "../../audio/Sfx";
 
 export const EVENTS = {
   MARS_CORE_REACTIVATED: "mars-core-reactivated",
@@ -42,6 +43,9 @@ export default class MarsScene extends Phaser.Scene {
       this.handleCoreReactivation,
       this
     );
+
+    // Play hit SFX when E is pressed during Mars gameplay
+    this.input.keyboard?.on("keydown-E", () => playHitSfx());
 
     // Handle Resize
     this.scale.on("resize", this.handleResize, this);

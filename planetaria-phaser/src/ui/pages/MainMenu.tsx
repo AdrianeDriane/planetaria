@@ -4,6 +4,8 @@ import spaceOdysseyLogo from "/assets/ui/space_odyssey_logo.png";
 
 interface MainMenuProps {
   onPlay: () => void;
+  isMuted?: boolean;
+  onToggleMute?: () => void;
 }
 
 // ─── Pixel Art Icon Components ───
@@ -127,13 +129,20 @@ const PixelSpeakerMutedIcon: React.FC = () => {
   );
 };
 
-const MainMenu: React.FC<MainMenuProps> = ({ onPlay }) => {
-  const [isMuted, setIsMuted] = useState(false);
+const MainMenu: React.FC<MainMenuProps> = ({ onPlay, isMuted: isMutedProp = false, onToggleMute }) => {
+  const [isMutedLocal, setIsMutedLocal] = useState(false);
+  const isMuted = onToggleMute ? isMutedProp : isMutedLocal;
 
   const handleHudClick = (e: React.MouseEvent, action: string) => {
     e.stopPropagation();
     console.log(`HUD Action: ${action}`);
-    if (action === "TOGGLE_AUDIO") setIsMuted(!isMuted);
+    if (action === "TOGGLE_AUDIO") {
+      if (onToggleMute) {
+        onToggleMute();
+      } else {
+        setIsMutedLocal(!isMutedLocal);
+      }
+    }
   };
 
   return (
