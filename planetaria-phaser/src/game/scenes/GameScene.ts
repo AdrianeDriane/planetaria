@@ -103,9 +103,8 @@ export default class GameScene extends Phaser.Scene {
   private isMobile: boolean = false;
   private isPortraitBlocked: boolean = false;
 
-  // Special timing for mechanical cog (10s delay)
-  private isCogOverlayActive: boolean = false;
-  private cogOverlayTimer: Phaser.Time.TimerEvent | null = null;
+  // Track if final cog overlay is awaiting manual dismiss
+  private awaitingCogDismiss: boolean = false;
 
   // Input
   private interactKey!: Phaser.Input.Keyboard.Key;
@@ -129,8 +128,7 @@ export default class GameScene extends Phaser.Scene {
     this.inventoryIcons = [];
     this.actionButtonPressed = false;
     this.lastActionButtonState = false;
-    this.isCogOverlayActive = false;
-    this.cogOverlayTimer = null;
+    this.awaitingCogDismiss = false;
     this.isPortraitBlocked = false;
 
     // Detect mobile device
@@ -423,7 +421,7 @@ export default class GameScene extends Phaser.Scene {
         this.mobileControlsContainer.setVisible(true);
       }
       // Only resume if not in fact overlay
-      if (!this.factOverlay.visible && !this.isCogOverlayActive) {
+      if (!this.factOverlay.visible) {
         this.physics.resume();
       }
     }
@@ -741,8 +739,9 @@ export default class GameScene extends Phaser.Scene {
 
     // Check if this is the mechanical cog (final trinket)
     if (trinket.id === "cog") {
-      // Show fact overlay with 10 second delay before proceeding
-      this.showCogOverlayWithDelay(trinket);
+      // Show regular overlay; completion triggers when player dismisses it
+      this.awaitingCogDismiss = true;
+      this.showFactOverlay(trinket);
     } else {
       // Show regular fact overlay
       this.showFactOverlay(trinket);
@@ -752,108 +751,6 @@ export default class GameScene extends Phaser.Scene {
         this.onAllTrinketsCollected();
       }
     }
-  }
-
-  private showCogOverlayWithDelay(trinket: TrinketData): void {
-    this.isCogOverlayActive = true;
-
-    // Clear previous content (keep background elements)
-    while (this.factOverlay.length > 2) {
-      this.factOverlay.removeAt(2, true);
-    }
-
-    // Title
-    const title = this.add.text(0, -50, trinket.name, {
-      fontSize: "20px",
-      color: "#ffdd00",
-      fontStyle: "bold",
-    });
-    title.setOrigin(0.5);
-    this.factOverlay.add(title);
-
-    // Icon
-    const icon = this.add.text(0, -15, trinket.iconSymbol, {
-      fontSize: "32px",
-    });
-    icon.setOrigin(0.5);
-    this.factOverlay.add(icon);
-
-    // Fact text
-    const fact = this.add.text(0, 30, trinket.fact, {
-      fontSize: "14px",
-      color: "#aaaaaa",
-      wordWrap: { width: 280 },
-      align: "center",
-    });
-    fact.setOrigin(0.5);
-    this.factOverlay.add(fact);
-
-    // Countdown text (will update)
-    const countdownText = this.add.text(0, 65, "Auto-continue in 10...", {
-      fontSize: "12px",
-      color: "#666666",
-    });
-    countdownText.setOrigin(0.5);
-    this.factOverlay.add(countdownText);
-
-    // Show with animation
-    this.factOverlay.setScale(0.8);
-    this.factOverlay.setAlpha(0);
-    this.factOverlay.setVisible(true);
-
-    this.tweens.add({
-      targets: this.factOverlay,
-      scaleX: 1,
-      scaleY: 1,
-      alpha: 1,
-      duration: 200,
-      ease: "Back.easeOut",
-    });
-
-    // Pause game
-    this.physics.pause();
-
-    // Countdown timer (10 seconds)
-    let countdown = 10;
-    this.cogOverlayTimer = this.time.addEvent({
-      delay: 1000,
-      repeat: 9,
-      callback: () => {
-        countdown--;
-        countdownText.setText(`Auto-continue in ${countdown}...`);
-
-        if (countdown <= 0) {
-          this.hideCogOverlayAndProceed();
-        }
-      },
-    });
-  }
-
-  private hideCogOverlayAndProceed(): void {
-    this.isCogOverlayActive = false;
-
-    if (this.cogOverlayTimer) {
-      this.cogOverlayTimer.destroy();
-      this.cogOverlayTimer = null;
-    }
-
-    this.tweens.add({
-      targets: this.factOverlay,
-      alpha: 0,
-      scaleX: 0.8,
-      scaleY: 0.8,
-      duration: 150,
-      onComplete: () => {
-        this.factOverlay.setVisible(false);
-        this.physics.resume();
-        this.updateMissionText();
-
-        // Now trigger completion since cog was the final piece
-        if (this.collectedTrinkets.size >= TRINKETS.length) {
-          this.onAllTrinketsCollected();
-        }
-      },
-    });
   }
 
   private addInventoryIcon(trinket: TrinketData): void {
@@ -1053,6 +950,13 @@ export default class GameScene extends Phaser.Scene {
         this.factOverlay.setVisible(false);
         this.physics.resume();
         this.updateMissionText();
+
+        if (this.awaitingCogDismiss) {
+          this.awaitingCogDismiss = false;
+          if (this.collectedTrinkets.size >= TRINKETS.length) {
+            this.onAllTrinketsCollected();
+          }
+        }
       },
     });
   }
@@ -1091,19 +995,12 @@ export default class GameScene extends Phaser.Scene {
   // ===========================================================================
 
   private handleInteractions(): void {
-    // If fact overlay is visible (non-cog), check for dismiss
-    if (this.factOverlay.visible && !this.isCogOverlayActive) {
+    // If fact overlay is visible, check for dismiss
+    if (this.factOverlay.visible) {
       const actionJustPressed = this.isActionJustPressed();
       if (actionJustPressed) {
         this.hideFactOverlay();
       }
-      // Must update state tracking even when returning early
-      this.lastActionButtonState = this.actionButtonPressed;
-      return;
-    }
-
-    // If cog overlay is active, only timer dismisses it
-    if (this.isCogOverlayActive) {
       // Must update state tracking even when returning early
       this.lastActionButtonState = this.actionButtonPressed;
       return;
@@ -1212,10 +1109,218 @@ export default class GameScene extends Phaser.Scene {
       // Show "Ship Repaired" notification
       this.showShipRepairedNotification();
 
-      // Start repair and launch sequence after notification
+      // Show Summary of Learnings after notification, before launch
       this.time.delayedCall(2000, () => {
-        this.startLaunchSequence();
+        this.showMercurySummary();
       });
+    });
+  }
+
+  /**
+   * Summary of Learnings screen for Mercury.
+   * Displays all collected trinket facts before launching to Venus.
+   */
+  private showMercurySummary(): void {
+    // Hide the ship repaired notification
+    if (this.shipRepairedNotification) {
+      this.tweens.add({
+        targets: this.shipRepairedNotification,
+        alpha: 0,
+        duration: 300,
+        onComplete: () => this.shipRepairedNotification?.destroy(),
+      });
+    }
+
+    // Hide mobile controls so they don't block the launch button on touch devices
+    if (this.mobileControlsContainer) {
+      this.mobileControlsContainer.setVisible(false);
+    }
+
+    const cx = this.scale.width / 2;
+    const cy = this.scale.height / 2;
+
+    const summaryContainer = this.add.container(cx, cy);
+    summaryContainer.setScrollFactor(0);
+    summaryContainer.setDepth(300);
+
+    // Dark backdrop
+    const backdrop = this.add.rectangle(
+      0,
+      0,
+      this.scale.width,
+      this.scale.height,
+      0x000000,
+      0.8
+    );
+    summaryContainer.add(backdrop);
+
+    // Panel
+    const panelWidth = Math.min(460, this.scale.width - 40);
+    const panelHeight = Math.min(380, this.scale.height - 60);
+    const panel = this.add.graphics();
+    panel.fillStyle(0x0d1b2a, 0.97);
+    panel.fillRoundedRect(
+      -panelWidth / 2,
+      -panelHeight / 2,
+      panelWidth,
+      panelHeight,
+      14
+    );
+    panel.lineStyle(3, 0xfbbf24, 1);
+    panel.strokeRoundedRect(
+      -panelWidth / 2,
+      -panelHeight / 2,
+      panelWidth,
+      panelHeight,
+      14
+    );
+    summaryContainer.add(panel);
+
+    // Title
+    const title = this.add.text(
+      0,
+      -panelHeight / 2 + 30,
+      "★ MERCURY: SUMMARY OF LEARNINGS ★",
+      {
+        fontSize: "14px",
+        color: "#fbbf24",
+        fontStyle: "bold",
+        fontFamily: "'Press Start 2P', 'Courier New'",
+        align: "center",
+        wordWrap: { width: panelWidth - 40 },
+      }
+    );
+    title.setOrigin(0.5, 0);
+    summaryContainer.add(title);
+
+    // Subtitle
+    const subtitle = this.add.text(
+      0,
+      -panelHeight / 2 + 60,
+      "Key facts discovered on Mercury:",
+      {
+        fontSize: "10px",
+        color: "#94a3b8",
+        fontFamily: "'Courier New'",
+      }
+    );
+    subtitle.setOrigin(0.5, 0);
+    summaryContainer.add(subtitle);
+
+    // List trinket facts
+    let factY = -panelHeight / 2 + 90;
+    TRINKETS.forEach((trinket) => {
+      // Skip the cog (it's a repair piece, not a learning fact)
+      if (trinket.id === "cog") return;
+
+      const bulletIcon = this.add.text(
+        -panelWidth / 2 + 30,
+        factY,
+        trinket.iconSymbol,
+        {
+          fontSize: "16px",
+        }
+      );
+      bulletIcon.setOrigin(0, 0);
+      summaryContainer.add(bulletIcon);
+
+      const factName = this.add.text(
+        -panelWidth / 2 + 60,
+        factY,
+        trinket.name,
+        {
+          fontSize: "11px",
+          color: "#fbbf24",
+          fontStyle: "bold",
+          fontFamily: "'Courier New'",
+        }
+      );
+      factName.setOrigin(0, 0);
+      summaryContainer.add(factName);
+
+      const factText = this.add.text(
+        -panelWidth / 2 + 60,
+        factY + 18,
+        trinket.fact,
+        {
+          fontSize: "10px",
+          color: "#e2e8f0",
+          fontFamily: "'Courier New'",
+          wordWrap: { width: panelWidth - 100 },
+          lineSpacing: 4,
+        }
+      );
+      factText.setOrigin(0, 0);
+      summaryContainer.add(factText);
+
+      factY += 45;
+    });
+
+    // Auto-continue countdown (replaces launch button)
+    const countdownText = this.add.text(
+      0,
+      panelHeight / 2 - 28,
+      "Auto-continue in 10...",
+      {
+        fontSize: "11px",
+        color: "#94a3b8",
+        fontFamily: "'Courier New'",
+        align: "center",
+      }
+    );
+    countdownText.setOrigin(0.5, 0.5);
+    summaryContainer.add(countdownText);
+
+    let countdown = 10;
+    let hasLaunched = false;
+
+    const proceedToVenus = () => {
+      if (hasLaunched) return;
+      hasLaunched = true;
+
+      try {
+        const STORAGE_KEY = "planetaria_progress";
+        const stored = localStorage.getItem(STORAGE_KEY);
+        let progress = stored ? JSON.parse(stored) : {};
+        progress[2] = "unlocked";
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+      } catch (e) {
+        console.warn("Failed to save progress in GameScene:", e);
+      }
+
+      this.tweens.add({
+        targets: summaryContainer,
+        alpha: 0,
+        duration: 500,
+        onComplete: () => {
+          summaryContainer.destroy();
+          this.startLaunchSequence();
+        },
+      });
+    };
+
+    this.time.addEvent({
+      delay: 1000,
+      repeat: 9,
+      callback: () => {
+        countdown--;
+        countdownText.setText(`Auto-continue in ${countdown}...`);
+        if (countdown <= 0) {
+          proceedToVenus();
+        }
+      },
+    });
+
+    // Animate entrance
+    summaryContainer.setScale(0.8);
+    summaryContainer.setAlpha(0);
+    this.tweens.add({
+      targets: summaryContainer,
+      scaleX: 1,
+      scaleY: 1,
+      alpha: 1,
+      duration: 500,
+      ease: "Back.easeOut",
     });
   }
 
@@ -1389,9 +1494,12 @@ export default class GameScene extends Phaser.Scene {
       }
 
       this.cameras.main.fadeOut(1000, 0, 0, 0);
-      this.cameras.main.once("camerafadeoutcomplete", () => {
-        EventBus.emit("mercury-complete");
-      });
+      this.cameras.main.once(
+        Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
+        () => {
+          EventBus.emit("mercury-complete");
+        }
+      );
     });
   }
 }

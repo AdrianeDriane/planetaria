@@ -16,165 +16,208 @@ interface QuizQuestion {
 }
 
 const QUESTIONS: QuizQuestion[] = [
+  // ── Mercury (from GameScene summary) ──
   {
-    question: "Mercury is the _____ planet from the Sun.",
-    options: ["Farthest", "Third", "Closest", "Fifth"],
-    correctIndex: 2,
-    planet: "Mercury",
-  },
-  {
-    question: "Why does Mercury have almost no atmosphere?",
+    question: "What is Mercury's atmosphere like?",
     options: [
-      "Its gravity is too weak to hold gas",
-      "It's too cold",
-      "It has too much water",
-      "It spins too fast",
+      "It has no atmosphere",
+      "It is thick with clouds",
+      "It is mostly nitrogen",
+      "It is similar to Earth's",
     ],
     correctIndex: 0,
     planet: "Mercury",
   },
   {
-    question:
-      "Venus is often called Earth's _____ because of its similar size.",
-    options: ["Shadow", "Copy", "Brother", "Twin"],
-    correctIndex: 3,
+    question: "How long does it take Mercury to orbit the Sun?",
+    options: ["365 days", "88 days", "243 days", "687 days"],
+    correctIndex: 1,
+    planet: "Mercury",
+  },
+  {
+    question: "How long does one rotation of Mercury take?",
+    options: [
+      "24 hours",
+      "58 days, 15 hours, and 30 minutes",
+      "88 days",
+      "243 days",
+    ],
+    correctIndex: 1,
+    planet: "Mercury",
+  },
+  // ── Venus (from VenusGame summary) ──
+  {
+    question: "How hot can Venus get, making it the hottest planet?",
+    options: ["Over 900 °F", "About 200 °F", "About 500 °F", "Over 2,000 °F"],
+    correctIndex: 0,
     planet: "Venus",
   },
   {
-    question: "What makes Venus the hottest planet in our solar system?",
+    question: "What kind of precipitation falls on Venus?",
     options: [
-      "It has active volcanoes everywhere",
-      "It's closest to the Sun",
-      "Its thick atmosphere traps heat",
-      "It has no water at all",
+      "Water rain",
+      "Sulfuric acid rain",
+      "Methane rain",
+      "No precipitation at all",
+    ],
+    correctIndex: 1,
+    planet: "Venus",
+  },
+  {
+    question: "How long does one day on Venus last?",
+    options: [
+      "24 Earth hours",
+      "88 Earth days",
+      "243 Earth days",
+      "365 Earth days",
     ],
     correctIndex: 2,
     planet: "Venus",
   },
+  // ── Earth (from EarthScene / EarthChecklist summary) ──
   {
-    question: "What percentage of Earth's surface is covered by water?",
-    options: ["About 71%", "About 50%", "About 90%", "About 30%"],
-    correctIndex: 0,
+    question: "How much of Earth's surface is covered by water?",
+    options: ["About 30%", "About 50%", "About 70%", "About 90%"],
+    correctIndex: 2,
     planet: "Earth",
   },
   {
-    question: "Earth's atmosphere is mostly made of which gas?",
-    options: ["Oxygen", "Carbon dioxide", "Hydrogen", "Nitrogen"],
-    correctIndex: 3,
+    question: "What is Earth's position from the Sun?",
+    options: ["First planet", "Second planet", "Third planet", "Fourth planet"],
+    correctIndex: 2,
     planet: "Earth",
   },
   {
-    question: "What protects Earth from harmful solar radiation?",
+    question: "How long does Earth take to complete one rotation?",
     options: [
-      "The oceans",
-      "The magnetic field",
-      "The clouds",
-      "The mountains",
+      "Exactly 24 hours",
+      "23 hours, 56 minutes",
+      "22 hours, 30 minutes",
+      "25 hours, 10 minutes",
     ],
     correctIndex: 1,
     planet: "Earth",
   },
+  // ── Mars (from MarsRedPuzzle summary) ──
   {
-    question: "Mars is known as the _____ Planet.",
-    options: ["Blue", "Green", "Red", "Gold"],
-    correctIndex: 2,
+    question: "Why does Mars appear red-yellow in color?",
+    options: [
+      "Iron oxide in its soil and dust",
+      "Its atmosphere filters sunlight",
+      "It reflects the Sun's red light",
+      "Its volcanoes emit red lava",
+    ],
+    correctIndex: 0,
     planet: "Mars",
   },
   {
-    question: "What is the tallest volcano in the solar system, found on Mars?",
+    question:
+      "What is the largest volcano in the solar system, located on Mars?",
     options: ["Mount Everest", "Valles Marineris", "Mauna Kea", "Olympus Mons"],
     correctIndex: 3,
     planet: "Mars",
   },
   {
-    question: "Mars has two small moons. What are they called?",
-    options: [
-      "Phobos and Deimos",
-      "Titan and Europa",
-      "Io and Ganymede",
-      "Luna and Sol",
-    ],
-    correctIndex: 0,
+    question:
+      "How long does Mars take to complete one revolution around the Sun?",
+    options: ["365 days", "88 days", "687 days", "243 days"],
+    correctIndex: 2,
     planet: "Mars",
   },
+  // ── Jupiter (from JupiterGame summary) ──
   {
-    question: "Jupiter is the _____ planet in our solar system.",
-    options: ["Smallest", "Hottest", "Closest", "Largest"],
-    correctIndex: 3,
-    planet: "Jupiter",
-  },
-  {
-    question: "What is Jupiter's Great Red Spot?",
-    options: [
-      "A giant volcano",
-      "A crater from an asteroid",
-      "A massive storm",
-      "A red ocean",
-    ],
+    question: "How many Earths could fit inside Jupiter?",
+    options: ["About 100", "About 500", "Over 1,300", "About 10,000"],
     correctIndex: 2,
     planet: "Jupiter",
   },
   {
-    question: "How many Earth-sized planets could fit inside Jupiter?",
-    options: ["About 1,300", "About 500", "About 50", "About 10,000"],
-    correctIndex: 0,
+    question: "How long has Jupiter's Great Red Spot storm been raging?",
+    options: [
+      "About 50 years",
+      "Over 300 years",
+      "About 1,000 years",
+      "About 10 years",
+    ],
+    correctIndex: 1,
     planet: "Jupiter",
   },
   {
-    question: "Saturn's rings are mostly made of what material?",
-    options: ["Gas clouds", "Ice particles", "Rock and metal", "Liquid lava"],
+    question: "How long does one full rotation of Jupiter take?",
+    options: ["24 hours", "9 hours, 56 minutes", "48 hours", "88 days"],
+    correctIndex: 1,
+    planet: "Jupiter",
+  },
+  // ── Saturn (from SaturnGame summary) ──
+  {
+    question: "What are Saturn's rings mostly made of?",
+    options: ["Rock and metal", "Gas clouds", "Ice particles", "Liquid lava"],
+    correctIndex: 2,
+    planet: "Saturn",
+  },
+  {
+    question: "Which moon of Saturn shoots geysers of water into space?",
+    options: ["Titan", "Enceladus", "Europa", "Io"],
     correctIndex: 1,
     planet: "Saturn",
   },
   {
-    question: "Saturn is so light that it could theoretically _____ in water.",
-    options: ["Freeze", "Dissolve", "Sink", "Float"],
-    correctIndex: 3,
+    question: "What is Saturn's position from the Sun?",
+    options: ["3rd planet", "5th planet", "6th planet", "8th planet"],
+    correctIndex: 2,
     planet: "Saturn",
   },
+  // ── Uranus (from UranusGame summary) ──
   {
-    question: "What makes Uranus unique among all the planets?",
-    options: [
-      "It has the most rings",
-      "It has no moons",
-      "It rotates on its side",
-      "It's the hottest planet",
-    ],
+    question: "At what angle is Uranus tilted on its axis?",
+    options: ["23°", "45°", "98°", "180°"],
     correctIndex: 2,
     planet: "Uranus",
   },
   {
     question: "What gives Uranus its blue-green color?",
     options: [
-      "Methane in the atmosphere",
       "Water on the surface",
+      "Methane gas in the atmosphere",
       "Copper in the rocks",
       "Reflected light from Neptune",
     ],
-    correctIndex: 0,
+    correctIndex: 1,
     planet: "Uranus",
   },
   {
-    question: "Neptune has the strongest _____ in the solar system.",
-    options: ["Gravity", "Tides", "Magnetic field", "Winds"],
-    correctIndex: 3,
+    question: "How many known moons does Uranus have?",
+    options: ["5 moons", "13 moons", "27 moons", "63 moons"],
+    correctIndex: 2,
+    planet: "Uranus",
+  },
+  // ── Neptune (from NeptuneGame summary) ──
+  {
+    question: "How fast can Neptune's winds reach?",
+    options: [
+      "Up to 500 km/h",
+      "Up to 1,000 km/h",
+      "Up to 2,100 km/h",
+      "Up to 5,000 km/h",
+    ],
+    correctIndex: 2,
     planet: "Neptune",
   },
   {
-    question: "How long does it take Neptune to orbit the Sun once?",
+    question: "How long does Neptune take to orbit the Sun once?",
     options: [
       "12 Earth years",
-      "165 Earth years",
       "84 Earth years",
-      "365 Earth days",
+      "165 Earth years",
+      "365 Earth years",
     ],
-    correctIndex: 1,
+    correctIndex: 2,
     planet: "Neptune",
   },
   {
-    question: "Neptune is classified as what type of planet?",
-    options: ["Ice giant", "Rocky planet", "Gas giant", "Dwarf planet"],
-    correctIndex: 0,
+    question: "What type of planet is Neptune classified as?",
+    options: ["Rocky planet", "Gas giant", "Ice giant", "Dwarf planet"],
+    correctIndex: 2,
     planet: "Neptune",
   },
 ];
@@ -766,7 +809,7 @@ export default class FinalBossScene extends Phaser.Scene {
     this.questionCounter = this.add
       .text(60, 16, "", {
         fontFamily: "'Press Start 2P', monospace",
-        fontSize: "7px",
+        fontSize: "9px",
         color: COLORS.TEXT_CYAN,
       })
       .setDepth(20);
@@ -776,11 +819,11 @@ export default class FinalBossScene extends Phaser.Scene {
     this.questionText = this.add
       .text(width / 2, questionY, "", {
         fontFamily: "'Press Start 2P', monospace",
-        fontSize: "8px",
+        fontSize: "12px",
         color: COLORS.TEXT_WHITE,
         align: "center",
-        wordWrap: { width: width * 0.75 },
-        lineSpacing: 6,
+        wordWrap: { width: width * 0.8 },
+        lineSpacing: 8,
       })
       .setOrigin(0.5, 0)
       .setDepth(20);
@@ -790,7 +833,7 @@ export default class FinalBossScene extends Phaser.Scene {
     this.feedbackText = this.add
       .text(width / 2, height * 0.47, "", {
         fontFamily: "'Press Start 2P', monospace",
-        fontSize: "10px",
+        fontSize: "14px",
         color: COLORS.TEXT_WHITE,
         align: "center",
       })
@@ -887,10 +930,10 @@ export default class FinalBossScene extends Phaser.Scene {
 
     // 2x2 grid layout
     const gridCols = 2;
-    const optionWidth = Math.min((width - 80) / 2, 200);
-    const optionHeight = 36;
-    const gapX = 10;
-    const gapY = 8;
+    const optionWidth = Math.min((width - 60) / 2, 260);
+    const optionHeight = 46;
+    const gapX = 12;
+    const gapY = 10;
     const gridWidth = gridCols * optionWidth + (gridCols - 1) * gapX;
     const gridStartX = (width - gridWidth) / 2;
     const gridStartY = height * 0.68;
@@ -926,10 +969,11 @@ export default class FinalBossScene extends Phaser.Scene {
       const text = this.add
         .text(0, 0, `${label}. ${optionText}`, {
           fontFamily: "'Press Start 2P', monospace",
-          fontSize: "6px",
+          fontSize: "9px",
           color: "#e2e8f0",
           align: "center",
-          wordWrap: { width: optionWidth - 16 },
+          wordWrap: { width: optionWidth - 20 },
+          lineSpacing: 4,
         })
         .setOrigin(0.5);
 

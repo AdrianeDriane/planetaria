@@ -221,7 +221,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onPlay }) => {
 
       {/* VERSION TAG - Bottom Left */}
       <div className="absolute bottom-4 left-4">
-        <p className="font-['Press_Start_2P'] text-[8px] text-gray-700">
+        <p className="font-['Press_Start_2P'] text-[12px] text-gray-700">
           BUILD v0.1.0
         </p>
       </div>

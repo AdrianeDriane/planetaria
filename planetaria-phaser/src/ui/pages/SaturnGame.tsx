@@ -331,28 +331,28 @@ const SaturnGame: React.FC<SaturnGameProps> = ({ onComplete, onBack }) => {
 
   // Font sizes
   const fs = {
-    banner: isMobile ? "text-[7px]" : "text-[11px]",
-    bannerSub: isMobile ? "text-[6px]" : "text-[9px]",
-    checklistTitle: isMobile ? "text-[7px]" : "text-[11px]",
-    checklistSub: isMobile ? "text-[6px]" : "text-[9px]",
-    checklistItem: isMobile ? "text-[6px]" : "text-[10px]",
-    checklistArrow: isMobile ? "text-[7px]" : "text-[9px]",
-    checklistIcon: isMobile ? "text-[8px]" : "text-sm",
-    hint: isMobile ? "text-[7px]" : "text-[10px]",
-    quizHeader: isMobile ? "text-[7px]" : "text-[10px]",
-    quizTitle: isMobile ? "text-[8px]" : "text-[12px]",
-    quizQuestion: isMobile ? "text-[7px]" : "text-[11px]",
-    quizOption: isMobile ? "text-[6px]" : "text-[10px]",
-    quizFeedback: isMobile ? "text-[7px]" : "text-[10px]",
-    discoveryHeader: isMobile ? "text-[7px]" : "text-[10px]",
-    discoveryTitle: isMobile ? "text-[8px]" : "text-[12px]",
-    discoveryBody: isMobile ? "text-[7px]" : "text-[10px]",
-    discoverySegment: isMobile ? "text-[6px]" : "text-[9px]",
+    banner: isMobile ? "text-[9px]" : "text-[9px]",
+    bannerSub: isMobile ? "text-[10px]" : "text-[9px]",
+    checklistTitle: isMobile ? "text-[9px]" : "text-[9px]",
+    checklistSub: isMobile ? "text-[10px]" : "text-[9px]",
+    checklistItem: isMobile ? "text-[10px]" : "text-[10px]",
+    checklistArrow: isMobile ? "text-[9px]" : "text-[9px]",
+    checklistIcon: isMobile ? "text-[10px]" : "text-sm",
+    hint: isMobile ? "text-[9px]" : "text-[10px]",
+    quizHeader: isMobile ? "text-[9px]" : "text-[10px]",
+    quizTitle: isMobile ? "text-[10px]" : "text-[10px]",
+    quizQuestion: isMobile ? "text-[9px]" : "text-[9px]",
+    quizOption: isMobile ? "text-[10px]" : "text-[10px]",
+    quizFeedback: isMobile ? "text-[9px]" : "text-[10px]",
+    discoveryHeader: isMobile ? "text-[9px]" : "text-[10px]",
+    discoveryTitle: isMobile ? "text-[10px]" : "text-[10px]",
+    discoveryBody: isMobile ? "text-[9px]" : "text-[10px]",
+    discoverySegment: isMobile ? "text-[10px]" : "text-[9px]",
     summaryHeader: isMobile ? "text-[9px]" : "text-sm",
     summaryBody: isMobile ? "text-[7px]" : "text-[10px]",
     summaryFacts: isMobile ? "text-[6px]" : "text-[9px]",
     summaryGrid: isMobile ? "text-[6px]" : "text-[9px]",
-    countdown: isMobile ? "text-[8px]" : "text-[11px]",
+    countdown: isMobile ? "text-[8px]" : "text-[9px]",
     nodeLabel: isMobile ? 6 : 9,
   };
 
@@ -829,7 +829,7 @@ const SaturnGame: React.FC<SaturnGameProps> = ({ onComplete, onBack }) => {
           <span className="block h-[2px] w-4 rounded bg-amber-400" />
           <span className="block h-[2px] w-4 rounded bg-amber-400" />
           <span className="block h-[2px] w-4 rounded bg-amber-400" />
-          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 font-['Press_Start_2P'] text-[7px] text-white">
+          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 font-['Press_Start_2P'] text-[11px] text-white">
             {collectedCount}
           </span>
         </button>
