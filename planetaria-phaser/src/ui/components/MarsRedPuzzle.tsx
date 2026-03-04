@@ -1,5 +1,10 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import "./MarsRedPuzzle.css";
+import {
+  playCelebrationSfx,
+  playCorrectSfx,
+  playWrongSfx,
+} from "../../audio/Sfx";
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 interface Level {
@@ -82,6 +87,15 @@ export const MarsRedPuzzle: React.FC<MarsRedPuzzleProps> = ({ onComplete }) => {
   const level = LEVELS[currentLevel];
   const letters = level.scramble.split(" ");
 
+  useEffect(() => {
+    // Keep the puzzle opening calm, then escalate with progress.
+    window.dispatchEvent(
+      new CustomEvent("audio-transition", {
+        detail: { situation: "ambient" },
+      })
+    );
+  }, []);
+
   const showFeedback = useCallback(() => {
     const messages = [
       "GREAT JOB!",
@@ -130,8 +144,13 @@ export const MarsRedPuzzle: React.FC<MarsRedPuzzleProps> = ({ onComplete }) => {
       if (newWord.length === level.answer.length) {
         if (newWord === level.answer) {
           showFeedback();
+          playCorrectSfx();
+          window.dispatchEvent(
+            new CustomEvent("audio-stinger", { detail: { situation: "mars" } })
+          );
           setPhase("trivia");
         } else {
+          playWrongSfx();
           setIsWrong(true);
           setTimeout(() => {
             setIsWrong(false);
@@ -149,6 +168,24 @@ export const MarsRedPuzzle: React.FC<MarsRedPuzzleProps> = ({ onComplete }) => {
     setSelectedLetters((prev) => prev.slice(0, -1));
     setBuiltWord((prev) => prev.slice(0, -1));
   }, [selectedLetters]);
+
+  // Escalate Mars score as the planet is reconstructed piece-by-piece.
+  useEffect(() => {
+    const count = solvedPieces.length;
+    if (count <= 0) return;
+
+    const nextSituation =
+      count >= 3 ? "climax" : count === 2 ? "action" : "tension";
+
+    window.dispatchEvent(
+      new CustomEvent("audio-transition", {
+        detail: {
+          situation: nextSituation,
+          immediate: true,
+        },
+      })
+    );
+  }, [solvedPieces.length]);
 
   // ─── Drag & Drop Assembly Logic ──────────────────────────────────────────
   const onPointerDown = (e: React.PointerEvent) => {
@@ -199,6 +236,10 @@ export const MarsRedPuzzle: React.FC<MarsRedPuzzleProps> = ({ onComplete }) => {
       ) {
         // Success
         showFeedback();
+        playCorrectSfx();
+        window.dispatchEvent(
+          new CustomEvent("audio-stinger", { detail: { situation: "mars" } })
+        );
         setSolvedPieces((prev) => [...prev, level.pieceKey]);
         setAssemblyError(null);
 
@@ -209,6 +250,14 @@ export const MarsRedPuzzle: React.FC<MarsRedPuzzleProps> = ({ onComplete }) => {
           setPhase("scramble");
         } else {
           setShowCelebration(true); // Trigger celebration before final screen
+          playCelebrationSfx();
+          window.setTimeout(() => {
+            window.dispatchEvent(
+              new CustomEvent("audio-transition", {
+                detail: { situation: "victory" },
+              })
+            );
+          }, 420);
           setTimeout(() => {
             setPhase("restored");
           }, 3000); // 3s of celebration

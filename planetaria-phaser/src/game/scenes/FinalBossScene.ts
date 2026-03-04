@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { EventBus } from "../EventBus";
+import { playLaserSfx, playErrorSfx } from "../../audio/Sfx";
 
 // ─── Configuration ───
 
@@ -307,6 +308,9 @@ export default class FinalBossScene extends Phaser.Scene {
   // Intensity effects
   private warningOverlay!: Phaser.GameObjects.Rectangle;
   private voidParticles!: Phaser.GameObjects.Particles.ParticleEmitter;
+  private bossAudioEscalated75: boolean = false;
+  private bossAudioEscalated50: boolean = false;
+  private bossAudioEscalated25: boolean = false;
 
   private static STAR_COLORS = [
     0xffffff, 0xc8c8ff, 0xffdcb4, 0xb4b4ff, 0xffb4b4, 0xb4ffdc, 0xdcc8ff,
@@ -359,6 +363,9 @@ export default class FinalBossScene extends Phaser.Scene {
     this.bgStars = [];
     this.elapsed = 0;
     this.playerRestX = width * 0.15;
+    this.bossAudioEscalated75 = false;
+    this.bossAudioEscalated50 = false;
+    this.bossAudioEscalated25 = false;
 
     this.shuffledQuestions = Phaser.Utils.Array.Shuffle([...QUESTIONS]);
 
@@ -1139,6 +1146,7 @@ export default class FinalBossScene extends Phaser.Scene {
   // ─── Correct Answer ───
 
   private onCorrectAnswer(question: QuizQuestion): void {
+    playLaserSfx();
     this.correctAnswers++;
     this.bossHealth = Math.max(0, this.bossHealth - 1);
 
@@ -1176,8 +1184,45 @@ export default class FinalBossScene extends Phaser.Scene {
       duration: 500,
     });
 
+    // Multi-step escalation tied to boss health thresholds.
+    const healthPct = this.bossHealth / CORRECT_TO_WIN;
+    if (healthPct <= 0.75 && !this.bossAudioEscalated75) {
+      this.bossAudioEscalated75 = true;
+      window.dispatchEvent(
+        new CustomEvent("audio-transition", {
+          detail: {
+            situation: "climax",
+            immediate: true,
+          },
+        })
+      );
+    }
+    if (healthPct <= 0.5 && !this.bossAudioEscalated50) {
+      this.bossAudioEscalated50 = true;
+      window.dispatchEvent(
+        new CustomEvent("audio-transition", {
+          detail: {
+            situation: "phase2",
+            immediate: true,
+          },
+        })
+      );
+    }
+    if (healthPct <= 0.25 && !this.bossAudioEscalated25) {
+      this.bossAudioEscalated25 = true;
+      window.dispatchEvent(
+        new CustomEvent("audio-transition", {
+          detail: {
+            situation: "critical",
+            immediate: true,
+          },
+        })
+      );
+    }
+
     if (this.bossHealth <= 0) {
       this.time.delayedCall(1200, () => {
+        window.dispatchEvent(new CustomEvent("audio-transition", { detail: { situation: "victory" } }));
         this.triggerVictory();
       });
       return;
@@ -1193,9 +1238,20 @@ export default class FinalBossScene extends Phaser.Scene {
   // ─── Wrong Answer ───
 
   private onWrongAnswer(_question: QuizQuestion): void {
+    playErrorSfx();
     this.lives--;
 
     this.showFeedback("SHIELD HIT!", "#ef4444");
+    if (this.lives <= 2 && !this.isGameOver) {
+      window.dispatchEvent(
+        new CustomEvent("audio-transition", {
+          detail: {
+            situation: "critical",
+            immediate: true,
+          },
+        })
+      );
+    }
 
     // Boss attack animation
     this.bossAttackAnimation();

@@ -1,4 +1,9 @@
 import { useState, useCallback, useEffect, useRef, type CSSProperties } from "react";
+import {
+  playCelebrationSfx,
+  playCorrectSfx,
+  playWrongSfx,
+} from "../../audio/Sfx";
 
 // ─── Types & Data ────────────────────────────────────────────────────────────
 interface PuzzlePiece {
@@ -182,6 +187,7 @@ const JupiterGame: React.FC<JupiterGameProps> = ({ onComplete }) => {
   const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
   const [dragPieceSize, setDragPieceSize] = useState({ w: 0, h: 0 });
   const [scatterPositions, setScatterPositions] = useState<Record<number, { x: number; y: number }>>({});
+  const hasTriggeredVictoryRef = useRef(false);
 
   const boardRef = useRef<HTMLDivElement>(null);
 
@@ -206,6 +212,7 @@ const JupiterGame: React.FC<JupiterGameProps> = ({ onComplete }) => {
   }, []);
 
   const triggerError = useCallback(() => {
+    playWrongSfx();
     setErrorMessage("ALIGNMENT FAILED — WRONG POSITION");
     setIsBoardShaking(true);
     setTimeout(() => { setErrorMessage(null); setIsBoardShaking(false); }, 800);
@@ -251,7 +258,28 @@ const JupiterGame: React.FC<JupiterGameProps> = ({ onComplete }) => {
         const droppedCol = Math.min(Math.floor(relX / cellWidth), COLS - 1);
         const droppedRow = Math.min(Math.floor(relY / cellHeight), ROWS - 1);
         if (droppedCol === piece.col && droppedRow === piece.row) {
+          const nextPlacedCount = placedPieces.length + 1;
+          const isPlanetCompleted = nextPlacedCount >= PUZZLE_PIECES.length;
+
           showFeedback();
+          if (isPlanetCompleted) {
+            playCelebrationSfx();
+            if (!hasTriggeredVictoryRef.current) {
+              hasTriggeredVictoryRef.current = true;
+              window.setTimeout(() => {
+                window.dispatchEvent(
+                  new CustomEvent("audio-transition", {
+                    detail: { situation: "victory" },
+                  })
+                );
+              }, 420);
+            }
+          } else {
+            playCorrectSfx();
+            window.dispatchEvent(
+              new CustomEvent("audio-stinger", { detail: { situation: "jupiter" } })
+            );
+          }
           setPlacedPieces((prev) => [...prev, piece.id]);
           setTriviaToShow(piece);
           setPhase("trivia");
@@ -261,7 +289,15 @@ const JupiterGame: React.FC<JupiterGameProps> = ({ onComplete }) => {
       }
     }
     setActivePieceId(null);
-  }, [isDragging, activePieceId, dragPos, dragPieceSize, showFeedback, triggerError]);
+  }, [
+    isDragging,
+    activePieceId,
+    dragPos,
+    dragPieceSize,
+    placedPieces.length,
+    showFeedback,
+    triggerError,
+  ]);
 
   // ─── Dismiss Trivia ─────────────────────────────────────────────────────
   const dismissTrivia = useCallback(() => {

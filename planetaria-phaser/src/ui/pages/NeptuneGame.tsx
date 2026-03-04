@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import PixelButton from "../components/PixelButton";
+import { playCelebrationSfx, playWrongSfx } from "../../audio/Sfx";
 
 interface NeptuneFeature {
   id: string;
@@ -494,6 +495,33 @@ const NeptuneMission: React.FC<NeptuneGameProps> = ({ onComplete, onBack }) => {
   const [wrongOptionId, setWrongOptionId] = useState<string | null>(null);
   const [lightPulseKey, setLightPulseKey] = useState(0);
 
+  useEffect(() => {
+    if (isCompleted) return;
+
+    let situation: "critical" | "hazard" | "action" | "climax" = "critical";
+    let immediate = true;
+
+    if (stabilityLevel >= 85) {
+      situation = "climax";
+      immediate = false;
+    } else if (stabilityLevel >= 50) {
+      situation = "action";
+      immediate = false;
+    } else if (stabilityLevel >= 20) {
+      situation = "hazard";
+      immediate = true;
+    }
+
+    window.dispatchEvent(
+      new CustomEvent("audio-transition", {
+        detail: {
+          situation,
+          immediate,
+        },
+      })
+    );
+  }, [stabilityLevel, isCompleted]);
+
   const handleAnswer = (featureId: string) => {
     if (!currentQuestion || isCompleted || showInfoCard) {
       return;
@@ -504,6 +532,7 @@ const NeptuneMission: React.FC<NeptuneGameProps> = ({ onComplete, onBack }) => {
     }
 
     if (featureId !== currentQuestion.correctId) {
+      playWrongSfx();
       setWrongOptionId(featureId);
       window.setTimeout(() => setWrongOptionId(null), 460);
       return;
@@ -521,8 +550,22 @@ const NeptuneMission: React.FC<NeptuneGameProps> = ({ onComplete, onBack }) => {
     setStabilityLevel(nextStability);
     setLightPulseKey((prevKey) => prevKey + 1);
     setShowInfoCard(featuresById[featureId]);
+
     if (allActivated) {
+      playCelebrationSfx();
       setIsCompleted(true);
+      window.setTimeout(() => {
+        window.dispatchEvent(
+          new CustomEvent("audio-transition", {
+            detail: { situation: "victory" },
+          })
+        );
+      }, 420);
+    } else {
+      // Audio trigger for standard discovery progress
+      window.dispatchEvent(
+        new CustomEvent("audio-stinger", { detail: { situation: "neptune" } })
+      );
     }
   };
 

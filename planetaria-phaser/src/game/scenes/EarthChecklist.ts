@@ -281,7 +281,7 @@ export class UIOverlay {
     // Placeholder icon text (since actual images may not exist yet)
     const iconMap: Record<string, string> = {
       liquid_water: "🌊",
-      living_things: "🌿",
+      living_things: "🧑",
       atmosphere: "☁️",
       sun_position: "☀️",
       moon: "🌙",

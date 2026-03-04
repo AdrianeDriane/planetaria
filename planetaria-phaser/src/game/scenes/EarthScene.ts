@@ -6,6 +6,7 @@ export default class EarthScene extends Phaser.Scene {
   private earth!: Phaser.Physics.Arcade.Sprite;
   private moon!: Phaser.GameObjects.Image;
   private sun!: Phaser.GameObjects.Image;
+  private humanFigure!: Phaser.GameObjects.Image;
   private uiOverlay!: UIOverlay;
   private hoverInfo!: HoverInfo;
 
@@ -110,6 +111,30 @@ export default class EarthScene extends Phaser.Scene {
       this.handleMoonClick(pointer);
     });
     this.addHoverCursor(this.moon);
+
+    // --- 2b. HUMAN FIGURE (representation of living things) ---
+    this.generateHumanFigureTexture();
+    const humanScale = earthSize / 150; // much bigger scale
+    const humanOffsetX = earthSize * 0.08; // on the land area
+    const humanOffsetY = -earthSize * 0.05;
+    this.humanFigure = this.add.image(
+      cX + humanOffsetX,
+      cY + humanOffsetY,
+      "human_figure"
+    );
+    this.humanFigure.setScale(humanScale);
+    this.humanFigure.setDepth(11);
+    this.humanFigure.setVisible(false); // starts hidden, shown on certain frames
+
+    // Subtle idle bounce animation
+    this.tweens.add({
+      targets: this.humanFigure,
+      y: this.humanFigure.y - 6,
+      duration: 1200,
+      yoyo: true,
+      repeat: -1,
+      ease: "Sine.easeInOut",
+    });
 
     // --- 3. THE EARTH (Pixel Perfect Logic) ---
     this.earth = this.physics.add.sprite(cX, cY, "earth_spin", 0);
@@ -240,7 +265,7 @@ export default class EarthScene extends Phaser.Scene {
         desc: "Earth has liquid water on its surface; about 70% is covered in water.",
       },
       {
-        icon: "🌿",
+        icon: "🧑",
         title: "Living Things",
         desc: "It is the only planet known to support life; it has plants, animals, and humans.",
       },
@@ -366,6 +391,81 @@ export default class EarthScene extends Phaser.Scene {
       duration: 500,
       ease: "Power2",
     });
+  }
+
+  /**
+   * Generates a pixel-art human figure texture to represent living things on Earth.
+   */
+  private generateHumanFigureTexture(): void {
+    if (this.textures.exists("human_figure")) return;
+
+    const gfx = this.add.graphics();
+    const w = 32;
+    const h = 56;
+
+    // Head (skin tone)
+    gfx.fillStyle(0xf5c6a0, 1);
+    gfx.fillRect(12, 0, 8, 8);
+
+    // Hair (dark brown)
+    gfx.fillStyle(0x3b2314, 1);
+    gfx.fillRect(12, 0, 8, 3);
+
+    // Eyes
+    gfx.fillStyle(0x222222, 1);
+    gfx.fillRect(14, 4, 2, 2);
+    gfx.fillRect(18, 4, 2, 2);
+
+    // Smile
+    gfx.fillStyle(0xd4956a, 1);
+    gfx.fillRect(15, 6, 4, 1);
+
+    // Body / Shirt (blue)
+    gfx.fillStyle(0x3b82f6, 1);
+    gfx.fillRect(10, 9, 12, 16);
+
+    // Shirt collar detail
+    gfx.fillStyle(0x2563eb, 1);
+    gfx.fillRect(13, 9, 6, 2);
+
+    // Arms (skin tone)
+    gfx.fillStyle(0xf5c6a0, 1);
+    gfx.fillRect(6, 10, 4, 12);
+    gfx.fillRect(22, 10, 4, 12);
+
+    // Hands
+    gfx.fillStyle(0xf5c6a0, 1);
+    gfx.fillRect(6, 22, 4, 3);
+    gfx.fillRect(22, 22, 4, 3);
+
+    // Pants (dark grey)
+    gfx.fillStyle(0x4b5563, 1);
+    gfx.fillRect(10, 25, 12, 14);
+
+    // Leg gap
+    gfx.fillStyle(0x000000, 0);
+    gfx.fillRect(15, 30, 2, 9);
+
+    // Left leg
+    gfx.fillStyle(0x4b5563, 1);
+    gfx.fillRect(10, 25, 5, 14);
+
+    // Right leg
+    gfx.fillStyle(0x4b5563, 1);
+    gfx.fillRect(17, 25, 5, 14);
+
+    // Shoes (brown)
+    gfx.fillStyle(0x78350f, 1);
+    gfx.fillRect(9, 39, 6, 4);
+    gfx.fillRect(17, 39, 6, 4);
+
+    // Small wave hand (one arm slightly raised - friendly pose)
+    gfx.fillStyle(0xf5c6a0, 1);
+    gfx.fillRect(22, 8, 4, 3);
+    gfx.fillRect(24, 5, 3, 4);
+
+    gfx.generateTexture("human_figure", w, h);
+    gfx.destroy();
   }
 
   handleHover(pointer: Phaser.Input.Pointer) {
@@ -650,7 +750,15 @@ export default class EarthScene extends Phaser.Scene {
     }
   }
 
-  update(_time: number) {}
+  update(_time: number) {
+    // Show the human figure only when land-facing frames are visible
+    // Frames 0-3 show land masses; frames 4-7 are mostly ocean
+    if (this.earth && this.humanFigure) {
+      const frame = parseInt(this.earth.frame.name);
+      const showOnFrames = [0, 1, 2, 3];
+      this.humanFigure.setVisible(showOnFrames.includes(frame));
+    }
+  }
 
   addHoverCursor(gameObject: Phaser.GameObjects.GameObject) {
     gameObject.on("pointerover", () => this.input.setDefaultCursor("pointer"));
@@ -667,6 +775,11 @@ export default class EarthScene extends Phaser.Scene {
       new CustomEvent("earth-discovery", {
         detail: { feature: featureID },
       })
+    );
+
+    // Audio trigger
+    window.dispatchEvent(
+      new CustomEvent("audio-stinger", { detail: { situation: "earth" } })
     );
 
     // Animations for feedback

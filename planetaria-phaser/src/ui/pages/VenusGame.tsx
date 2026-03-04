@@ -1,6 +1,11 @@
 import { useState, useRef, useEffect } from "react";
-import { startAlarmLoopSfx, stopAlarmLoopSfx, playCorrectSfx } from "../../audio/Sfx";
-import { setBgMusicVolume, DEFAULT_VOLUME, playBgMusic, setBgMusicLoop } from "../../audio/BgMusic";
+import {
+  playCelebrationSfx,
+  startAlarmLoopSfx,
+  stopAlarmLoopSfx,
+  playCorrectSfx,
+} from "../../audio/Sfx";
+import { setBgMusicVolume, DEFAULT_VOLUME } from "../../audio/BgMusic";
 import PixelButton from "../components/PixelButton";
 
 interface DataPacket {
@@ -230,6 +235,9 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
   const [screenShake, setScreenShake] = useState({ x: 0, y: 0 });
   const [flashIntensity, setFlashIntensity] = useState(0);
   const [heatWaveIntensity, setHeatWaveIntensity] = useState(0);
+  const [previousPressureZone, setPreviousPressureZone] = useState<
+    "safe" | "danger"
+  >("safe");
 
   // TRAP EFFECTS STATE
   const [lensIsBroken, setLensIsBroken] = useState(false);
@@ -683,8 +691,21 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
 
           // Handle packet contents
           if (targetPacket.type === "data") {
-            // DATA PACKET - Success!
-            playCorrectSfx();
+            const openedDataCount = dataPackets.filter(
+              (packet) => packet.type === "data" && packet.opened
+            ).length;
+            const isFinalDataPacket = openedDataCount >= 3;
+
+            if (isFinalDataPacket) {
+              playCelebrationSfx();
+            } else {
+              playCorrectSfx();
+              window.dispatchEvent(
+                new CustomEvent("audio-stinger", {
+                  detail: { situation: "venus" },
+                })
+              );
+            }
 
             // Show trivia modal with custom content
             const triviaData = {
@@ -975,6 +996,26 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
     };
   }, [activeTrap]);
 
+  // Handle audio transition based on pressure zone crossing (discrete events only)
+  useEffect(() => {
+    const inSafeZone = pressure >= 40 && pressure <= 70;
+    const currentZone = inSafeZone ? "safe" : "danger";
+
+    // Only dispatch on zone crossing, NOT every pressure change
+    if (currentZone !== previousPressureZone) {
+      const targetSituation = inSafeZone ? "ambient" : "hazard";
+      window.dispatchEvent(
+        new CustomEvent("audio-transition", {
+          detail: {
+            situation: targetSituation,
+            immediate: true, // Fast cut for danger state
+          },
+        })
+      );
+      setPreviousPressureZone(currentZone);
+    }
+  }, [pressure, previousPressureZone]);
+
   // Only count DATA packets for completion (4 required, traps don't count)
   const allFound =
     dataPackets.filter((p) => p.type === "data" && p.opened).length === 4;
@@ -984,14 +1025,19 @@ const VenusGame: React.FC<VenusGameProps> = ({ onComplete, onBack }) => {
     if (allFound) {
       if (!victoryTriggeredRef.current) {
         victoryTriggeredRef.current = true;
-        setBgMusicLoop(false);
-        playBgMusic("/musicalscores/victory.mp3");
+        window.setTimeout(() => {
+          window.dispatchEvent(
+            new CustomEvent("audio-transition", {
+              detail: { situation: "victory" },
+            })
+          );
+        }, 420);
       }
       // Close trivia modal if open, then show completion modal
       setShowTriviaModal(false);
       const timer = setTimeout(() => {
         setShowCompletionModal(true);
-      }, 500);
+      }, 980);
       return () => clearTimeout(timer);
     }
   }, [allFound]);

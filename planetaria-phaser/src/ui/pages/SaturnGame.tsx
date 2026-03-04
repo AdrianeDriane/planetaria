@@ -5,6 +5,11 @@ import React, {
   useMemo,
   useRef,
 } from "react";
+import {
+  playCelebrationSfx,
+  playCorrectSfx,
+  playWrongSfx,
+} from "../../audio/Sfx";
 
 // ─── Types ───
 
@@ -133,13 +138,11 @@ const SaturnGame: React.FC<SaturnGameProps> = ({ onComplete, onBack }) => {
   const [isChecklistOpen, setIsChecklistOpen] = useState(false);
   const [ringBuildAnim, setRingBuildAnim] = useState(false);
   const [pulseMap, setPulseMap] = useState<Record<string, number>>({});
-  const [countdown, setCountdown] = useState(5);
   const [saturnRotation, setSaturnRotation] = useState(0);
   const [bandOffset, setBandOffset] = useState(0);
 
   // Refs to avoid stale closures
   const hasCompletedRef = useRef(false);
-  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Responsive
   useEffect(() => {
@@ -180,41 +183,6 @@ const SaturnGame: React.FC<SaturnGameProps> = ({ onComplete, onBack }) => {
 
     return () => clearTimeout(t);
   }, [allCollected]);
-
-  // Replace the countdown useEffect with this:
-  useEffect(() => {
-    if (!showSummary) return;
-    if (hasCompletedRef.current) return;
-
-    console.log("[Saturn] Summary shown, starting 5s countdown...");
-    let remaining = 5;
-    setCountdown(remaining);
-
-    countdownRef.current = setInterval(() => {
-      remaining -= 1;
-      console.log("[Saturn] Countdown:", remaining);
-      setCountdown(remaining);
-
-      if (remaining <= 0) {
-        if (countdownRef.current) {
-          clearInterval(countdownRef.current);
-          countdownRef.current = null;
-        }
-        if (!hasCompletedRef.current) {
-          hasCompletedRef.current = true;
-          console.log("[Saturn] Countdown done! Calling onComplete...");
-          onComplete();
-        }
-      }
-    }, 1000);
-
-    return () => {
-      if (countdownRef.current) {
-        clearInterval(countdownRef.current);
-        countdownRef.current = null;
-      }
-    };
-  }, [showSummary, onComplete]);
 
   // Floating pulse animation for uncollected material nodes
   useEffect(() => {
@@ -257,7 +225,26 @@ const SaturnGame: React.FC<SaturnGameProps> = ({ onComplete, onBack }) => {
       setSelectedAnswer(optionIndex);
 
       if (optionIndex === activeQuiz.correctIndex) {
+        const nextCollectedCount = collectedCount + 1;
+        const isFinalCollection = nextCollectedCount >= materials.length;
         setAnswerState("correct");
+        if (isFinalCollection) {
+          playCelebrationSfx();
+          window.setTimeout(() => {
+            window.dispatchEvent(
+              new CustomEvent("audio-transition", {
+                detail: { situation: "victory" },
+              })
+            );
+          }, 420);
+        } else {
+          playCorrectSfx();
+          window.dispatchEvent(
+            new CustomEvent("audio-stinger", {
+              detail: { situation: "saturn" },
+            })
+          );
+        }
         setTimeout(() => {
           setMaterials((prev) =>
             prev.map((m) =>
@@ -270,6 +257,7 @@ const SaturnGame: React.FC<SaturnGameProps> = ({ onComplete, onBack }) => {
           setSelectedAnswer(null);
         }, 1200);
       } else {
+        playWrongSfx();
         setAnswerState("wrong");
         setTimeout(() => {
           setAnswerState("idle");
@@ -277,7 +265,7 @@ const SaturnGame: React.FC<SaturnGameProps> = ({ onComplete, onBack }) => {
         }, 1500);
       }
     },
-    [activeQuiz, answerState]
+    [activeQuiz, answerState, collectedCount, materials.length]
   );
 
   // Ring segments to render
@@ -819,23 +807,21 @@ const SaturnGame: React.FC<SaturnGameProps> = ({ onComplete, onBack }) => {
       })}
 
       {/* ─── Checklist Panel / Hamburger ─── */}
-      {isMobile && (
-        <button
-          className="pointer-events-auto absolute top-2 right-2 z-50 flex flex-col items-center justify-center gap-[3px] rounded border border-amber-700 bg-slate-900/80 p-1.5"
-          style={{ width: 36, height: 36 }}
-          onClick={() => setIsChecklistOpen((v) => !v)}
-          aria-label="Toggle checklist"
-        >
-          <span className="block h-[2px] w-4 rounded bg-amber-400" />
-          <span className="block h-[2px] w-4 rounded bg-amber-400" />
-          <span className="block h-[2px] w-4 rounded bg-amber-400" />
-          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 font-['Press_Start_2P'] text-[11px] text-white">
-            {collectedCount}
-          </span>
-        </button>
-      )}
+      <button
+        className="pointer-events-auto absolute top-2 right-2 z-50 flex flex-col items-center justify-center gap-[3px] rounded border border-amber-700 bg-slate-900/80 p-1.5"
+        style={{ width: 36, height: 36 }}
+        onClick={() => setIsChecklistOpen((v) => !v)}
+        aria-label="Toggle checklist"
+      >
+        <span className="block h-[2px] w-4 rounded bg-amber-400" />
+        <span className="block h-[2px] w-4 rounded bg-amber-400" />
+        <span className="block h-[2px] w-4 rounded bg-amber-400" />
+        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 font-['Press_Start_2P'] text-[11px] text-white">
+          {collectedCount}
+        </span>
+      </button>
 
-      {(!isMobile || isChecklistOpen) && (
+      {isChecklistOpen && (
         <div
           className={`fade-in pointer-events-auto absolute z-40 font-['Press_Start_2P'] ${
             isMobile ? "top-10 right-2 w-52" : "top-12 right-4 w-72"
@@ -1155,23 +1141,20 @@ const SaturnGame: React.FC<SaturnGameProps> = ({ onComplete, onBack }) => {
                 </div>
               </div>
               <div className="flex flex-col items-center gap-2 border-t border-green-800 px-4 py-4">
-                <div
-                  className={`text-green-300 ${fs.countdown} tracking-wider`}
-                  style={{
-                    animation: "countdown-pulse 1s infinite",
+                <button
+                  className={`${fs.countdown} cursor-pointer rounded-md border-2 border-green-400 bg-green-600 px-6 py-2 font-['Press_Start_2P'] tracking-wider text-white transition-colors hover:bg-green-500 active:bg-green-700`}
+                  onClick={() => {
+                    if (!hasCompletedRef.current) {
+                      hasCompletedRef.current = true;
+                      console.log(
+                        "[Saturn] Continue clicked! Calling onComplete..."
+                      );
+                      onComplete();
+                    }
                   }}
                 >
-                  Proceeding to Uranus in {countdown}...
-                </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-green-500 to-cyan-400"
-                    style={{
-                      width: `${((5 - countdown) / 5) * 100}%`,
-                      transition: "width 1s linear",
-                    }}
-                  />
-                </div>
+                  CONTINUE TO URANUS
+                </button>
               </div>
             </div>
           </div>
