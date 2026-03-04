@@ -476,9 +476,9 @@ const PlanetNode: React.FC<PlanetNodeProps> = ({
           className={`text-center font-['Press_Start_2P'] tracking-wider ${
             level.isBoss
               ? showDefeated
-                ? "text-[8px] text-green-400 md:text-[10px]"
-                : "text-[8px] text-red-400 md:text-[10px]"
-              : "text-[6px] text-gray-300 md:text-[8px]"
+                ? "text-[12px] text-green-400 md:text-[12px]"
+                : "text-[12px] text-red-400 md:text-[12px]"
+              : "text-[12px] text-gray-300 md:text-[12px]"
           }`}
           style={{
             textShadow: isUnlocked
@@ -493,7 +493,7 @@ const PlanetNode: React.FC<PlanetNodeProps> = ({
       </div>
 
       <div
-        className={`absolute font-['Press_Start_2P'] text-[6px] ${
+        className={`absolute font-['Press_Start_2P'] text-[12px] ${
           isUnlocked ? "text-white/60" : "text-white/30"
         }`}
         style={{
@@ -725,7 +725,7 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({
         <h1 className="font-['Press_Start_2P'] text-sm tracking-widest text-indigo-300 md:text-xl">
           PLANET MAP
         </h1>
-        <p className="mt-1 font-['Press_Start_2P'] text-[6px] text-gray-500 md:mt-2 md:text-[7px]">
+        <p className="mt-1 font-['Press_Start_2P'] text-[12px] text-gray-500 md:mt-2 md:text-[11px]">
           {isBossDefeated
             ? "ALL WORLDS LIBERATED • HARMONY RESTORED ✦"
             : `SELECT A PLANET • ${unlockedCount}/9 WORLDS DISCOVERED`}
@@ -737,7 +737,7 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({
           e.stopPropagation();
           onBack();
         }}
-        className="absolute top-4 left-4 z-20 flex cursor-pointer items-center gap-2 border-2 border-slate-600 bg-slate-900/80 px-3 py-2 font-['Press_Start_2P'] text-[7px] text-slate-400 transition-colors duration-150 hover:border-slate-400 hover:text-white md:top-6 md:left-6 md:gap-3 md:px-4 md:text-[8px]"
+        className="absolute top-4 left-4 z-20 flex cursor-pointer items-center gap-2 border-2 border-slate-600 bg-slate-900/80 px-3 py-2 font-['Press_Start_2P'] text-[11px] text-slate-400 transition-colors duration-150 hover:border-slate-400 hover:text-white md:top-6 md:left-6 md:gap-3 md:px-4 md:text-[12px]"
       >
         <PixelBackArrow />
         BACK
@@ -774,7 +774,7 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({
         {selectedData && isSelectedUnlocked ? (
           <div className="animate-info-slide-up flex flex-col items-center gap-2">
             <p
-              className="font-['Press_Start_2P'] text-[10px] md:text-xs"
+              className="font-['Press_Start_2P'] text-[12px] md:text-xs"
               style={{
                 color:
                   selectedData.isBoss && isBossDefeated
@@ -790,7 +790,7 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({
                 ? "VOID DEVOURER"
                 : selectedData.name}
             </p>
-            <p className="font-['Press_Start_2P'] text-[6px] text-gray-400 md:text-[7px]">
+            <p className="font-['Press_Start_2P'] text-[12px] text-gray-400 md:text-[11px]">
               {selectedData.isBoss && isBossDefeated
                 ? "DEFEATED • THE VOID IS VANQUISHED"
                 : selectedData.subtitle}
@@ -800,7 +800,7 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({
                 e.stopPropagation();
                 handleLaunch(selectedData.id);
               }}
-              className="mt-1 cursor-pointer border-2 px-6 pt-1 pb-2 font-['Press_Start_2P'] text-[8px] tracking-wider transition-all duration-150 active:scale-95 md:text-[9px]"
+              className="mt-1 cursor-pointer border-2 px-6 pt-1 pb-2 font-['Press_Start_2P'] text-[12px] tracking-wider transition-all duration-150 active:scale-95 md:text-[11px]"
               style={{
                 borderColor:
                   selectedData.isBoss && isBossDefeated
@@ -826,22 +826,22 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({
           </div>
         ) : selectedData && !isSelectedUnlocked ? (
           <div className="animate-info-slide-up flex flex-col items-center gap-1">
-            <p className="font-['Press_Start_2P'] text-[9px] text-gray-500">
+            <p className="font-['Press_Start_2P'] text-[11px] text-gray-500">
               {selectedData.isBoss ? "? ? ?" : selectedData.name}
             </p>
-            <p className="font-['Press_Start_2P'] text-[6px] text-gray-600">
+            <p className="font-['Press_Start_2P'] text-[12px] text-gray-600">
               🔒 COMPLETE PREVIOUS PLANET TO UNLOCK
             </p>
           </div>
         ) : (
-          <p className="font-['Press_Start_2P'] text-[6px] text-gray-600 md:text-[7px]">
+          <p className="font-['Press_Start_2P'] text-[12px] text-gray-600 md:text-[11px]">
             TAP A PLANET TO VIEW DETAILS
           </p>
         )}
       </div>
 
       <div className="absolute bottom-4 left-4">
-        <p className="font-['Press_Start_2P'] text-[8px] text-gray-700">
+        <p className="font-['Press_Start_2P'] text-[12px] text-gray-700">
           BUILD v0.1.0
         </p>
       </div>
