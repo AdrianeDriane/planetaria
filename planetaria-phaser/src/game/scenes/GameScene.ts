@@ -108,6 +108,10 @@ export default class GameScene extends Phaser.Scene {
   // Track if final cog overlay is awaiting manual dismiss
   private awaitingCogDismiss: boolean = false;
 
+  // Track if summary screen is awaiting dismiss
+  private awaitingSummaryDismiss: boolean = false;
+  private summaryContainer!: Phaser.GameObjects.Container;
+
   // Input
   private interactKey!: Phaser.Input.Keyboard.Key;
 
@@ -1007,6 +1011,28 @@ export default class GameScene extends Phaser.Scene {
   // ===========================================================================
 
   private handleInteractions(): void {
+    // If summary screen is showing, check for dismiss via E / ⚡
+    if (this.awaitingSummaryDismiss) {
+      const actionJustPressed = this.isActionJustPressed();
+      if (actionJustPressed) {
+        this.awaitingSummaryDismiss = false;
+
+        console.log("[Mercury] CONTINUE pressed — starting launch sequence");
+
+        this.tweens.add({
+          targets: this.summaryContainer,
+          alpha: 0,
+          duration: 400,
+          onComplete: () => {
+            this.summaryContainer.destroy();
+            this.startLaunchSequence();
+          },
+        });
+      }
+      this.lastActionButtonState = this.actionButtonPressed;
+      return;
+    }
+
     // If fact overlay is visible, check for dismiss
     if (this.factOverlay.visible) {
       const actionJustPressed = this.isActionJustPressed();
@@ -1279,60 +1305,35 @@ export default class GameScene extends Phaser.Scene {
       factY += 45;
     });
 
-    // Auto-continue countdown (replaces launch button)
-    const countdownText = this.add.text(
-      0,
-      panelHeight / 2 - 28,
-      "Auto-continue in 10...",
+    // "Continue" prompt — uses [E] / ⚡ action button (same as rest of the game)
+    const promptText = this.isMobile ? "Tap ⚡ to continue" : "[E] Continue";
+    const continuePrompt = this.add.text(
+      panelWidth / 2 - 14,
+      panelHeight / 2 - 22,
+      promptText,
       {
         fontSize: "11px",
-        color: "#94a3b8",
-        fontFamily: "'Courier New'",
-        align: "center",
+        color: "#fbbf24",
+        fontStyle: "bold",
+        fontFamily: "'Press Start 2P', 'Courier New'",
+        align: "right",
       }
     );
-    countdownText.setOrigin(0.5, 0.5);
-    summaryContainer.add(countdownText);
+    continuePrompt.setOrigin(1, 0.5);
+    summaryContainer.add(continuePrompt);
 
-    let countdown = 10;
-    let hasLaunched = false;
-
-    const proceedToVenus = () => {
-      if (hasLaunched) return;
-      hasLaunched = true;
-
-      try {
-        const STORAGE_KEY = "planetaria_progress";
-        const stored = localStorage.getItem(STORAGE_KEY);
-        let progress = stored ? JSON.parse(stored) : {};
-        progress[2] = "unlocked";
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-      } catch (e) {
-        console.warn("Failed to save progress in GameScene:", e);
-      }
-
-      this.tweens.add({
-        targets: summaryContainer,
-        alpha: 0,
-        duration: 500,
-        onComplete: () => {
-          summaryContainer.destroy();
-          this.startLaunchSequence();
-        },
-      });
-    };
-
-    this.time.addEvent({
-      delay: 1000,
-      repeat: 9,
-      callback: () => {
-        countdown--;
-        countdownText.setText(`Auto-continue in ${countdown}...`);
-        if (countdown <= 0) {
-          proceedToVenus();
-        }
-      },
+    // Blink the prompt to draw attention
+    this.tweens.add({
+      targets: continuePrompt,
+      alpha: { from: 1, to: 0.3 },
+      duration: 600,
+      yoyo: true,
+      repeat: -1,
     });
+
+    // Store reference so handleInteractions can dismiss it
+    this.summaryContainer = summaryContainer;
+    this.awaitingSummaryDismiss = true;
 
     // Animate entrance
     summaryContainer.setScale(0.8);
@@ -1344,72 +1345,6 @@ export default class GameScene extends Phaser.Scene {
       alpha: 1,
       duration: 500,
       ease: "Back.easeOut",
-    });
-  }
-
-  private showShipRepairedNotification(): void {
-    this.shipRepairedNotification = this.add.container(
-      this.scale.width / 2,
-      this.scale.height / 2
-    );
-    this.shipRepairedNotification.setScrollFactor(0);
-    this.shipRepairedNotification.setDepth(250);
-
-    // Background panel
-    const panelWidth = 280;
-    const panelHeight = 100;
-    const panel = this.add.graphics();
-    panel.fillStyle(0x1a3a1a, 0.95);
-    panel.fillRoundedRect(
-      -panelWidth / 2,
-      -panelHeight / 2,
-      panelWidth,
-      panelHeight,
-      12
-    );
-    panel.lineStyle(4, 0x44ff44, 1);
-    panel.strokeRoundedRect(
-      -panelWidth / 2,
-      -panelHeight / 2,
-      panelWidth,
-      panelHeight,
-      12
-    );
-    this.shipRepairedNotification.add(panel);
-
-    // Success icon
-    const icon = this.add.text(0, -20, "✅", { fontSize: "32px" });
-    icon.setOrigin(0.5);
-    this.shipRepairedNotification.add(icon);
-
-    // Title
-    const title = this.add.text(0, 20, "SHIP REPAIRED!", {
-      fontSize: "20px",
-      color: "#44ff44",
-      fontStyle: "bold",
-    });
-    title.setOrigin(0.5);
-    this.shipRepairedNotification.add(title);
-
-    // Animate in
-    this.shipRepairedNotification.setScale(0);
-    this.shipRepairedNotification.setAlpha(0);
-    this.tweens.add({
-      targets: this.shipRepairedNotification,
-      scaleX: 1,
-      scaleY: 1,
-      alpha: 1,
-      duration: 400,
-      ease: "Back.easeOut",
-    });
-
-    // Flash effect on the panel
-    this.tweens.add({
-      targets: panel,
-      alpha: { from: 1, to: 0.7 },
-      duration: 300,
-      yoyo: true,
-      repeat: 3,
     });
   }
 
@@ -1500,29 +1435,90 @@ export default class GameScene extends Phaser.Scene {
       ease: "Power2.easeIn",
     });
 
-    // Fade to white
+    // Save Venus as unlocked before transitioning
+    try {
+      const STORAGE_KEY = "planetaria_progress";
+      const stored = localStorage.getItem(STORAGE_KEY);
+      let progress = stored ? JSON.parse(stored) : {};
+      progress[2] = "unlocked";
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    } catch (e) {
+      console.warn("Failed to save progress in GameScene:", e);
+    }
+
+    // Single fade with reliable completion callback
     this.cameras.main.fadeOut(2000, 255, 255, 255);
-
-    // Transition to Venus scene (or next scene)
-    this.time.delayedCall(2500, () => {
-      // Save Venus as unlocked before transitioning
-      try {
-        const STORAGE_KEY = "planetaria_progress";
-        const stored = localStorage.getItem(STORAGE_KEY);
-        let progress = stored ? JSON.parse(stored) : {};
-        progress[2] = "unlocked"; // Venus is planet index 2
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-      } catch (e) {
-        console.warn("Failed to save progress in GameScene:", e);
+    this.cameras.main.once(
+      Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
+      () => {
+        EventBus.emit("mercury-complete");
       }
+    );
+  }
 
-      this.cameras.main.fadeOut(1000, 0, 0, 0);
-      this.cameras.main.once(
-        Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
-        () => {
-          EventBus.emit("mercury-complete");
-        }
-      );
+  private showShipRepairedNotification(): void {
+    this.shipRepairedNotification = this.add.container(
+      this.scale.width / 2,
+      this.scale.height / 2
+    );
+    this.shipRepairedNotification.setScrollFactor(0);
+    this.shipRepairedNotification.setDepth(250);
+
+    // Background panel
+    const panelWidth = 280;
+    const panelHeight = 100;
+    const panel = this.add.graphics();
+    panel.fillStyle(0x1a3a1a, 0.95);
+    panel.fillRoundedRect(
+      -panelWidth / 2,
+      -panelHeight / 2,
+      panelWidth,
+      panelHeight,
+      12
+    );
+    panel.lineStyle(4, 0x44ff44, 1);
+    panel.strokeRoundedRect(
+      -panelWidth / 2,
+      -panelHeight / 2,
+      panelWidth,
+      panelHeight,
+      12
+    );
+    this.shipRepairedNotification.add(panel);
+
+    // Success icon
+    const icon = this.add.text(0, -20, "✅", { fontSize: "32px" });
+    icon.setOrigin(0.5);
+    this.shipRepairedNotification.add(icon);
+
+    // Title
+    const title = this.add.text(0, 20, "SHIP REPAIRED!", {
+      fontSize: "20px",
+      color: "#44ff44",
+      fontStyle: "bold",
+    });
+    title.setOrigin(0.5);
+    this.shipRepairedNotification.add(title);
+
+    // Animate in
+    this.shipRepairedNotification.setScale(0);
+    this.shipRepairedNotification.setAlpha(0);
+    this.tweens.add({
+      targets: this.shipRepairedNotification,
+      scaleX: 1,
+      scaleY: 1,
+      alpha: 1,
+      duration: 400,
+      ease: "Back.easeOut",
+    });
+
+    // Flash effect on the panel
+    this.tweens.add({
+      targets: panel,
+      alpha: { from: 1, to: 0.7 },
+      duration: 300,
+      yoyo: true,
+      repeat: 3,
     });
   }
 }
