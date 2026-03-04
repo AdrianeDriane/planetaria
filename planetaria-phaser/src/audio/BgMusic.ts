@@ -23,7 +23,7 @@ interface TrackLayer {
   situation: AudioSituation;
 }
 
-export const DEFAULT_VOLUME = 0.4;
+export const DEFAULT_VOLUME = 0.8;
 const FADE_DURATION = 1.5; // Seconds
 
 let audioContext: AudioContext | null = null;
@@ -308,6 +308,9 @@ export function setPlanetAudio(planet: string): void {
     case "boss":
       createLayer("phase1", `${base}/boss_phase1.mp3`, 30); // 0:30
       createLayer("phase2", `${base}/boss_phase2.mp3`, 70); // 1:10
+      break;
+    case "menu":
+      createLayer("ambient", `${base}/mainbgmusic.mp3`, 0);
       break;
   }
 

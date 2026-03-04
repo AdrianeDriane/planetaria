@@ -78,6 +78,7 @@ function App() {
     setMuted(false);
     setAudioMuted(false);
     setShowSoundGate(false);
+    setPlanetAudio("menu");
   };
 
   useEffect(() => {

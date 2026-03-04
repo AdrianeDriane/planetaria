@@ -388,6 +388,35 @@ export function startAlarmLoopSfx(): void {
   }
 }
 
+// ─── Laser & Error SFX ───
+
+let laserAudio: HTMLAudioElement | null = null;
+let errorAudio: HTMLAudioElement | null = null;
+
+/** Play the laser shot sound effect. */
+export function playLaserSfx(): void {
+  try {
+    if (!laserAudio) {
+      laserAudio = new Audio("/musicalscores/laser.mp3");
+      laserAudio.volume = 0.5;
+    }
+    laserAudio.currentTime = 0;
+    laserAudio.play().catch(() => {});
+  } catch (_e) { /* silently ignore */ }
+}
+
+/** Play the error / wrong-answer sound effect. */
+export function playErrorSfx(): void {
+  try {
+    if (!errorAudio) {
+      errorAudio = new Audio("/musicalscores/error.mp3");
+      errorAudio.volume = 0.5;
+    }
+    errorAudio.currentTime = 0;
+    errorAudio.play().catch(() => {});
+  } catch (_e) { /* silently ignore */ }
+}
+
 /** Stop the looping alarm (audio or fallback synth). */
 export function stopAlarmLoopSfx(): void {
   if (alarmAudio) {

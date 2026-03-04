@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { EventBus } from "../EventBus";
+import { playLaserSfx, playErrorSfx } from "../../audio/Sfx";
 
 // ─── Configuration ───
 
@@ -1145,6 +1146,7 @@ export default class FinalBossScene extends Phaser.Scene {
   // ─── Correct Answer ───
 
   private onCorrectAnswer(question: QuizQuestion): void {
+    playLaserSfx();
     this.correctAnswers++;
     this.bossHealth = Math.max(0, this.bossHealth - 1);
 
@@ -1236,6 +1238,7 @@ export default class FinalBossScene extends Phaser.Scene {
   // ─── Wrong Answer ───
 
   private onWrongAnswer(_question: QuizQuestion): void {
+    playErrorSfx();
     this.lives--;
 
     this.showFeedback("SHIELD HIT!", "#ef4444");
