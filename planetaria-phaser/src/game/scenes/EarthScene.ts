@@ -668,6 +668,9 @@ export default class EarthScene extends Phaser.Scene {
         detail: { feature: featureID },
       })
     );
+    
+    // Audio trigger
+    window.dispatchEvent(new CustomEvent("audio-stinger", { detail: { situation: "earth" } }));
 
     // Animations for feedback
     if (featureID === "moon") {

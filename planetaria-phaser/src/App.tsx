@@ -15,15 +15,17 @@ import { EarthCongratulationCinematic } from "./ui/components/EarthCongratulatio
 import { PlanetIntroCinematic } from "./ui/components/PlanetIntroCinematic";
 import { EventBus } from "./game/EventBus";
 import {
-  playBgMusic,
-  initBgMusic,
+  setPlanetAudio,
+  initDynamicAudio,
   toggleMute,
   isMuted as getIsMuted,
   setMuted,
-  setBgMusicTrack,
-  DEFAULT_TRACK,
+  transitionTo,
+  playStinger,
+  setSituationIntensity,
+  AudioSituation
 } from "./audio/BgMusic";
-import { playClickSfx } from "./audio/Sfx";
+import { playCelebrationSfx, playCelebrationStinger, playClickSfx } from "./audio/Sfx";
 
 type AppState = "menu" | "levels" | "playing";
 
@@ -47,26 +49,16 @@ function App() {
   const [audioMuted, setAudioMuted] = useState(getIsMuted());
   const [showSoundGate, setShowSoundGate] = useState(true);
 
-  const VENUS_GAMEPLAY_TRACK = "/musicalscores/venusbg.mp3";
-
-  const PLANET_TRACKS: Record<string, string> = {
-    default: DEFAULT_TRACK,
-    mercury: DEFAULT_TRACK,
-    venus: DEFAULT_TRACK,
-    earth: DEFAULT_TRACK,
-    mars: DEFAULT_TRACK,
-    jupiter: DEFAULT_TRACK,
-    saturn: DEFAULT_TRACK,
-    uranus: DEFAULT_TRACK,
-    neptune: DEFAULT_TRACK,
-  };
-
   const setPlanet = (planet: string) => {
     setCurrentPlanet(planet);
-    const track = PLANET_TRACKS[planet] || PLANET_TRACKS.default;
-    setBgMusicTrack(track);
-    playBgMusic(track);
+    setPlanetAudio(planet);
   };
+
+  const triggerPlanetCelebration = useCallback(() => {
+    transitionTo("victory");
+    playCelebrationSfx();
+    playCelebrationStinger(currentPlanet);
+  }, [currentPlanet]);
 
   // Global click/tap SFX
   useEffect(() => {
@@ -77,28 +69,14 @@ function App() {
     };
   }, []);
 
-  // Start background music immediately on mount (muted autoplay),
-  // BgMusic.initBgMusic() will unmute it on the first user interaction.
+  // Start background music immediately on mount
   useEffect(() => {
-    initBgMusic();
+    initDynamicAudio();
   }, []);
-
-  // Swap to alternate track during Venus gameplay only
-  useEffect(() => {
-    if (showVenusGame) {
-      setBgMusicTrack(VENUS_GAMEPLAY_TRACK);
-      playBgMusic(VENUS_GAMEPLAY_TRACK);
-    } else if (currentPlanet) {
-      const track = PLANET_TRACKS[currentPlanet] || PLANET_TRACKS.default;
-      setBgMusicTrack(track);
-      playBgMusic(track);
-    }
-  }, [showVenusGame, currentPlanet]);
 
   const handleEnableSound = () => {
     setMuted(false);
     setAudioMuted(false);
-    playBgMusic();
     setShowSoundGate(false);
   };
 
@@ -127,29 +105,47 @@ function App() {
       setPlanet(planet);
       setShowPlanetCinematic(true);
     };
-        const handleMercuryCompleteEvent = () => {
-      unlockLevel(2); // Unlock Venus
+    const handleMercuryCompleteEvent = () => {
+      triggerPlanetCelebration();
+      unlockLevel(2); 
       setPlanet("venus");
       setShowPlanetCinematic(true);
-        };
+    };
     const handleVenusCompleteEvent = () => {
+      triggerPlanetCelebration();
       unlockLevel(3);
+      setPlanet("earth");
       setShowEarthCinematic(true);
     };
 
-    // Boss events
     const handleBossDefeated = () => {
-      // Progress is saved inside FinalBossScene/FinalOutroScene directly
-      // No app state change here — Phaser handles scene transition internally
+      playCelebrationSfx();
+      transitionTo("victory");
     };
     const handleBossReturnToMenu = () => {
       setAppState("levels");
     };
 
-    // Outro complete — user clicked "RETURN TO PLANET MAP" in FinalOutroScene
     const handleOutroComplete = () => {
       setAppState("levels");
     };
+
+    // Custom Event Listeners for Dynamic Audio
+    const handleAudioTransition = (e: any) => {
+      if (e.detail && e.detail.situation) {
+        transitionTo(e.detail.situation as AudioSituation, !!e.detail.immediate);
+      }
+    };
+    const handleStingerTrigger = (e: any) => {
+      if (e.detail && e.detail.situation) {
+        playStinger(e.detail.situation);
+      }
+    };
+    const handleAudioIntensity = (e: any) => {
+        if (e.detail && e.detail.situation) {
+          setSituationIntensity(e.detail.situation as AudioSituation, e.detail.intensity);
+        }
+      };
 
     EventBus.on("enter-mars-scene", enterMars);
     EventBus.on("leave-mars-scene", leaveMars);
@@ -175,6 +171,10 @@ function App() {
     EventBus.on("boss-return-to-menu", handleBossReturnToMenu);
     EventBus.on("outro-complete", handleOutroComplete);
 
+    window.addEventListener("audio-transition", handleAudioTransition);
+    window.addEventListener("audio-stinger", handleStingerTrigger);
+    window.addEventListener("audio-intensity", handleAudioIntensity);
+
     return () => {
       EventBus.off("enter-mars-scene", enterMars);
       EventBus.off("leave-mars-scene", leaveMars);
@@ -199,11 +199,16 @@ function App() {
       EventBus.off("boss-defeated", handleBossDefeated);
       EventBus.off("boss-return-to-menu", handleBossReturnToMenu);
       EventBus.off("outro-complete", handleOutroComplete);
+
+      window.removeEventListener("audio-transition", handleAudioTransition);
+      window.removeEventListener("audio-stinger", handleStingerTrigger);
+      window.removeEventListener("audio-intensity", handleAudioIntensity);
     };
-  }, []);
+  }, [currentPlanet, triggerPlanetCelebration]);
 
   const unlockLevel = (levelId: number) => {
     try {
+      const STORAGE_KEY = "planetaria_progress";
       const stored = localStorage.getItem(STORAGE_KEY);
       let progress = stored ? JSON.parse(stored) : {};
       progress[levelId] = "unlocked";
@@ -217,7 +222,6 @@ function App() {
     setSelectedLevelId(levelId);
     setAppState("playing");
 
-    // Reset all game/cinematic states
     setShowVenusGame(false);
     setShowEarthGame(false);
     setShowMarsPuzzle(false);
@@ -230,7 +234,6 @@ function App() {
     setShowEarthCongratulation(false);
     setShowPlanetCinematic(false);
 
-    // Trigger Intros Directly
     if (levelId === 1) {
       setPlanet("mercury");
       setShowPlanetCinematic(true);
@@ -238,8 +241,10 @@ function App() {
       setPlanet("venus");
       setShowPlanetCinematic(true);
     } else if (levelId === 3) {
+      setPlanet("earth");
       setShowEarthCinematic(true);
     } else if (levelId === 4) {
+      setPlanet("mars");
       setShowMarsCinematic(true);
     } else if (levelId === 5) {
       setPlanet("jupiter");
@@ -254,16 +259,18 @@ function App() {
       setPlanet("neptune");
       setShowPlanetCinematic(true);
     } else if (levelId === 9) {
-      setCurrentPlanet("boss");
+      setPlanet("boss");
       setShowPlanetCinematic(true);
     }
   };
 
   const handleVenusComplete = () => {
+    triggerPlanetCelebration();
     unlockLevel(3);
     EventBus.emit("venus-core-reactivated");
     setTimeout(() => {
       setShowVenusGame(false);
+      setPlanet("earth");
       setShowEarthCinematic(true);
     }, 2000);
   };
@@ -274,6 +281,7 @@ function App() {
   };
 
   const handleEarthComplete = () => {
+    triggerPlanetCelebration();
     unlockLevel(4);
     setTimeout(() => {
       setShowEarthGame(false);
@@ -283,6 +291,7 @@ function App() {
 
   const handleEarthCongratulationComplete = () => {
     setShowEarthCongratulation(false);
+    setPlanet("mars");
     setShowMarsCinematic(true);
   };
 
@@ -311,6 +320,7 @@ function App() {
   };
 
   const handleMarsPuzzleComplete = () => {
+    triggerPlanetCelebration();
     unlockLevel(5);
     EventBus.emit("mars-core-reactivated");
     setTimeout(() => {
@@ -321,6 +331,7 @@ function App() {
   };
 
   const handleJupiterComplete = () => {
+    triggerPlanetCelebration();
     unlockLevel(6);
     EventBus.emit("jupiter-core-reactivated");
     setTimeout(() => {
@@ -331,6 +342,7 @@ function App() {
   };
 
   const handleSaturnComplete = useCallback(() => {
+    triggerPlanetCelebration();
     unlockLevel(7);
     EventBus.emit("saturn-core-reactivated");
     setTimeout(() => {
@@ -338,9 +350,10 @@ function App() {
       setPlanet("uranus");
       setShowPlanetCinematic(true);
     }, 2000);
-  }, []);
+  }, [triggerPlanetCelebration]);
 
   const handleUranusComplete = () => {
+    triggerPlanetCelebration();
     unlockLevel(8);
     setTimeout(() => {
       setShowUranusGame(false);
@@ -350,10 +363,11 @@ function App() {
   };
 
   const handleNeptuneComplete = () => {
+    triggerPlanetCelebration();
     unlockLevel(9);
     setTimeout(() => {
       setShowNeptuneGame(false);
-      setCurrentPlanet("boss");
+      setPlanet("boss");
       setShowPlanetCinematic(true);
     }, 2000);
   };
@@ -391,7 +405,6 @@ function App() {
       {appState === "menu" && (
         <MainMenu
           onPlay={() => {
-            playBgMusic();
             setAppState("levels");
           }}
           isMuted={audioMuted}
@@ -427,6 +440,7 @@ function App() {
             <EarthIntroCinematic
               onComplete={handleEarthCinematicComplete}
               canSkip={(() => {
+                const STORAGE_KEY = "planetaria_progress";
                 const stored = localStorage.getItem(STORAGE_KEY);
                 const progress = stored ? JSON.parse(stored) : {};
                 return !!progress[4];
@@ -437,6 +451,7 @@ function App() {
             <MarsIntroCinematic
               onComplete={handleMarsCinematicComplete}
               canSkip={(() => {
+                const STORAGE_KEY = "planetaria_progress";
                 const stored = localStorage.getItem(STORAGE_KEY);
                 const progress = stored ? JSON.parse(stored) : {};
                 return !!progress[5];

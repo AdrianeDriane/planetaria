@@ -70,6 +70,63 @@ export const MarsIntroCinematic: React.FC<MarsIntroCinematicProps> = ({
       const beat = DIALOGUE_BEATS[currentBeatIndex];
       typeText(beat.text);
 
+      // Drive a cinematic, reactive Mars score arc by narrative beat.
+      if (currentBeatIndex === 0) {
+        window.dispatchEvent(
+          new CustomEvent("audio-transition", {
+            detail: { situation: "tension" },
+          })
+        );
+      }
+      if (beat.glitch) {
+        window.dispatchEvent(
+          new CustomEvent("audio-transition", {
+            detail: { situation: "tension" },
+          })
+        );
+        window.dispatchEvent(
+          new CustomEvent("audio-intensity", {
+            detail: { situation: "tension", intensity: 0.62 },
+          })
+        );
+      }
+      if (beat.shatter) {
+        window.dispatchEvent(
+          new CustomEvent("audio-transition", {
+            detail: { situation: "climax", immediate: true },
+          })
+        );
+        window.dispatchEvent(
+          new CustomEvent("audio-intensity", {
+            detail: { situation: "climax", intensity: 0.9 },
+          })
+        );
+      }
+      if (beat.scramble) {
+        window.dispatchEvent(
+          new CustomEvent("audio-transition", {
+            detail: { situation: "tension" },
+          })
+        );
+        window.dispatchEvent(
+          new CustomEvent("audio-intensity", {
+            detail: { situation: "tension", intensity: 0.66 },
+          })
+        );
+      }
+      if (beat.approach) {
+        window.dispatchEvent(
+          new CustomEvent("audio-transition", {
+            detail: { situation: "tension" },
+          })
+        );
+        window.dispatchEvent(
+          new CustomEvent("audio-intensity", {
+            detail: { situation: "tension", intensity: 0.7 },
+          })
+        );
+      }
+
       if (beat.glitch) setIsGlitching(true);
       if (beat.shatter) setIsShattering(true);
       if (beat.scramble) setIsScrambling(true);
@@ -95,6 +152,11 @@ export const MarsIntroCinematic: React.FC<MarsIntroCinematicProps> = ({
 
   const finishCinematic = () => {
     setIsFinishing(true);
+    window.dispatchEvent(
+      new CustomEvent("audio-transition", {
+        detail: { situation: "tension" },
+      })
+    );
     setTimeout(() => {
       onComplete();
     }, 1500);

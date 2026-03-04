@@ -4,8 +4,7 @@ import { GameStarfield } from "../world/GridBackground";
 import Terrain from "../world/Terrain";
 import Player from "../entities/Player";
 import { EventBus } from "../EventBus";
-import { playHitSfx } from "../../audio/Sfx";
-import { setBgMusicTrack, playBgMusic, setBgMusicLoop } from "../../audio/BgMusic";
+import { playHitSfx, playCorrectSfx } from "../../audio/Sfx";
 
 const SHIP_TEXTURE = "game_ss_astra";
 const SHIP_ASSET = "assets/ui/ss_astra.png";
@@ -739,6 +738,14 @@ export default class GameScene extends Phaser.Scene {
   private collectTrinket(trinket: TrinketData): void {
     this.collectedTrinkets.add(trinket.id);
 
+    // Audio feedback on collection
+    playCorrectSfx();
+    window.dispatchEvent(
+      new CustomEvent("audio-stinger", {
+        detail: { situation: "mercury" },
+      })
+    );
+
     // Add to inventory UI
     this.addInventoryIcon(trinket);
 
@@ -1111,10 +1118,11 @@ export default class GameScene extends Phaser.Scene {
 
       // Swap to victory music
       if (!this.victoryMusicPlayed) {
-        const victoryTrack = "/musicalscores/victory.mp3";
-        setBgMusicLoop(false);
-        setBgMusicTrack(victoryTrack);
-        playBgMusic(victoryTrack);
+        window.dispatchEvent(
+          new CustomEvent("audio-transition", {
+            detail: { situation: "victory" },
+          })
+        );
         this.victoryMusicPlayed = true;
       }
 

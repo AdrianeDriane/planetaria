@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import PixelButton from "../components/PixelButton";
+import { playCelebrationSfx } from "../../audio/Sfx";
 
 // ─── Types ───
 
@@ -102,6 +103,7 @@ const UranusGame: React.FC<UranusGameProps> = ({ onComplete, onBack }) => {
   const [gustActive, setGustActive] = useState(false);
   const [gustKey, setGustKey] = useState(0);
   const [rotateValue, setRotateValue] = useState(0);
+  const lastSituationRef = useRef<string>("");
 
   // Responsive
   useEffect(() => {
@@ -166,6 +168,35 @@ const UranusGame: React.FC<UranusGameProps> = ({ onComplete, onBack }) => {
     return absV - 4;
   };
 
+  // Reactive score: escalating states as instability increases with stronger tilt.
+  useEffect(() => {
+    let situation: "ambient" | "tension" | "hazard" | "critical" = "ambient";
+    let immediate = false;
+
+    if (rotateValue > 13) {
+      situation = "critical";
+      immediate = true;
+    } else if (rotateValue > 10) {
+      situation = "hazard";
+      immediate = true;
+    } else if (rotateValue > 7) {
+      situation = "tension";
+      immediate = false;
+    }
+
+    if (lastSituationRef.current === situation) return;
+    lastSituationRef.current = situation;
+
+    window.dispatchEvent(
+      new CustomEvent("audio-transition", {
+        detail: {
+          situation,
+          immediate,
+        },
+      })
+    );
+  }, [rotateValue]);
+
   const axisOpacity = getAxisOpacity(rotateValue);
   const axisPointerEvents = Math.abs(rotateValue) > 4 ? "auto" : "none";
 
@@ -177,12 +208,31 @@ const UranusGame: React.FC<UranusGameProps> = ({ onComplete, onBack }) => {
   const handleZoneClick = useCallback(
     (zone: DiscoveryZone) => {
       if (zone.found || showSummary) return;
+      const nextFoundCount = foundCount + 1;
+      const isFinalDiscovery = nextFoundCount >= zones.length;
       setZones((prev) =>
         prev.map((z) => (z.id === zone.id ? { ...z, found: true } : z))
       );
       setActiveDiscovery({ ...zone, found: true });
+
+      if (isFinalDiscovery) {
+        playCelebrationSfx();
+        window.setTimeout(() => {
+          window.dispatchEvent(
+            new CustomEvent("audio-transition", {
+              detail: { situation: "victory" },
+            })
+          );
+        }, 420);
+      } else {
+        window.dispatchEvent(
+          new CustomEvent("audio-stinger", {
+            detail: { situation: "uranus" },
+          })
+        );
+      }
     },
-    [showSummary]
+    [showSummary, foundCount, zones.length]
   );
 
   return (

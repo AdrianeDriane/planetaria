@@ -5,6 +5,11 @@ import React, {
   useMemo,
   useRef,
 } from "react";
+import {
+  playCelebrationSfx,
+  playCorrectSfx,
+  playWrongSfx,
+} from "../../audio/Sfx";
 
 // ─── Types ───
 
@@ -257,7 +262,26 @@ const SaturnGame: React.FC<SaturnGameProps> = ({ onComplete, onBack }) => {
       setSelectedAnswer(optionIndex);
 
       if (optionIndex === activeQuiz.correctIndex) {
+        const nextCollectedCount = collectedCount + 1;
+        const isFinalCollection = nextCollectedCount >= materials.length;
         setAnswerState("correct");
+        if (isFinalCollection) {
+          playCelebrationSfx();
+          window.setTimeout(() => {
+            window.dispatchEvent(
+              new CustomEvent("audio-transition", {
+                detail: { situation: "victory" },
+              })
+            );
+          }, 420);
+        } else {
+          playCorrectSfx();
+          window.dispatchEvent(
+            new CustomEvent("audio-stinger", {
+              detail: { situation: "saturn" },
+            })
+          );
+        }
         setTimeout(() => {
           setMaterials((prev) =>
             prev.map((m) =>
@@ -270,6 +294,7 @@ const SaturnGame: React.FC<SaturnGameProps> = ({ onComplete, onBack }) => {
           setSelectedAnswer(null);
         }, 1200);
       } else {
+        playWrongSfx();
         setAnswerState("wrong");
         setTimeout(() => {
           setAnswerState("idle");
@@ -277,7 +302,7 @@ const SaturnGame: React.FC<SaturnGameProps> = ({ onComplete, onBack }) => {
         }, 1500);
       }
     },
-    [activeQuiz, answerState]
+    [activeQuiz, answerState, collectedCount, materials.length]
   );
 
   // Ring segments to render
