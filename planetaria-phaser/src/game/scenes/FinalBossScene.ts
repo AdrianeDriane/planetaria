@@ -83,12 +83,7 @@ const QUESTIONS: QuizQuestion[] = [
   },
   {
     question: "What is Earth's position from the Sun?",
-    options: [
-      "First planet",
-      "Second planet",
-      "Third planet",
-      "Fourth planet",
-    ],
+    options: ["First planet", "Second planet", "Third planet", "Fourth planet"],
     correctIndex: 2,
     planet: "Earth",
   },
@@ -149,12 +144,7 @@ const QUESTIONS: QuizQuestion[] = [
   },
   {
     question: "How long does one full rotation of Jupiter take?",
-    options: [
-      "24 hours",
-      "9 hours, 56 minutes",
-      "48 hours",
-      "88 days",
-    ],
+    options: ["24 hours", "9 hours, 56 minutes", "48 hours", "88 days"],
     correctIndex: 1,
     planet: "Jupiter",
   },
@@ -173,12 +163,7 @@ const QUESTIONS: QuizQuestion[] = [
   },
   {
     question: "What is Saturn's position from the Sun?",
-    options: [
-      "3rd planet",
-      "5th planet",
-      "6th planet",
-      "8th planet",
-    ],
+    options: ["3rd planet", "5th planet", "6th planet", "8th planet"],
     correctIndex: 2,
     planet: "Saturn",
   },
